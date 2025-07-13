@@ -2,6 +2,11 @@
 __pycache__/
 *.py[codz]
 *$py.class
+drone-dateset/
+drone-dateset-sample/
+drone_detection1.ipynb
+drone_detection2.ipynb
+.DS_Store
 
 # C extensions
 *.so
