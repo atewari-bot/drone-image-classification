@@ -2,7 +2,7 @@
 
 **Author**
 
-#### Executive summary
+## Executive summary
 
 #### Rationale
 Why should anyone care about this question?
