@@ -4,22 +4,23 @@
 
 ## Executive summary
 
-#### Rationale - Why should anyone care about this question?
+### Rationale - Why should anyone care about this question?
 In recent years, we have observed the unprecedented usage of drone and related technologies in various areas like surveillance, security, crops monitoring, delivery drones, airspace monitoring, search & rescue operations. This incredibly useful technology has many benefits but if armed, drones pose great threat to civilian and armed forces life & infrastructure. These drones could also be used for surveillance by bad people or could be a great concern for violation of privacy. 
 
 The anti-drone technologies used to counter these drones could also harm wild life if drone detection accuracy is not very high. Thus, drone detection model with high accuracy could save lives, critical infrastructure and avoid harm to wild life.
 
-#### Research Question - What are you trying to answer?
+### Research Question - What are you trying to answer?
 How drones detection in images or video frames using computer vision techniques could help security, surveillance, airspace monitoring and wild life protection? 
 
-#### Data Sources
+### Data Sources
 [Roboflow Drone Dataset](https://universe.roboflow.com/ahmedmohsen/drone-detection-new-peksv)
+
 [Sample Drone Dataset](https://github.com/atewari-bot/drone-image-classification/blob/main/data/drone-dataset-sample.zip)
 
-#### Methodology
+### Methodology
 What methods are you using to answer the question?
 
-#### Results
+### Results
 
 ## Data Understanding (Exploratory Data Analysis)
 
@@ -29,10 +30,10 @@ What methods are you using to answer the question?
 
 ![Image](/images/image_quality_metrics.png)
 
-#### Next steps
+### Next steps
 What suggestions do you have for next steps?
 
-#### Outline of project
+### Outline of project
 
 - [Project Report](https://github.com/atewari-bot/drone-image-classification/blob/main/README.md)
 - [Model Training & Performance Metrics Analysis](https://github.com/atewari-bot/drone-image-classification/blob/main/drone_detection.ipynb)
