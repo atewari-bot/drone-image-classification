@@ -35,9 +35,9 @@ Original file is located at
 - Noise reduction and enhancement
 
 ### 3. **Detection Framework Selection**
+- **Custom CNN**: Tailored architecture
 - **YOLO (You Only Look Once)**: Real-time detection
 - **Faster R-CNN**: High accuracy detection
-- **Custom CNN**: Tailored architecture
 - Trade-off analysis between efficiency and accuracy
 
 ### 4. **Model Configuration and Training**
@@ -47,7 +47,6 @@ Original file is located at
 
 ### 5. **Model Evaluation**
 - Classification metrics (Precision, Recall, F1-score)
-- Mean Average Precision (mAP)
 - Confusion matrix analysis
 
 ### 6. **Deployment and Monitoring**
@@ -91,6 +90,8 @@ The trained model should achieve:
 # %pip install opencv-python
 # %pip install zipfile
 # %pip install scikit-image
+# # %pip install pyyaml
+# # %pip install ultralytics
 
 import zipfile
 import io
@@ -114,6 +115,7 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, make_scorer, precision_score, recall_score, f1_score, precision_recall_curve, average_precision_score
+from sklearn.utils import class_weight
 
 from collections import Counter, defaultdict
 from scipy import stats as scipy_stats
@@ -141,23 +143,11 @@ img_size = (224, 224)
 MAX_BOXES = 10
 class_names = ['AIRPLANE', 'DRONE', 'HELICOPTER', 'BIRD']
 NUM_CLASSES = len(class_names)
-EPOCHS = 50
+EPOCHS = 10
 BATCH_SIZE = 32
 SMALL_BATCH_SIZE = 8
 run_grid_search = True
-score_df = pd.DataFrame(index = [
-        'RandomForestClassifier',
-        'Optimized RandomForest',
-        'CNN',
-        'CNN Denoised'
-    ], columns = [
-        'Model Train Time',
-        'MSE Train', 'MSE Test',
-        'Acc Train', 'Acc Test',
-        'MAE Train', 'MAE Test',
-        'Precision Train', 'Precision Test',
-        'Recall Train', 'Recall Test',
-        'F1 Train', 'F1 Test'])
+
 
 model_training_time = []
 
@@ -703,7 +693,7 @@ def perform_rf_dimensionality_analysis(X_features, y_labels, feature_names):
     Perform PCA analysis on features
     '''
     print("="*60)
-    print("Dimensionality Reduction Analysis - Random Forest")
+    print("Dimensionality Reduction Analysis - RandomForest")
     print("="*60)
 
     # Standardize features
@@ -890,6 +880,15 @@ These pattern analysis offer a deep look into **spatial and textural characteris
 - Feature selection and engineering
 - Preprocessing strategies
 - Neural network architecture decisions
+
+We analyzed 6 types of spatial patterns:
+
+* Center Region Analysis
+* Gradient Magnitude Analysis
+* Corner Detection Analysis (Harris corner detection)
+* Symmetry Analysis
+* Frequency Domain Analysis (FFT analysis)
+* Texture Complexity
 """
 
 def analyze_spatial_patterns(X, y_labels=None):
@@ -1077,70 +1076,28 @@ eda_results['spatial_patterns'] = spatial_patterns
 
 """### Spatial Patterns Analysis Summary
 
-| **Visualization**                | **What it Shows**                                                                                                                                                       | **Insights**                                                                                                                                                                                                 |
-|----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Center vs Edge Intensity**     | Compares average pixel intensity in the center of the image vs. the edges.                                                                                              | - Clusters along the diagonal imply uniform intensity.<br>- Deviations suggest contrast between object (center) and background (edges).<br>- Useful for spatial focus clues.                             |
-| **Gradient Magnitude Distribution** | Histogram of mean gradient magnitudes (rate of pixel intensity change).                                                                                                  | - Indicates level of detail or texture in images.<br>- Higher values mean sharper, more detailed images.<br>- Helps identify variation in texture or edge density across the dataset.                    |
-| **Corner Detection Analysis**    | Histogram of number of detected corners (using Harris detector).                                                                                                        | - Measures shape/structure complexity.<br>- More corners → more intricate shapes.<br>- Differences across classes can reflect object structure (e.g., drones vs airplanes).                              |
-| **Vertical Symmetry Analysis**   | Distribution of vertical symmetry score (comparing left and right halves of images).                                                                                    | - Higher scores imply strong symmetry (e.g., frontal view of airplane).<br>- Can help differentiate symmetrical objects from asymmetrical ones.                                                            |
-| **Frequency Domain Analysis**    | Histogram of high-frequency energy from Fourier Transform spectrum.                                                                                                     | - Highlights presence of fine details and edges.<br>- Complements gradient analysis.<br>- Useful for understanding texture richness.                                                                      |
-| **Texture Complexity Analysis**  | Distribution of mean local variance (a measure of texture).                                                                                                             | - Higher values → more complex textures.<br>- Helps identify texture-heavy objects (e.g., birds with feathers vs smooth drones).                                                                          |
+These plots offer a visual understanding of the structural and textural characteristics of the drone dataset. Below is a table summarizing each analysis and key insights derived from the visual patterns.
+
+| **Analysis Type**              | **What the Plot Shows**                                                                                  | **Observed Insight from Plot**                                                                                      |
+|-------------------------------|-----------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
+| **1. Center vs Edge Intensity** | Scatter plot of center vs edge intensity with a reference diagonal.                                       | Most points lie below the diagonal, suggesting **edges are generally brighter than centers** in the images.         |
+| **2. Gradient Magnitude**       | Histogram of mean gradient magnitude per image (edge strength).                                           | The majority of images have a gradient magnitude around **0.006–0.008**, indicating moderate edge detail.            |
+| **3. Corner Detection**         | Histogram of number of corners detected using Harris method.                                              | Most images contain **100–400 corners**, suggesting the presence of structured objects with some variation.         |
+| **4. Vertical Symmetry**        | Histogram of symmetry scores comparing left vs right halves.                                              | High scores (most > 0.95) suggest **strong vertical symmetry**, expected for man-made objects like drones/planes.    |
+| **5. Frequency Domain**         | Histogram of high-frequency energy from FFT.                                                              | Clear peak around **40,000**, with several images showing high values, indicating **sharper textures and edges**.    |
+| **6. Texture Complexity**       | Histogram of local variance (texture).                                                                    | Most images have low complexity, but some exhibit high variance, indicating **mixture of smooth and detailed images**.|
 
 ---
-"""
 
-def eda_report(X):
-    '''
-    Generate a EDA report based recommendation
-    '''
-    # 7. Generate recommendations
-    print("\n" + "="*60)
-    print("RECOMMENDATIONS BASED ON EDA")
-    print("="*60)
+### General Observations
 
-    recommendations = []
+- **Symmetry & Structure:** Strong symmetry and moderate to high corner counts point toward structured objects like drones or airplanes dominating the dataset.
+- **Edge Detail:** Most images show moderate edge strength (gradient) and frequency content, useful for distinguishing flying objects from the background.
+- **Brightness Contrast:** Center regions are typically darker than edges, which could indicate drones often appear against brighter skies.
 
-    # Class imbalance recommendations
-    if y_labels is not None and imbalance_ratio > 2:
-        recommendations.append(f"• High class imbalance detected (ratio: {imbalance_ratio:.2f}). Consider data augmentation or class weighting.")
+---
 
-    # Brightness recommendations
-    brightness_std = np.std(pixel_stats['brightness'])
-    if brightness_std > 0.2:
-        recommendations.append("• High brightness variation detected. Consider brightness normalization.")
-
-    # Contrast recommendations
-    contrast_mean = np.mean(pixel_stats['contrast'])
-    if contrast_mean < 0.1:
-        recommendations.append("• Low contrast images detected. Consider contrast enhancement techniques.")
-
-    # Sharpness recommendations
-    sharpness_values = quality_metrics['sharpness']
-    if np.mean(sharpness_values) < 100:
-        recommendations.append("• Low sharpness detected in some images. Consider sharpening filters.")
-
-    # Noise recommendations
-    noise_values = quality_metrics['noise_level']
-    if np.mean(noise_values) > 50:
-        recommendations.append("• High noise levels detected. Consider denoising techniques.")
-
-    # Dimensionality recommendations
-    if dim_analysis['n_components_95'] < X.shape[1] * X.shape[2] * X.shape[3] * 0.1:
-        recommendations.append("• Low intrinsic dimensionality detected. PCA preprocessing might be beneficial.")
-
-    if len(recommendations) == 0:
-        recommendations.append("• Dataset appears to be of good quality. Standard preprocessing should be sufficient.")
-
-    for rec in recommendations:
-        print(rec)
-
-    eda_results['recommendations'] = recommendations
-
-    return eda_results
-
-eda_results = eda_report(X_train_cls)
-
-"""# Image Preprocessing
+# Image Preprocessing
 
 ## Denoising Images
 
@@ -1151,12 +1108,12 @@ In image denoising, the goal is to:
 * Eliminate unwanted variations like grain, blur, or compression artifacts
 """
 
-def apply_denoising_techniques(X, y_labels=None):
+def apply_denoising_techniques(X, y_labels=None, sample_idx=0):
     '''
     Apply various denoising and preprocessing techniques
     '''
     print("="*60)
-    print("DENOISING AND PREPROCESSING")
+    print("Denoising and Preprocessing")
     print("="*60)
 
     # Select a sample image for demonstration
@@ -1244,8 +1201,11 @@ def apply_denoising_techniques(X, y_labels=None):
 
 """### Apply denoising techniques"""
 
-print("\nApplying denoising techniques...")
+print("\nApplying denoising techniques on Train Data...")
 X_train_denoised, denoising_techniques = apply_denoising_techniques(X_train_cls, y_train_cls)
+
+print("\nApplying denoising techniques on Validation Data...")
+X_val_denoised, denoising_techniques = apply_denoising_techniques(X_val_cls, y_val_cls, sample_idx=21)
 
 """# Feature Extractions
 
@@ -1282,7 +1242,7 @@ def visualize_rf_feature_distributions(X_features, y_labels, feature_names, num_
     Visualize distributions of most important features for Random Forest
     '''
     print("="*60)
-    print("VISUALIZING FEATURE DISTRIBUTIONS - RANDOM FOREST")
+    print("Visualizing Feature Distribution - RandomForest")
     print("="*60)
 
     # For demonstration, show distributions of first num_features features
@@ -1325,7 +1285,7 @@ def extract_rf_features(X, y_labels=None):
     Extract features for Random Forest model
     '''
     print("="*60)
-    print("EXTRACTING FEATURES FOR RANDOM FOREST")
+    print("Extracting Features - RandomForest")
     print("="*60)
 
     n_samples = len(X)
@@ -1508,17 +1468,75 @@ if X_test_cls is not None and len(X_test_cls) > 0:
     print("Extracting test features...")
     X_test_features, _ = extract_rf_features(X_test_cls, y_test_cls)
 
+"""## Visualize feature distributions - Random Forest"""
+
 print("\n" + "="*80)
 print("RandomForestClassfier Feature Analysis")
 print("="*80)
 
-# Visualize feature distributions
 visualize_rf_feature_distributions(X_train_features, y_train_cls, feature_names)
 
-# Perform dimensionality analysis
+"""### Color Feature Distribution Analysis (Red & Green Channels)
+
+Below is a summary of each feature plot and what insights we can derive from it:
+
+| **Feature**     | **Description**                                                                 | **Insights from Plot**                                                                                                                                     |
+|-----------------|----------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **R_mean**      | Mean intensity of red channel.                                                  | DRONE images (red) have a consistent narrow distribution peaking around 0.45, suggesting standardized brightness. BIRDS show more variability.            |
+| **R_std**       | Standard deviation (contrast) of red channel.                                   | DRONEs again show a sharp peak around 0.05, indicating uniform red channel contrast, while other classes like BIRDs have a wider distribution.             |
+| **R_min**       | Minimum red intensity in image.                                                 | AIRPLANEs and DRONEs often have lower minimums, possibly due to background. DRONEs sharply peak around 0.1.                                                |
+| **R_max**       | Maximum red intensity.                                                          | DRONEs show distinct peak between 0.5–0.6, while AIRPLANEs and BIRDs stretch toward 1.0, indicating brighter red features.                                 |
+| **R_median**    | Median red value (robust to outliers).                                          | DRONEs and HELICOPTERs have tight peaks, while BIRDs vary more, reflecting mixed textures/backgrounds.                                                    |
+| **R_skew**      | Asymmetry in red distribution.                                                  | DRONEs skew negatively (longer tail on the left), AIRPLANEs slightly positively, suggesting image color bias differences.                                 |
+| **R_kurtosis**  | Peakedness of red intensity distribution.                                       | DRONEs show a very high peak near zero, while other classes (esp. BIRDs) have longer tails, implying more outliers or textured content.                   |
+| **R_q25**       | 25th percentile (lower quartile) red value.                                     | DRONEs again are tightly clustered, BIRDs show greater spread.                                                                                             |
+| **R_q75**       | 75th percentile (upper quartile) red value.                                     | Helps understand spread — DRONEs are tight around 0.45, while BIRDs peak around 0.6–0.7.                                                                   |
+| **G_mean**      | Mean green intensity.                                                           | DRONEs show similar pattern as R_mean: narrow, centered peak, suggesting strong color uniformity in drone images.                                          |
+| **G_std**       | Standard deviation (contrast) in green channel.                                 | Similar behavior to R_std. DRONEs exhibit low variability. Other classes are broader, especially HELICOPTERs.                                              |
+| **G_min**       | Minimum green intensity.                                                        | DRONEs maintain a sharp peak at lower values. AIRPLANEs have a bimodal pattern — some images have low green, others higher.                               |
+
+---
+
+### Key Takeaways:
+
+- **DRONE** images show **high consistency across color stats** — tight peaks, low standard deviation, and low kurtosis. This likely reflects their typical appearance: consistent body color, often against uniform skies.
+- **BIRD** and **HELICOPTER** classes exhibit **higher variability** across most features, likely due to varying backgrounds, lighting, and object shapes.
+- **AIRPLANEs** fall in between — showing variation in some plots (R_max, G_min) and concentration in others (R_mean, R_q25).
+
+---
+
+### Implications for Modeling for Random Forests:
+
+- These **distribution differences** make the color stats useful features for classification.
+- DRONE class, being more narrowly distributed in many features, may be **easier to isolate** using decision trees or ensemble methods.
+- BIRD and HELICOPTER classes may require more **complex feature combinations** due to their broader and overlapping distributions.
+
+---
+
+## Perform dimensionality analysis - RandomForest
+"""
+
 pca, n_components_95 = perform_rf_dimensionality_analysis(X_train_features, y_train_cls, feature_names)
 
-"""## Feature Extraction for Convolutional Neural Networks (CNNs)
+"""| **PCA Plot**                          | **What It Shows**                                                                                                                                                                                                                                                                                                 | **Insights (Including Class-Specific)**                                                                                                                                                                                                                          |
+|--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **PCA: Explained Variance Ratio**    | Line plot showing how much variance each principal component explains, sorted in descending order. <br>PC1 captures the most variance, with steep drop afterward.                                                                                                                                                    | **PC1 (~28%)** and **PC2 (~14%)** together explain **~42%** of the variance. <br> After the first 5–6 components, the added benefit drops off. <br> DRONE class separation is likely captured in early PCs due to high variance signal.                     |
+| **PCA: Cumulative Explained Variance** | Line plot showing how total variance increases as more PCs are added. Includes a 95% threshold line.                                                                                                                                                                                                            | **95% of variance is captured by ~30 components**. <br> Dimensionality can be reduced from 50+ features to ~30 without significant information loss. <br> Random Forest training can be faster and less prone to overfitting after PCA preprocessing.       |
+| **PCA: First Two Components**        | 2D scatter plot of data projected onto PC1 and PC2. Each point is an image, colored by class: <br>🔵 AIRPLANE, 🔴 DRONE, 🟢 HELICOPTER, 🟠 BIRD.                                                                                                                                                                  | 🔴 **DRONE**: Forms a compact, well-separated cluster → easiest to detect. <br> 🟢 **HELICOPTER**: Moderately scattered; overlaps with AIRPLANE and BIRD → less distinctive. <br> 🟠 **BIRD**: High overlap with HELICOPTER → shared features. <br> 🔵 **AIRPLANE**: Spread out, overlaps others. |
+
+
+Key Insights and Takeaways:
+
+Dimensionality Reduction Potential:
+* Strong feature compression is possible. Only 30 components are enough to retain 95% of the variance.
+* This suggests you can simplify the feature space significantly before using it in algorithms like Random Forest, which helps with training speed and potentially reduces overfitting.
+
+Class Separability:
+* DRONE class is clearly separated in the 2D PCA plot → suggests it’s distinct in feature space.
+* BIRD, HELICOPTER, and AIRPLANE have significant overlap, indicating these classes may require more than 2 principal components to be separated well.
+* This visualization suggests DRONE detection is likely easier (distinctive features), whereas fine-tuning is needed to distinguish between other flying objects.
+
+## Feature Extraction for Convolutional Neural Networks (CNNs)
 
 For images, this often means extracting things like:
  * Edges
@@ -1594,7 +1612,7 @@ def extract_cnn_features(X, y_labels=None):
     Extract traditional image features
     '''
     print("="*60)
-    print("TRADITIONAL FEATURE EXTRACTION")
+    print("CNN Feature Extraction")
     print("="*60)
 
     features_dict = {}
@@ -1756,7 +1774,26 @@ def extract_cnn_features(X, y_labels=None):
 # Extract traditional features
 traditional_features = extract_cnn_features(X_train_cls, y_train_cls)
 
-"""# Model Training
+"""### Feature Extraction Analysis for CNN Drone Classification
+
+| Feature Type            | Best Performance | Characteristics                                                        | Strengths                                                | Weaknesses                                      | CNN Implications                            |
+|-------------------------|------------------|------------------------------------------------------------------------|-----------------------------------------------------------|------------------------------------------------|----------------------------------------------|
+| HOG Features (PCA)      | AIRPLANE         | Distinct clustering for airplanes, scattered helicopters, overlapping birds | Excellent for structural/shape discrimination, consistent edge patterns | Struggles with organic vs. mechanical shapes | Use for shape-based attention mechanisms     |
+| LBP Features            | DRONE            | Drones dominate 0.010–0.015 range, distributed patterns for others     | Strong texture discrimination for manufactured surfaces   | Limited distinction between airplanes/helicopters | High weight in texture feature extraction    |
+| Color Histogram (PCA)   | HELICOPTER       | Widest spread for helicopters, clustered airplanes                     | Moderate discrimination, environmental context           | Less distinctive for primary classification   | Secondary feature for context enhancement    |
+| Statistical Features    | DRONE/AIRPLANE   | High peaks for drones (~0.40) and airplanes (~0.45)                    | Consistent properties for manufactured objects           | Poor discrimination for complex/natural objects | Feature normalization and consistency checks |
+| Texture Features        | DRONE            | Dominant frequency around 0.10–0.12 for drones                         | Excellent manufactured vs. natural distinction           | Minimal bird representation                    | Primary discriminative feature weighting     |
+
+
+### Class Based Analysis:
+| Category    | Distinguishing Features                                              | Classification Difficulty                   |                    |
+|-------------|----------------------------------------------------------------------|----------------------------------------------|---------------------------------------------|
+| AIRPLANE    | Consistent HOG clustering, moderate color clustering, clear statistical peak | Low – Well-separated in multiple features    |
+| DRONE       | Dominates LBP, texture, and statistical features                     | Very Low – Most homogeneous and distinctive  |
+| HELICOPTER  | High variability across all features, widest color spread            | High – High intra-class variance             |
+| BIRD        | Overlaps significantly with aircraft in most features                | Very High – Organic vs. mechanical confusion |
+
+# Model Training
 
 ## Random Forest Classifier
 """
@@ -1840,7 +1877,7 @@ def record_performance_metrics(dataset_type, model, X_scaled, y_true, model_name
     # Evaluate on data set
     y_pred = model.predict(X_scaled)
 
-    if model_name == 'cnn' or model_name == 'cnn-d':
+    if model_name == 'cnn':
       print("Recording Performance Metrics for CNN:")
       if y_true.ndim > 1:
         y_true = np.argmax(y_true, axis=1)
@@ -1849,11 +1886,7 @@ def record_performance_metrics(dataset_type, model, X_scaled, y_true, model_name
     else:
       print("Recording Performance Metrics for RandomForest:")
 
-    if model_name == 'cnn-d':
-      accuracy = np.mean(y_true == y_pred)
-    else:
-      accuracy = accuracy_score(y_true, y_pred)
-
+    accuracy = accuracy_score(y_true, y_pred)
     mse = mse_loss(y_true, y_pred)
     mae = mae_loss(y_true, y_pred)
     precision = precision_score(y_true, y_pred, average='weighted', zero_division=0)
@@ -1904,21 +1937,15 @@ def record_performance_metrics(dataset_type, model, X_scaled, y_true, model_name
 
     return accuracy
 
-def train_baseline_random_forest(X_train_features, y_train, feature_names, X_val_features=None, y_val=None):
+def train_baseline_random_forest(X_train_features, y_train, feature_names, X_val_features, y_val, X_test_features, y_test):
     '''
     Train baseline Random Forest model for comparison with GridSearchCV
     '''
     # Scale features
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train_features)
-
-    if X_val_features is not None:
-        X_val_scaled = scaler.transform(X_val_features)
-    else:
-        # Create validation split if not provided
-        X_train_scaled, X_val_scaled, y_train, y_val = train_test_split(
-            X_train_scaled, y_train, test_size=0.2, random_state=42, stratify=y_train
-        )
+    X_val_scaled = scaler.transform(X_val_features)
+    X_test_scaled = scaler.transform(X_test_features)
 
     print(f"Training samples: {len(X_train_scaled)}")
     print(f"Validation samples: {len(X_val_scaled)}")
@@ -1950,12 +1977,13 @@ def train_baseline_random_forest(X_train_features, y_train, feature_names, X_val
 
     # Evaluate on train set
     train_accuracy = record_performance_metrics('train', baseline_rf, X_train_scaled, y_train)
-
     # Evaluate on validation set
     valid_accuracy = record_performance_metrics('valid', baseline_rf, X_val_scaled, y_val)
+    # Evaluate on test set
+    test_accuracy = record_performance_metrics('test', baseline_rf, X_test_scaled, y_test)
 
 
-    return baseline_rf, scaler, train_accuracy, valid_accuracy, baseline_params
+    return baseline_rf, scaler, train_accuracy, valid_accuracy, test_accuracy, baseline_params
 
 # Commented out IPython magic to ensure Python compatibility.
 # %%time
@@ -1965,12 +1993,13 @@ def train_baseline_random_forest(X_train_features, y_train, feature_names, X_val
 # # Train baseline model for comparison
 # rf_base_start_time = time.time()
 # try:
-#     baseline_rf, baseline_scaler, train_accuracy, baseline_accuracy, baseline_params = train_baseline_random_forest(
-#         X_train_features, y_train_cls, feature_names, X_val_features, y_val_cls
+#     baseline_rf, baseline_scaler, train_accuracy, valid_accuracy, test_accuracy, baseline_params = train_baseline_random_forest(
+#         X_train_features, y_train_cls, feature_names, X_val_features, y_val_cls, X_test_features, y_test_cls
 #     )
 # 
 #     print(f"Baseline Random Forest Training Accuracy: {train_accuracy:.4f}")
-#     print(f"Baseline Random Forest Validation Accuracy: {baseline_accuracy:.4f}")
+#     print(f"Baseline Random Forest Validation Accuracy: {valid_accuracy:.4f}")
+#     print(f"Baseline Random Forest Test Accuracy: {test_accuracy:.4f}")
 # 
 # except Exception as e:
 #     print(f"Error during baseline Random Forest training: {e}")
@@ -2051,12 +2080,6 @@ def perform_grid_search(X_train_features, y_train, feature_names, cv_folds=3, n_
     best_score = grid_search.best_score_
     best_estimator = grid_search.best_estimator_
 
-    # # Evaluate on train set
-    # train_accuracy = record_performance_metrics('train', best_estimator, X_train_scaled, y_train)
-
-    # # Evaluate on validation set
-    # valid_accuracy = record_performance_metrics('valid', best_estimator, X_val_scaled, y_val)
-
     print(f"\nBest Cross-Validation Score: {best_score:.4f}")
     print("\nBest Parameters:")
     for param, value in best_params.items():
@@ -2092,7 +2115,7 @@ def perform_grid_search(X_train_features, y_train, feature_names, cv_folds=3, n_
 # try:
 #     if run_grid_search:
 #       grid_search, grid_scaler, best_params, best_score, results_df = perform_grid_search(
-#           X_train_features, y_train_cls, feature_names, cv_folds=3, n_jobs=-1
+#           X_train_features, y_train_cls, feature_names, cv_folds=2, n_jobs=-1
 #       )
 # 
 #       print(f"GridSearchCV Best Cross-Validation Score: {best_score:.4f}")
@@ -2103,24 +2126,14 @@ def perform_grid_search(X_train_features, y_train, feature_names, cv_folds=3, n_
 # rf_grid_end_time = time.time()
 
 def train_optimized_random_forest_model(X_train_features, y_train, best_params, feature_names,
-                                       X_val_features=None, y_val=None, scaler=None):
+                                       X_val_features, y_val, X_test_features, y_test):
     '''
     Train Random Forest model with optimized hyperparameters
     '''
-    # Use provided scaler or create new one
-    if scaler is None:
-        scaler = StandardScaler()
-        X_train_scaled = scaler.fit_transform(X_train_features)
-    else:
-        X_train_scaled = scaler.transform(X_train_features)
-
-    if X_val_features is not None:
-        X_val_scaled = scaler.transform(X_val_features)
-    else:
-        # Create validation split if not provided
-        X_train_scaled, X_val_scaled, y_train, y_val = train_test_split(
-            X_train_scaled, y_train, test_size=0.2, random_state=42, stratify=y_train
-        )
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train_features)
+    X_val_scaled = scaler.transform(X_val_features)
+    X_test_scaled = scaler.transform(X_test_features)
 
     print(f"Training samples: {len(X_train_scaled)}")
     print(f"Validation samples: {len(X_val_scaled)}")
@@ -2145,9 +2158,10 @@ def train_optimized_random_forest_model(X_train_features, y_train, best_params, 
 
     # Evaluate on train set
     train_accuracy = record_performance_metrics('train', rf_model, X_train_scaled, y_train)
-
     # Evaluate on validation set
     valid_accuracy = record_performance_metrics('valid', rf_model, X_val_scaled, y_val)
+    # Evaluate on test set
+    test_accuracy = record_performance_metrics('test', rf_model, X_test_scaled, y_test)
 
     # Print classification report
     print("\nValidation Classification Report:")
@@ -2185,7 +2199,7 @@ def train_optimized_random_forest_model(X_train_features, y_train, best_params, 
     plt.ylabel('Actual')
     plt.show()
 
-    return rf_model, scaler, train_accuracy, valid_accuracy, feature_importance
+    return rf_model, scaler, train_accuracy, valid_accuracy, test_accuracy, feature_importance
 
 # Commented out IPython magic to ensure Python compatibility.
 # %%time
@@ -2196,11 +2210,11 @@ def train_optimized_random_forest_model(X_train_features, y_train, best_params, 
 # # Train optimized model with best parameters
 # rf_opti_start_time = time.time()
 # try:
-#     optimized_rf, optimized_scaler, optimized_train_accuracy, optimized_valid_accuracy, feature_importance = train_optimized_random_forest_model(
-#         X_train_features, y_train_cls, best_params, feature_names, X_val_features, y_val_cls, grid_scaler
+#     optimized_rf, optimized_scaler, optimized_train_accuracy, optimized_valid_accuracy, optimized_test_accuracy, feature_importance = train_optimized_random_forest_model(
+#         X_train_features, y_train_cls, best_params, feature_names, X_val_features, y_val_cls, X_test_features, y_test_cls
 #     )
 # 
-#     # print(f"Optimized Random Forest Validation Accuracy: {optimized_accuracy:.4f}")
+#     print(f"Optimized Random Forest Test Accuracy: {optimized_test_accuracy:.4f}")
 #     print(f"Optimized Random Forest Training Accuracy: {optimized_train_accuracy:.4f}")
 #     print(f"Optimized Random Forest Validation Accuracy: {optimized_valid_accuracy:.4f}")
 # 
@@ -2288,7 +2302,7 @@ print("Baseline Vs Optimized Model Comparision")
 print("="*80)
 
 # Compare baseline vs optimized model
-compare_baseline_vs_optimized(baseline_accuracy, optimized_valid_accuracy, baseline_params, best_params)
+compare_baseline_vs_optimized(valid_accuracy, optimized_valid_accuracy, baseline_params, best_params)
 
 """## RandomForest Model Evaluation"""
 
@@ -2302,14 +2316,6 @@ def evaluate_random_forest_model(model, scaler, X_test_features, y_test, feature
     # Make predictions
     y_test_pred = model.predict(X_test_scaled)
     y_test_proba = model.predict_proba(X_test_scaled)
-
-    # Calculate accuracy
-    # test_accuracy = accuracy_score(y_test, y_test_pred)
-    # print(f"Test Accuracy: {test_accuracy:.4f}")
-
-    # Evaluate on test set
-    test_accuracy = record_performance_metrics('test', model, X_test_scaled, y_test)
-    print(f"Test Accuracy: {test_accuracy:.4f}")
 
     # Classification report
     print("\nTest Classification Report:")
@@ -2466,7 +2472,7 @@ def create_classification_model(input_shape=(224, 224, 3), num_classes=4):
 
     return model
 
-def train_classification_model(X_train, y_train, X_val=None, y_val=None):
+def train_classification_model(X_train, y_train, X_val=None, y_val=None, X_test=None, y_test=None):
     '''
     Train classification model
     '''
@@ -2493,12 +2499,6 @@ def train_classification_model(X_train, y_train, X_val=None, y_val=None):
         ModelCheckpoint('best_classification_model.h5', save_best_only=True, monitor='val_loss')
     ]
 
-    # Prepare validation data
-    if X_val is None or y_val is None:
-        X_train, X_val, y_train, y_val = train_test_split(
-            X_train, y_train, test_size=0.2, random_state=42, stratify=y_train
-        )
-
     print(f"Training samples: {len(X_train)}")
     print(f"Validation samples: {len(X_val)}")
     print(f"Classes distribution in training: {Counter(y_train)}")
@@ -2513,9 +2513,15 @@ def train_classification_model(X_train, y_train, X_val=None, y_val=None):
         verbose=1
     )
     training_accuracy = record_performance_metrics('train', model, X_train, y_train, model_name='cnn')
-    validation_accuracy = record_performance_metrics('valid', model, X_val, y_val, model_name='cnn')
+    if X_val is not None and len(X_val) > 0:
+      validation_accuracy = record_performance_metrics('valid', model, X_val, y_val, model_name='cnn')
+      print(f"Validation Accuracy - CNN: {validation_accuracy:.4f}")
+    if X_test is not None and len(X_test) > 0:
+      test_accuracy = record_performance_metrics('test', model, X_test, y_test, model_name='cnn')
+      print(f"Test Accuracy - CNN: {test_accuracy:.4f}")
+
     print(f"Training Accuracy - CNN: {training_accuracy:.4f}")
-    print(f"Validation Accuracy - CNN: {validation_accuracy:.4f}")
+
 
     return model, history
 
@@ -2603,8 +2609,10 @@ def evaluate_classification_model(model, X_test, y_test, filename="cnn_confusion
 #     '''
 #     print("\nStarting classification model training on original data...")
 #     try:
+#         if X_val is not None:
+#           X_val_cls, y_val_cls = create_classification_data(X_val, Y_val)
 #         cls_model, cls_history = train_classification_model(
-#             X_train_cls, y_train_cls, X_val_cls, y_val_cls
+#             X_train_cls, y_train_cls, X_val_cls, y_val_cls, X_test_cls, y_test_cls
 #         )
 # 
 #         # Plot training history
@@ -2637,14 +2645,7 @@ def evaluate_classification_model(model, X_test, y_test, filename="cnn_confusion
 #     '''
 #     print("\nStarting classification model training on denoised data...")
 #     try:
-#         cls_model_denoised, cls_history_denoised = train_classification_model(
-#             X_train_denoised, y_train_cls, X_val_cls, y_val_cls
-#         )
-# 
-#         # Plot training history
-#         plot_training_history(cls_history_denoised, "Classification Model Training (Denoised)", "cnn_denoised_training_history")
-# 
-#         # Evaluate on test set
+#       # Evaluate on test set
 #         if X_test_cls is not None and len(X_test_cls) > 0:
 #             # Apply denoising to test set
 #             X_test_denoised = np.zeros_like(X_test_cls)
@@ -2653,10 +2654,17 @@ def evaluate_classification_model(model, X_test, y_test, filename="cnn_confusion
 #                 blurred = cv2.GaussianBlur(img_uint8, (3, 3), 0)
 #                 X_test_denoised[i] = blurred / 255.0
 # 
-#             accuracy_denoised = evaluate_classification_model(cls_model_denoised, X_test_denoised, y_test_cls, "cnn_denoised_confusion_matrix")
-#             print(f"Final Classification Test Accuracy (Denoised): {accuracy_denoised:.4f}")
+#         cls_model_denoised, cls_history_denoised = train_classification_model(
+#             X_train_denoised, y_train_cls, X_val_denoised, y_val_cls, X_test_denoised, y_test_cls
+#         )
 # 
-#             return cls_model_denoised, cls_history_denoised
+#         # Plot training history
+#         plot_training_history(cls_history_denoised, "Classification Model Training (Denoised)", "cnn_denoised_training_history")
+# 
+#         accuracy_denoised = evaluate_classification_model(cls_model_denoised, X_test_denoised, y_test_cls, "cnn_denoised_confusion_matrix")
+#         print(f"Final Classification Test Accuracy (Denoised): {accuracy_denoised:.4f}")
+# 
+#         return cls_model_denoised, cls_history_denoised
 #     except Exception as e:
 #         print(f"Error during denoised classification training: {e}")
 #         import traceback
@@ -2713,11 +2721,11 @@ def create_detection_model(input_shape=(224, 224, 3), num_classes=4, max_boxes=1
     model = Model(inputs=inputs, outputs=outputs)
     return model
 
-def visualize_detection_predictions(X_test, Y_true, Y_pred, num_samples=6):
+def visualize_detection_predictions(X_test, Y_true, Y_pred, num_samples=12):
     '''
     Visualize detection predictions
     '''
-    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+    fig, axes = plt.subplots(4, 3, figsize=(18, 12))
     fig.suptitle('Detection Model Predictions vs Ground Truth', fontsize=16, fontweight='bold')
     axes = axes.flatten()
 
@@ -2801,7 +2809,7 @@ def evaluate_detection_model(model, X_test, Y_test):
     Evaluate detection model
     '''
     print("="*60)
-    print("EVALUATING DETECTION MODEL")
+    print("Evaluating Detection Model")
     print("="*60)
 
     # Make predictions
@@ -2815,7 +2823,7 @@ def evaluate_detection_model(model, X_test, Y_test):
     print(f"Test MSE: {tf.reduce_mean(mse):.4f}")
 
     # Visualize some predictions
-    visualize_detection_predictions(X_test, Y_test, predictions, num_samples=6)
+    visualize_detection_predictions(X_test, Y_test, predictions, num_samples=12)
 
     return tf.reduce_mean(mae).numpy()
 
@@ -2841,7 +2849,7 @@ def detection_loss(y_true, y_pred):
 
     return tf.reduce_mean(sample_loss)
 
-def train_detection_model(X_train, Y_train, X_val=None, Y_val=None):
+def train_detection_model(X_train, Y_train, X_val, Y_val):
     '''
     Train detection model
     '''
@@ -2868,12 +2876,6 @@ def train_detection_model(X_train, Y_train, X_val=None, Y_val=None):
         ModelCheckpoint('best_detection_model.h5', save_best_only=True, monitor='val_loss')
     ]
 
-    # Prepare validation data
-    if X_val is None or Y_val is None:
-        X_train, X_val, Y_train, Y_val = train_test_split(
-            X_train, Y_train, test_size=0.2, random_state=42
-        )
-
     print(f"Training samples: {len(X_train)}")
     print(f"Validation samples: {len(X_val)}")
     print(f"Input shape: {X_train.shape}")
@@ -2883,8 +2885,8 @@ def train_detection_model(X_train, Y_train, X_val=None, Y_val=None):
     history = model.fit(
         X_train, Y_train,
         validation_data=(X_val, Y_val),
-        epochs=EPOCHS,  # Reduced epochs for initial training
-        batch_size=SMALL_BATCH_SIZE,   # Smaller batch size
+        epochs=EPOCHS,
+        batch_size=SMALL_BATCH_SIZE,
         callbacks=callbacks,
         verbose=1
     )
@@ -2893,7 +2895,7 @@ def train_detection_model(X_train, Y_train, X_val=None, Y_val=None):
 # Commented out IPython magic to ensure Python compatibility.
 # %%time
 # # Train and evaluate detection model (simplified)
-# def train_and_evaluate_detection_model(X_train, Y_train, X_val=None, Y_val=None):
+# def train_and_evaluate_detection_model(X_train, Y_train, X_val, Y_val):
 #     '''
 #     Train detection model (simplified)
 #     '''
@@ -2902,14 +2904,6 @@ def train_detection_model(X_train, Y_train, X_val=None, Y_val=None):
 #         det_model, det_history = train_detection_model(
 #             X_train, Y_train, X_val, Y_val
 #         )
-# 
-#         # Plot training history
-#         plot_training_history(det_history, "Detection Model Training")
-# 
-#         # Evaluate on test set
-#         if X_test is not None and len(X_test) > 0:
-#             mae = evaluate_detection_model(det_model, X_test, Y_test)
-#             print(f"Final Detection Test MAE: {mae:.4f}")
 # 
 #         return det_model, det_history
 #     except Exception as e:
@@ -2921,7 +2915,18 @@ def train_detection_model(X_train, Y_train, X_val=None, Y_val=None):
 # cnn_detection_start_time = time.time()
 # det_model, det_history = train_and_evaluate_detection_model(X_train, Y_train, X_val, Y_val)
 # cnn_detection_end_time = time.time()
-# model_training_time.append(cnn_detection_end_time - cnn_detection_start_time)
+# # model_training_time.append(cnn_detection_end_time - cnn_detection_start_time)
+
+"""### Plot detection model training history"""
+
+plot_training_history(det_history, "Detection Model Training", "cnn_detection_training_history")
+
+"""### Evaluate detection model"""
+
+# Evaluate on test set
+if X_test is not None and len(X_test) > 0:
+    mae = evaluate_detection_model(det_model, X_test, Y_test)
+    print(f"Final Detection Test MAE: {mae:.4f}")
 
 print(f"🕒 Base Model Training Duration (seconds): {(rf_base_end_time - rf_base_start_time):.2f}")
 print(f"🕒 GridSearch + RandomForest Model Training Duration (seconds): {(rf_grid_end_time - rf_grid_start_time):.2f}")
@@ -2930,3 +2935,43 @@ print(f"🕒 RandomForest Optimized Training Duration (seconds): {(rf_opti_end_t
 print(f"🕒 CNN Model Training Duration (seconds): {(cnn_end_time - cnn_start_time):.2f}")
 print(f"🕒 CNN Denoised Model Training Duration (seconds): {(cnn_denoised_end_time - cnn_denoised_start_time):.2f}")
 print(f"🕒 CNN Detection Model Training Duration (seconds): {(cnn_detection_end_time - cnn_detection_start_time):.2f}")
+
+score_df = pd.DataFrame(index = [
+        'RandomForestClassifier',
+        'Optimized RandomForest',
+        'CNN',
+        'CNN Denoised'
+    ], columns = [
+        'Train Time (Seconds)',
+        'Accuracy Train', 'Accuracy Valid', 'Accuracy Test',
+        'MSE Train', 'MSE Valid', 'MSE Test',
+        'MAE Train', 'MAE Valid', 'MAE Test',
+        'Precision Train', 'Precision Valid', 'Precision Test',
+        'Recall Train', 'Recall Valid', 'Recall Test',
+        'F1 Train', 'F1 Valid', 'F1 Test'])
+
+score_df['Train Time (Seconds)'] = model_training_time[:-1]
+score_df['Accuracy Train'] = acc_train_models
+score_df['Accuracy Test'] = acc_test_models
+score_df['Accuracy Valid'] = acc_val_models
+
+score_df['MSE Train'] = mse_train_models
+score_df['MSE Valid'] = mse_val_models
+score_df['MSE Test'] = mse_test_models
+
+score_df['MAE Train'] = mae_train_models
+score_df['MAE Valid'] = mae_val_models
+score_df['MAE Test'] = mae_test_models
+
+score_df['Precision Train'] = precision_train_models
+score_df['Precision Valid'] = precision_val_models
+score_df['Precision Test'] = precision_test_models
+
+score_df['Recall Train'] = recall_train_models
+score_df['Recall Valid'] = recall_val_models
+score_df['Recall Test'] = recall_test_models
+
+score_df['F1 Train'] = f1_train_models
+score_df['F1 Valid'] = f1_val_models
+score_df['F1 Test'] = f1_test_models
+score_df.T
