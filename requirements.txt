@@ -1,0 +1,12 @@
+pandas
+matplotlib
+seaborn
+tensorflow
+sklearn
+opencv-python
+zipfile
+scikit-image
+numpy
+scikit-learn
+scipy
+Pillow
