@@ -187,20 +187,52 @@ Detection Models
 
 ### Data Understanding (Exploratory Data Analysis)
 
-**Class Distribution**
+**Class Balance Analysis**
 
 **Key Takeaways:** 
+* Total samples: 2100
+* Imbalance ratio (max/min): 2.19
+* Class distribution:
+    * DRONE: 834 samples (39.7%)
+    * HELICOPTER: 460 samples (21.9%)
+    * BIRD: 380 samples (18.1%)
+    * AIRPLANE: 426 samples (20.3%)
 
 ![Image](/images/class_distribution.png)
 
 **Pixel Statistics**
 
 **Key Takeaways:** 
+## Class-wise Insights
+
+| Class | Key Characteristics | Background Context | Technical Notes |
+|-------|-------------------|-------------------|-----------------|
+| **AIRPLANE** | Sky dominance, size variation, consistent lighting | High-altitude captures with clear sky backgrounds | Bimodal distribution: close-up and distant shots |
+| **BIRD** | Natural environment, variable contrast | Outdoor/natural backgrounds | Motion blur potential, lighting variations |
+| **DRONE** | Mixed backgrounds, technical clarity | Diverse operational environments | Scale variations: detail shots and operational distance |
+| **HELICOPTER** | Operational context, distinctive features | Aerial operations over varied terrain | Rotor blade visibility, environmental diversity |
+
 ![Image](/images/pixel_statistics.png)
 
 **Image Quality Metrics**
 
-**Key Takeaways:** 
+### Key Takeaways
+
+| Quality Metric     | Best Performing Class | Worst Performing Class | Recommendation                          |
+|--------------------|------------------------|--------------------------|------------------------------------------|
+| Consistency         | DRONE                  | BIRD                     | Focus augmentation on BIRD class         |
+| Contrast            | DRONE                  | AIRPLANE                 | Enhance edge detection for AIRPLANE      |
+| Sharpness           | DRONE                  | HELICOPTER               | Apply deblurring for HELICOPTER          |
+| Noise Level         | AIRPLANE               | BIRD                     | Implement noise reduction for BIRD       |
+| Feature Richness    | BIRD                   | AIRPLANE                 | Extract texture features for BIRD        |
+
+### Classification Implications
+
+- **DRONE**: Most consistent quality metrics make it easiest to classify  
+- **AIRPLANE**: Sky backgrounds provide clear context but lower contrast  
+- **HELICOPTER**: Motion blur challenges require specialized preprocessing  
+- **BIRD**: Highest variability requires robust augmentation strategies
+
 
 ![Image](/images/image_quality_metrics.png)
 
@@ -208,15 +240,61 @@ Detection Models
 
 **Key Takeaways:** 
 
+| Spatial Feature       | Most Distinctive Class | Least Distinctive Class | Recommendation                           |
+|-----------------------|------------------------|--------------------------|-------------------------------------------|
+| **Center Positioning** | AIRPLANE               | BIRD                     | Use spatial attention for AIRPLANE        |
+| **Edge Definition**    | DRONE                  | BIRD                     | Enhance edge detection for DRONE          |
+| **Corner Features**    | BIRD                   | AIRPLANE                 | Extract corner features for BIRD          |
+| **Symmetry**           | AIRPLANE               | BIRD                     | Use symmetry features for aircraft        |
+| **Texture Complexity** | BIRD                   | AIRPLANE                 | Focus on texture for BIRD classification  |
+
+
+### Classification Strategy Implications
+
+- **AIRPLANE**: Leverage high symmetry and center positioning
+- **DRONE**: Utilize geometric corner patterns and edge definition
+- **HELICOPTER**: Focus on complex rotor blade spatial patterns
+- **BIRD**: Extract rich texture and natural shape variations
+
 ![Image](/images/spatial_patterns_analysis.png)
+
+### Performance Metrics
+
+## Model Performance Comparison
+
+| Metric                         | RandomForestClassifier | Optimized RandomForest | CNN Classification | CNN Classification Denoised | CNN Detection Model |
+|--------------------------------|-------------------------|-------------------------|---------------------|------------------------------|----------------------|
+| **Training Time (Seconds)**    | 0.420267                | 1.271861                | 116.020224          | 116.554183                   | 112.900911           |
+| **Accuracy/Coord_Acc Train**   | 1.0                     | 0.999524                | 0.965238            | 0.965238                     | 0.708126             |
+| **Accuracy/Coord_Acc Val**     | 0.965                   | 0.9725                  | 0.945               | 0.925                        | 0.693035             |
+| **Accuracy/Coord_Acc Test**    | 0.9825                  | 0.9775                  | 0.9375              | 0.94                         | 0.703941             |
+| **MSE Train**                  | 0.0                     | 0.001905                | 0.191429            | 0.203333                     | 0.006081             |
+| **MSE Validation**             | 0.155                   | 0.1275                  | 0.2875              | 0.405                        | 0.008238             |
+| **MSE Test**                   | 0.075                   | 0.1025                  | 0.355               | 0.3525                       | 0.00816              |
+| **MAE Train**                  | 0.0                     | 0.026488                | 0.041565            | 0.064083                     | 0.015825             |
+| **MAE Validation**             | 0.035                   | 0.03269                 | 0.051682            | 0.073712                     | 0.017127             |
+| **MAE Test**                   | 0.035                   | 0.035159                | 0.06205             | 0.079444                     | 0.016778             |
+| **Precision/IoU Train**        | 1.0                     | 0.999525                | 0.966507            | 0.965961                     | 0.146845             |
+| **Precision/IoU Validation**   | 0.966808                | 0.973644                | 0.947548            | 0.927988                     | 0.137712             |
+| **Precision/IoU Test**         | 0.9829                  | 0.978307                | 0.938652            | 0.942225                     | 0.142931             |
+| **Recall Train**               | 1.0                     | 0.999524                | 0.965238            | 0.965238                     | N/A                  |
+| **Recall Validation**          | 0.965                   | 0.9725                  | 0.945               | 0.925                        | N/A                  |
+| **Recall Test**                | 0.9825                  | 0.9775                  | 0.9375              | 0.94                         | N/A                  |
+| **F1-Score Train**             | 1.0                     | 0.999524                | 0.964933            | 0.965111                     | N/A                  |
+| **F1-Score Validation**        | 0.965093                | 0.972521                | 0.944851            | 0.924921                     | N/A                  |
+| **F1-Score Test**              | 0.98237                 | 0.977431                | 0.936915            | 0.939451                     | N/A                  |
+| **R² Score Train**             | 1.0                     | 0.9981                  | 0.809098            | 0.797226                     | 0.910327             |
+| **R² Score Validation**        | 0.850096                | 0.876692                | 0.721952            | 0.608315                     | 0.870752             |
+| **R² Score Test**              | 0.928588                | 0.902404                | 0.661983            | 0.664364                     | 0.876526             |
+
+![Image](/images/loss_function_metrics.png)
 
 ## Next steps
 What suggestions do you have for next steps?
 
-* Model Enhancement: Add diverse samples
+* Model Enhancement: Add image augmentation techniques or use **Fast R-CNN** techinique
 * Ensemble Methods: Combine CNN + RF
 * Real-time Optimization: Use model quantization for edge
-* Use **Fast R-CNN** techinique to train the model and compare the performance.
 * Add RoC and Precison-Recall curve and understand the insight gained to further improve model performance.
 * Save and deploy the model.
 
