@@ -35,9 +35,9 @@ Original file is located at
 - Noise reduction and enhancement
 
 ### 3. **Detection Framework Selection**
+- **Custom CNN**: Tailored architecture
 - **YOLO (You Only Look Once)**: Real-time detection
 - **Faster R-CNN**: High accuracy detection
-- **Custom CNN**: Tailored architecture
 - Trade-off analysis between efficiency and accuracy
 
 ### 4. **Model Configuration and Training**
@@ -47,7 +47,6 @@ Original file is located at
 
 ### 5. **Model Evaluation**
 - Classification metrics (Precision, Recall, F1-score)
-- Mean Average Precision (mAP)
 - Confusion matrix analysis
 
 ### 6. **Deployment and Monitoring**
@@ -91,12 +90,15 @@ The trained model should achieve:
 # %pip install opencv-python
 # %pip install zipfile
 # %pip install scikit-image
+# # %pip install pyyaml
+# # %pip install ultralytics
 
 import zipfile
 import io
 import os
 import sys
 import time
+import traceback
 import tensorflow as tf
 import numpy as np
 import pandas as pd
@@ -113,7 +115,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, make_scorer, precision_score, recall_score, f1_score, precision_recall_curve, average_precision_score
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, make_scorer, precision_score
+from sklearn.metrics import recall_score, f1_score, r2_score, precision_recall_curve, average_precision_score, mean_squared_error, mean_absolute_error
+from sklearn.utils import class_weight
 
 from collections import Counter, defaultdict
 from scipy import stats as scipy_stats
@@ -141,23 +145,11 @@ img_size = (224, 224)
 MAX_BOXES = 10
 class_names = ['AIRPLANE', 'DRONE', 'HELICOPTER', 'BIRD']
 NUM_CLASSES = len(class_names)
-EPOCHS = 50
+EPOCHS = 10
 BATCH_SIZE = 32
 SMALL_BATCH_SIZE = 8
 run_grid_search = True
-score_df = pd.DataFrame(index = [
-        'RandomForestClassifier',
-        'Optimized RandomForest',
-        'CNN',
-        'CNN Denoised'
-    ], columns = [
-        'Model Train Time',
-        'MSE Train', 'MSE Test',
-        'Acc Train', 'Acc Test',
-        'MAE Train', 'MAE Test',
-        'Precision Train', 'Precision Test',
-        'Recall Train', 'Recall Test',
-        'F1 Train', 'F1 Test'])
+
 
 model_training_time = []
 
@@ -167,6 +159,7 @@ acc_train_models = []
 precision_train_models = []
 recall_train_models = []
 f1_train_models = []
+r2_train_models = []
 
 mse_val_models = []
 mae_val_models = []
@@ -174,6 +167,7 @@ acc_val_models = []
 precision_val_models = []
 recall_val_models = []
 f1_val_models = []
+r2_val_models = []
 
 mse_test_models = []
 mae_test_models = []
@@ -181,6 +175,27 @@ acc_test_models = []
 precision_test_models = []
 recall_test_models = []
 f1_test_models = []
+r2_test_models = []
+
+detection_mse_train = []
+detection_mae_train = []
+detection_r2_train = []
+detection_coord_acc_train = []
+detection_iou_train = []
+
+detection_mse_val = []
+detection_mae_val = []
+detection_r2_val = []
+detection_coord_acc_val = []
+detection_iou_val = []
+
+detection_mse_test = []
+detection_mae_test = []
+detection_r2_test = []
+detection_coord_acc_test = []
+detection_iou_test = []
+
+detection_training_time = []
 
 # Global declarations
 # Initialize loss and metric functions
@@ -593,34 +608,34 @@ def analyze_image_quality_metrics(X, y_labels=None):
         img = X[idx]
         gray = rgb2gray(img)
 
-        # 1. Brightness (mean luminance)
+        # Brightness (mean luminance)
         brightness = np.mean(gray)
         quality_metrics['brightness'].append(brightness)
 
-        # 2. Contrast (standard deviation)
+        # Contrast (standard deviation)
         contrast = np.std(gray)
         quality_metrics['contrast'].append(contrast)
 
-        # 3. Sharpness (variance of Laplacian)
+        # Sharpness (variance of Laplacian)
         gray_uint8 = (gray * 255).astype(np.uint8)
         laplacian_var = cv2.Laplacian(gray_uint8, cv2.CV_64F).var()
         quality_metrics['sharpness'].append(laplacian_var)
 
-        # 4. Entropy (information content)
+        # Entropy (information content)
         hist, _ = np.histogram(gray.flatten(), bins=256, density=True)
         # Remove zeros to avoid log(0) issues
         hist = hist[hist > 0]
         entropy = -np.sum(hist * np.log2(hist + 1e-10))
         quality_metrics['entropy'].append(entropy)
 
-        # 5. Noise level (high frequency energy)
+        # Noise level (high frequency energy)
         # Apply high-pass filter and measure energy
         kernel = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
         high_freq = cv2.filter2D(gray_uint8, -1, kernel)
         noise_level = np.std(high_freq)
         quality_metrics['noise_level'].append(noise_level)
 
-        # 6. Color richness (number of unique colors)
+        # Color richness (number of unique colors)
         img_uint8 = (img * 255).astype(np.uint8)
         # Count unique colors (simplified)
         unique_colors = len(np.unique(img_uint8.reshape(-1, 3), axis=0))
@@ -703,7 +718,7 @@ def perform_rf_dimensionality_analysis(X_features, y_labels, feature_names):
     Perform PCA analysis on features
     '''
     print("="*60)
-    print("Dimensionality Reduction Analysis - Random Forest")
+    print("Dimensionality Reduction Analysis - RandomForest")
     print("="*60)
 
     # Standardize features
@@ -787,7 +802,7 @@ def perform_cnn_dimensionality_analysis(X, y_labels=None):
 
     print(f"Analyzing {n_samples} samples...")
 
-    # 1. PCA Analysis
+    # PCA Analysis
     print("Performing PCA...")
     pca = PCA()
     X_pca = pca.fit_transform(X_subset)
@@ -836,7 +851,7 @@ def perform_cnn_dimensionality_analysis(X, y_labels=None):
     axes[1, 0].set_ylabel(f'PC2 ({explained_var[1]:.2%} variance)')
     axes[1, 0].grid(True, alpha=0.3)
 
-    # 2. t-SNE Analysis
+    # t-SNE Analysis
     print("Performing t-SNE...")
     tsne = TSNE(n_components=2, random_state=42, perplexity=30)
     X_tsne = tsne.fit_transform(X_subset[:200])
@@ -890,6 +905,15 @@ These pattern analysis offer a deep look into **spatial and textural characteris
 - Feature selection and engineering
 - Preprocessing strategies
 - Neural network architecture decisions
+
+We analyzed 6 types of spatial patterns:
+
+* Center Region Analysis
+* Gradient Magnitude Analysis
+* Corner Detection Analysis (Harris corner detection)
+* Symmetry Analysis
+* Frequency Domain Analysis (FFT analysis)
+* Texture Complexity
 """
 
 def analyze_spatial_patterns(X, y_labels=None):
@@ -917,7 +941,7 @@ def analyze_spatial_patterns(X, y_labels=None):
 
     fig, axes = plt.subplots(2, 3, figsize=(18, 12))
 
-    # 1. Center region analysis
+    # Center region analysis
     center_intensities = []
     edge_intensities = []
 
@@ -945,7 +969,7 @@ def analyze_spatial_patterns(X, y_labels=None):
     axes[0, 0].set_title('Center vs Edge Intensity')
     axes[0, 0].grid(True, alpha=0.3)
 
-    # 2. Gradient magnitude analysis
+    # Gradient magnitude analysis
     gradient_stats = []
     for idx in sample_indices:
         img = X[idx]
@@ -964,7 +988,7 @@ def analyze_spatial_patterns(X, y_labels=None):
     axes[0, 1].set_title('Gradient Magnitude Distribution')
     axes[0, 1].grid(True, alpha=0.3)
 
-    # 3. Corner detection analysis
+    # Corner detection analysis
     corner_counts = []
     for idx in sample_indices[:20]:  # Limit for computational efficiency
         img = X[idx]
@@ -982,7 +1006,7 @@ def analyze_spatial_patterns(X, y_labels=None):
     axes[0, 2].set_title('Corner Detection Analysis')
     axes[0, 2].grid(True, alpha=0.3)
 
-    # 4. Symmetry analysis
+    # Symmetry analysis
     symmetry_scores = []
     for idx in sample_indices:
         img = X[idx]
@@ -1007,7 +1031,7 @@ def analyze_spatial_patterns(X, y_labels=None):
     axes[1, 0].set_title('Vertical Symmetry Analysis')
     axes[1, 0].grid(True, alpha=0.3)
 
-    # 5. Frequency domain analysis
+    # Frequency domain analysis
     frequency_energies = []
     for idx in sample_indices:
         img = X[idx]
@@ -1033,7 +1057,7 @@ def analyze_spatial_patterns(X, y_labels=None):
     axes[1, 1].set_title('Frequency Domain Analysis')
     axes[1, 1].grid(True, alpha=0.3)
 
-    # 6. Texture complexity
+    # Texture complexity
     texture_complexity = []
     for idx in sample_indices:
         img = X[idx]
@@ -1077,70 +1101,28 @@ eda_results['spatial_patterns'] = spatial_patterns
 
 """### Spatial Patterns Analysis Summary
 
-| **Visualization**                | **What it Shows**                                                                                                                                                       | **Insights**                                                                                                                                                                                                 |
-|----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Center vs Edge Intensity**     | Compares average pixel intensity in the center of the image vs. the edges.                                                                                              | - Clusters along the diagonal imply uniform intensity.<br>- Deviations suggest contrast between object (center) and background (edges).<br>- Useful for spatial focus clues.                             |
-| **Gradient Magnitude Distribution** | Histogram of mean gradient magnitudes (rate of pixel intensity change).                                                                                                  | - Indicates level of detail or texture in images.<br>- Higher values mean sharper, more detailed images.<br>- Helps identify variation in texture or edge density across the dataset.                    |
-| **Corner Detection Analysis**    | Histogram of number of detected corners (using Harris detector).                                                                                                        | - Measures shape/structure complexity.<br>- More corners → more intricate shapes.<br>- Differences across classes can reflect object structure (e.g., drones vs airplanes).                              |
-| **Vertical Symmetry Analysis**   | Distribution of vertical symmetry score (comparing left and right halves of images).                                                                                    | - Higher scores imply strong symmetry (e.g., frontal view of airplane).<br>- Can help differentiate symmetrical objects from asymmetrical ones.                                                            |
-| **Frequency Domain Analysis**    | Histogram of high-frequency energy from Fourier Transform spectrum.                                                                                                     | - Highlights presence of fine details and edges.<br>- Complements gradient analysis.<br>- Useful for understanding texture richness.                                                                      |
-| **Texture Complexity Analysis**  | Distribution of mean local variance (a measure of texture).                                                                                                             | - Higher values → more complex textures.<br>- Helps identify texture-heavy objects (e.g., birds with feathers vs smooth drones).                                                                          |
+These plots offer a visual understanding of the structural and textural characteristics of the drone dataset. Below is a table summarizing each analysis and key insights derived from the visual patterns.
+
+| **Analysis Type**              | **What the Plot Shows**                                                                                  | **Observed Insight from Plot**                                                                                      |
+|-------------------------------|-----------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
+| **1. Center vs Edge Intensity** | Scatter plot of center vs edge intensity with a reference diagonal.                                       | Most points lie below the diagonal, suggesting **edges are generally brighter than centers** in the images.         |
+| **2. Gradient Magnitude**       | Histogram of mean gradient magnitude per image (edge strength).                                           | The majority of images have a gradient magnitude around **0.006–0.008**, indicating moderate edge detail.            |
+| **3. Corner Detection**         | Histogram of number of corners detected using Harris method.                                              | Most images contain **100–400 corners**, suggesting the presence of structured objects with some variation.         |
+| **4. Vertical Symmetry**        | Histogram of symmetry scores comparing left vs right halves.                                              | High scores (most > 0.95) suggest **strong vertical symmetry**, expected for man-made objects like drones/planes.    |
+| **5. Frequency Domain**         | Histogram of high-frequency energy from FFT.                                                              | Clear peak around **40,000**, with several images showing high values, indicating **sharper textures and edges**.    |
+| **6. Texture Complexity**       | Histogram of local variance (texture).                                                                    | Most images have low complexity, but some exhibit high variance, indicating **mixture of smooth and detailed images**.|
 
 ---
-"""
 
-def eda_report(X):
-    '''
-    Generate a EDA report based recommendation
-    '''
-    # 7. Generate recommendations
-    print("\n" + "="*60)
-    print("RECOMMENDATIONS BASED ON EDA")
-    print("="*60)
+### General Observations
 
-    recommendations = []
+- **Symmetry & Structure:** Strong symmetry and moderate to high corner counts point toward structured objects like drones or airplanes dominating the dataset.
+- **Edge Detail:** Most images show moderate edge strength (gradient) and frequency content, useful for distinguishing flying objects from the background.
+- **Brightness Contrast:** Center regions are typically darker than edges, which could indicate drones often appear against brighter skies.
 
-    # Class imbalance recommendations
-    if y_labels is not None and imbalance_ratio > 2:
-        recommendations.append(f"• High class imbalance detected (ratio: {imbalance_ratio:.2f}). Consider data augmentation or class weighting.")
+---
 
-    # Brightness recommendations
-    brightness_std = np.std(pixel_stats['brightness'])
-    if brightness_std > 0.2:
-        recommendations.append("• High brightness variation detected. Consider brightness normalization.")
-
-    # Contrast recommendations
-    contrast_mean = np.mean(pixel_stats['contrast'])
-    if contrast_mean < 0.1:
-        recommendations.append("• Low contrast images detected. Consider contrast enhancement techniques.")
-
-    # Sharpness recommendations
-    sharpness_values = quality_metrics['sharpness']
-    if np.mean(sharpness_values) < 100:
-        recommendations.append("• Low sharpness detected in some images. Consider sharpening filters.")
-
-    # Noise recommendations
-    noise_values = quality_metrics['noise_level']
-    if np.mean(noise_values) > 50:
-        recommendations.append("• High noise levels detected. Consider denoising techniques.")
-
-    # Dimensionality recommendations
-    if dim_analysis['n_components_95'] < X.shape[1] * X.shape[2] * X.shape[3] * 0.1:
-        recommendations.append("• Low intrinsic dimensionality detected. PCA preprocessing might be beneficial.")
-
-    if len(recommendations) == 0:
-        recommendations.append("• Dataset appears to be of good quality. Standard preprocessing should be sufficient.")
-
-    for rec in recommendations:
-        print(rec)
-
-    eda_results['recommendations'] = recommendations
-
-    return eda_results
-
-eda_results = eda_report(X_train_cls)
-
-"""# Image Preprocessing
+# Image Preprocessing
 
 ## Denoising Images
 
@@ -1149,14 +1131,25 @@ Denoising is the process of removing noise (unwanted random variations or artifa
 In image denoising, the goal is to:
 * Preserve important features like edges and textures
 * Eliminate unwanted variations like grain, blur, or compression artifacts
+
+We performed 8 types of denoising techniques:
+
+* Gaussian Blur
+* Median Filter
+* Bilateral Filter
+* Non-local Means Denoising
+* Grayscale conversion
+* Edge Enhancement (Unsharp Masking)
+* Histogram Equalization
+* CLAHE (Contrast Limited Adaptive Histogram Equalization)
 """
 
-def apply_denoising_techniques(X, y_labels=None):
+def apply_denoising_techniques(X, y_labels=None, sample_idx=0):
     '''
     Apply various denoising and preprocessing techniques
     '''
     print("="*60)
-    print("DENOISING AND PREPROCESSING")
+    print("Denoising and Preprocessing")
     print("="*60)
 
     # Select a sample image for demonstration
@@ -1169,38 +1162,38 @@ def apply_denoising_techniques(X, y_labels=None):
     # Apply various denoising techniques
     techniques = {}
 
-    # 1. Gaussian Blur
+    # Gaussian Blur
     gaussian_blur = cv2.GaussianBlur(sample_img_uint8, (5, 5), 0)
     techniques['Gaussian Blur'] = gaussian_blur / 255.0
 
-    # 2. Median Filter
+    # Median Filter
     median_filter = cv2.medianBlur(sample_img_uint8, 5)
     techniques['Median Filter'] = median_filter / 255.0
 
-    # 3. Bilateral Filter
+    # Bilateral Filter
     bilateral_filter = cv2.bilateralFilter(sample_img_uint8, 9, 75, 75)
     techniques['Bilateral Filter'] = bilateral_filter / 255.0
 
-    # 4. Non-local Means Denoising
+    # Non-local Means Denoising
     nlm_denoised = cv2.fastNlMeansDenoisingColored(sample_img_uint8, None, 10, 10, 7, 21)
     techniques['NLM Denoising'] = nlm_denoised / 255.0
 
-    # 5. Grayscale conversion
+    # Grayscale conversion
     gray_img = cv2.cvtColor(sample_img_uint8, cv2.COLOR_RGB2GRAY)
     techniques['Grayscale'] = gray_img / 255.0
 
-    # 6. Edge Enhancement (Unsharp Masking)
+    # Edge Enhancement (Unsharp Masking)
     gaussian = cv2.GaussianBlur(sample_img_uint8, (0, 0), 2.0)
     unsharp_mask = cv2.addWeighted(sample_img_uint8, 1.5, gaussian, -0.5, 0)
     techniques['Edge Enhanced'] = unsharp_mask / 255.0
 
-    # 7. Histogram Equalization
+    # Histogram Equalization
     img_yuv = cv2.cvtColor(sample_img_uint8, cv2.COLOR_RGB2YUV)
     img_yuv[:, :, 0] = cv2.equalizeHist(img_yuv[:, :, 0])
     hist_eq = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2RGB)
     techniques['Histogram Equalized'] = hist_eq / 255.0
 
-    # 8. CLAHE (Contrast Limited Adaptive Histogram Equalization)
+    # CLAHE (Contrast Limited Adaptive Histogram Equalization)
     clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
     img_lab = cv2.cvtColor(sample_img_uint8, cv2.COLOR_RGB2LAB)
     img_lab[:, :, 0] = clahe.apply(img_lab[:, :, 0])
@@ -1244,8 +1237,11 @@ def apply_denoising_techniques(X, y_labels=None):
 
 """### Apply denoising techniques"""
 
-print("\nApplying denoising techniques...")
+print("\nApplying denoising techniques on Train Data...")
 X_train_denoised, denoising_techniques = apply_denoising_techniques(X_train_cls, y_train_cls)
+
+print("\nApplying denoising techniques on Validation Data...")
+X_val_denoised, denoising_techniques = apply_denoising_techniques(X_val_cls, y_val_cls, sample_idx=21)
 
 """# Feature Extractions
 
@@ -1275,14 +1271,17 @@ def sobel_filter_edge_detection(image):
 
         return np.sqrt(grad_x**2 + grad_y**2)
 
-"""## Feature extraction for Random Forest Classifier"""
+"""## Feature extraction for Random Forest Classifier
+
+**Visualize distributions of most important features for Random Forest**
+"""
 
 def visualize_rf_feature_distributions(X_features, y_labels, feature_names, num_features=12):
     '''
     Visualize distributions of most important features for Random Forest
     '''
     print("="*60)
-    print("VISUALIZING FEATURE DISTRIBUTIONS - RANDOM FOREST")
+    print("Visualizing Feature Distribution - RandomForest")
     print("="*60)
 
     # For demonstration, show distributions of first num_features features
@@ -1320,12 +1319,25 @@ def visualize_rf_feature_distributions(X_features, y_labels, feature_names, num_
     plt.savefig("images/rf_features_distribution.png")
     plt.show()
 
+"""**Extract features for Random Forest model**
+
+We extracted 7 features for Random Forest Model
+
+* Basic Statistical Features (per channel + grayscale)
+* Grayscale Statistical Features
+* Color Histogram Features
+* Texture Features (gradient-based)
+* Local Binary Pattern Features
+* Spatial Features
+* HOG Features (reduced dimensionality)
+"""
+
 def extract_rf_features(X, y_labels=None):
     '''
     Extract features for Random Forest model
     '''
     print("="*60)
-    print("EXTRACTING FEATURES FOR RANDOM FOREST")
+    print("Extracting Features - RandomForest")
     print("="*60)
 
     n_samples = len(X)
@@ -1340,7 +1352,7 @@ def extract_rf_features(X, y_labels=None):
         # Convert to different color spaces for feature extraction
         gray = rgb2gray(img)
 
-        # 1. Basic Statistical Features (per channel + grayscale)
+        # Basic Statistical Features (per channel + grayscale)
         for ch_idx, ch_name in enumerate(['R', 'G', 'B']):
             channel = img[:, :, ch_idx]
             img_features.extend([
@@ -1362,7 +1374,7 @@ def extract_rf_features(X, y_labels=None):
                     f'{ch_name}_q25', f'{ch_name}_q75'
                 ])
 
-        # 2. Grayscale Statistical Features
+        # Grayscale Statistical Features
         hist, _ = np.histogram(gray.flatten(), bins=256, density=True)
         hist = hist[hist > 0]
         entropy_val = -np.sum(hist * np.log2(hist + 1e-10))
@@ -1382,7 +1394,7 @@ def extract_rf_features(X, y_labels=None):
                 'gray_skew', 'gray_kurtosis'
             ])
 
-        # 3. Color Histogram Features (simplified)
+        # Color Histogram Features
         for ch_idx, ch_name in enumerate(['R', 'G', 'B']):
             channel = img[:, :, ch_idx]
             hist_ch = np.histogram(channel, bins=8, range=(0, 1))[0]
@@ -1392,7 +1404,7 @@ def extract_rf_features(X, y_labels=None):
             if i == 0:
                 feature_names.extend([f'{ch_name}_hist_{j}' for j in range(8)])
 
-        # 4. Texture Features (gradient-based)
+        # Texture Features (gradient-based)
         grad_x = np.gradient(gray, axis=1)
         grad_y = np.gradient(gray, axis=0)
         gradient_magnitude = np.sqrt(grad_x**2 + grad_y**2)
@@ -1414,7 +1426,7 @@ def extract_rf_features(X, y_labels=None):
                 'grad_x_mean', 'grad_y_mean'
             ])
 
-        # 5. Local Binary Pattern Features
+        # Local Binary Pattern Features
         try:
             gray_uint8 = img_as_ubyte(gray)
             lbp = local_binary_pattern(gray_uint8, P=8, R=1, method='uniform')
@@ -1429,7 +1441,7 @@ def extract_rf_features(X, y_labels=None):
             if i == 0:
                 feature_names.extend([f'lbp_fallback_{j}' for j in range(10)])
 
-        # 6. Spatial Features
+        # Spatial Features
         h, w = gray.shape
 
         # Center vs edge intensity
@@ -1469,7 +1481,7 @@ def extract_rf_features(X, y_labels=None):
                 'center_intensity', 'edge_intensity', 'center_edge_diff', 'symmetry_score'
             ])
 
-        # 7. HOG Features (reduced dimensionality)
+        # HOG Features (reduced dimensionality)
         try:
             hog_features = hog(gray, orientations=6, pixels_per_cell=(16, 16),
                              cells_per_block=(2, 2), visualize=False)
@@ -1508,23 +1520,83 @@ if X_test_cls is not None and len(X_test_cls) > 0:
     print("Extracting test features...")
     X_test_features, _ = extract_rf_features(X_test_cls, y_test_cls)
 
+"""## Visualize feature distributions - Random Forest"""
+
 print("\n" + "="*80)
 print("RandomForestClassfier Feature Analysis")
 print("="*80)
 
-# Visualize feature distributions
 visualize_rf_feature_distributions(X_train_features, y_train_cls, feature_names)
 
-# Perform dimensionality analysis
+"""### Color Feature Distribution Analysis (Red & Green Channels)
+
+Below is a summary of each feature plot and what insights we can derive from it:
+
+| **Feature**     | **Description**                                                                 | **Insights from Plot**                                                                                                                                     |
+|-----------------|----------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **R_mean**      | Mean intensity of red channel.                                                  | DRONE images (red) have a consistent narrow distribution peaking around 0.45, suggesting standardized brightness. BIRDS show more variability.            |
+| **R_std**       | Standard deviation (contrast) of red channel.                                   | DRONEs again show a sharp peak around 0.05, indicating uniform red channel contrast, while other classes like BIRDs have a wider distribution.             |
+| **R_min**       | Minimum red intensity in image.                                                 | AIRPLANEs and DRONEs often have lower minimums, possibly due to background. DRONEs sharply peak around 0.1.                                                |
+| **R_max**       | Maximum red intensity.                                                          | DRONEs show distinct peak between 0.5–0.6, while AIRPLANEs and BIRDs stretch toward 1.0, indicating brighter red features.                                 |
+| **R_median**    | Median red value (robust to outliers).                                          | DRONEs and HELICOPTERs have tight peaks, while BIRDs vary more, reflecting mixed textures/backgrounds.                                                    |
+| **R_skew**      | Asymmetry in red distribution.                                                  | DRONEs skew negatively (longer tail on the left), AIRPLANEs slightly positively, suggesting image color bias differences.                                 |
+| **R_kurtosis**  | Peakedness of red intensity distribution.                                       | DRONEs show a very high peak near zero, while other classes (esp. BIRDs) have longer tails, implying more outliers or textured content.                   |
+| **R_q25**       | 25th percentile (lower quartile) red value.                                     | DRONEs again are tightly clustered, BIRDs show greater spread.                                                                                             |
+| **R_q75**       | 75th percentile (upper quartile) red value.                                     | Helps understand spread — DRONEs are tight around 0.45, while BIRDs peak around 0.6–0.7.                                                                   |
+| **G_mean**      | Mean green intensity.                                                           | DRONEs show similar pattern as R_mean: narrow, centered peak, suggesting strong color uniformity in drone images.                                          |
+| **G_std**       | Standard deviation (contrast) in green channel.                                 | Similar behavior to R_std. DRONEs exhibit low variability. Other classes are broader, especially HELICOPTERs.                                              |
+| **G_min**       | Minimum green intensity.                                                        | DRONEs maintain a sharp peak at lower values. AIRPLANEs have a bimodal pattern — some images have low green, others higher.                               |
+
+---
+
+### Key Takeaways:
+
+- **DRONE** images show **high consistency across color stats** — tight peaks, low standard deviation, and low kurtosis. This likely reflects their typical appearance: consistent body color, often against uniform skies.
+- **BIRD** and **HELICOPTER** classes exhibit **higher variability** across most features, likely due to varying backgrounds, lighting, and object shapes.
+- **AIRPLANEs** fall in between — showing variation in some plots (R_max, G_min) and concentration in others (R_mean, R_q25).
+
+---
+
+### Implications for Modeling for Random Forests:
+
+- These **distribution differences** make the color stats useful features for classification.
+- DRONE class, being more narrowly distributed in many features, may be **easier to isolate** using decision trees or ensemble methods.
+- BIRD and HELICOPTER classes may require more **complex feature combinations** due to their broader and overlapping distributions.
+
+---
+
+## Perform dimensionality analysis - RandomForest
+"""
+
 pca, n_components_95 = perform_rf_dimensionality_analysis(X_train_features, y_train_cls, feature_names)
 
-"""## Feature Extraction for Convolutional Neural Networks (CNNs)
+"""| **PCA Plot**                          | **What It Shows**                                                                                                                                                                                                                                                                                                 | **Insights (Including Class-Specific)**                                                                                                                                                                                                                          |
+|--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **PCA: Explained Variance Ratio**    | Line plot showing how much variance each principal component explains, sorted in descending order. <br>PC1 captures the most variance, with steep drop afterward.                                                                                                                                                    | **PC1 (~28%)** and **PC2 (~14%)** together explain **~42%** of the variance. <br> After the first 5–6 components, the added benefit drops off. <br> DRONE class separation is likely captured in early PCs due to high variance signal.                     |
+| **PCA: Cumulative Explained Variance** | Line plot showing how total variance increases as more PCs are added. Includes a 95% threshold line.                                                                                                                                                                                                            | **95% of variance is captured by ~30 components**. <br> Dimensionality can be reduced from 50+ features to ~30 without significant information loss. <br> Random Forest training can be faster and less prone to overfitting after PCA preprocessing.       |
+| **PCA: First Two Components**        | 2D scatter plot of data projected onto PC1 and PC2. Each point is an image, colored by class: <br>🔵 AIRPLANE, 🔴 DRONE, 🟢 HELICOPTER, 🟠 BIRD.                                                                                                                                                                  | 🔴 **DRONE**: Forms a compact, well-separated cluster → easiest to detect. <br> 🟢 **HELICOPTER**: Moderately scattered; overlaps with AIRPLANE and BIRD → less distinctive. <br> 🟠 **BIRD**: High overlap with HELICOPTER → shared features. <br> 🔵 **AIRPLANE**: Spread out, overlaps others. |
+
+
+Key Insights and Takeaways:
+
+Dimensionality Reduction Potential:
+* Strong feature compression is possible. Only 30 components are enough to retain 95% of the variance.
+* This suggests you can simplify the feature space significantly before using it in algorithms like Random Forest, which helps with training speed and potentially reduces overfitting.
+
+Class Separability:
+* DRONE class is clearly separated in the 2D PCA plot → suggests it’s distinct in feature space.
+* BIRD, HELICOPTER, and AIRPLANE have significant overlap, indicating these classes may require more than 2 principal components to be separated well.
+* This visualization suggests DRONE detection is likely easier (distinctive features), whereas fine-tuning is needed to distinguish between other flying objects.
+
+## Feature Extraction for Convolutional Neural Networks (CNNs)
 
 For images, this often means extracting things like:
  * Edges
  * Textures
  * Shapes
  * Keypoints
+
+**Visualizing feature distributions for CNN**
 """
 
 def visualize_cnn_feature_distributions(features_dict, y_labels=None):
@@ -1589,12 +1661,20 @@ def visualize_cnn_feature_distributions(features_dict, y_labels=None):
     plt.savefig("images/cnn_features_distribution.png")
     plt.show()
 
+"""**Extract image features**
+
+*   HOG (Histogram of Oriented Gradients) Features
+*   LBP (Local Binary Pattern) Features
+*   Color Histogram Features
+*   Statistical Features
+"""
+
 def extract_cnn_features(X, y_labels=None):
     '''
-    Extract traditional image features
+    Extract image features
     '''
     print("="*60)
-    print("TRADITIONAL FEATURE EXTRACTION")
+    print("CNN Feature Extraction")
     print("="*60)
 
     features_dict = {}
@@ -1607,7 +1687,7 @@ def extract_cnn_features(X, y_labels=None):
 
     print(f"Extracting features from {subset_size} images...")
 
-    # 1. HOG (Histogram of Oriented Gradients) Features
+    # HOG (Histogram of Oriented Gradients) Features
     print("Extracting HOG features...")
     hog_features = []
     for i, img in enumerate(X_subset):
@@ -1620,7 +1700,7 @@ def extract_cnn_features(X, y_labels=None):
     features_dict['HOG'] = hog_features
     print(f"HOG features shape: {hog_features.shape}")
 
-    # 2. LBP (Local Binary Pattern) Features
+    # LBP (Local Binary Pattern) Features
     print("Extracting LBP features...")
     lbp_features = []
     for i, img in enumerate(X_subset):
@@ -1634,7 +1714,7 @@ def extract_cnn_features(X, y_labels=None):
     features_dict['LBP'] = lbp_features
     print(f"LBP features shape: {lbp_features.shape}")
 
-    # 3. Color Histogram Features
+    # Color Histogram Features
     print("Extracting color histogram features...")
     color_features = []
     for i, img in enumerate(X_subset):
@@ -1655,7 +1735,7 @@ def extract_cnn_features(X, y_labels=None):
     features_dict['Color_Histogram'] = color_features
     print(f"Color histogram features shape: {color_features.shape}")
 
-    # 4. Statistical Features
+    # Statistical Features
     print("Extracting statistical features...")
     statistical_features = []
     for i, img in enumerate(X_subset):
@@ -1753,8 +1833,442 @@ def extract_cnn_features(X, y_labels=None):
 
     return features_dict
 
-# Extract traditional features
-traditional_features = extract_cnn_features(X_train_cls, y_train_cls)
+# Extract Image features for CNN
+cnn_features = extract_cnn_features(X_train_cls, y_train_cls)
+
+"""### Feature Extraction Analysis for CNN Drone Classification
+
+| Feature Type            | Best Performance | Characteristics                                                        | Strengths                                                | Weaknesses                                      | CNN Implications                            |
+|-------------------------|------------------|------------------------------------------------------------------------|-----------------------------------------------------------|------------------------------------------------|----------------------------------------------|
+| HOG Features (PCA)      | AIRPLANE         | Distinct clustering for airplanes, scattered helicopters, overlapping birds | Excellent for structural/shape discrimination, consistent edge patterns | Struggles with organic vs. mechanical shapes | Use for shape-based attention mechanisms     |
+| LBP Features            | DRONE            | Drones dominate 0.010–0.015 range, distributed patterns for others     | Strong texture discrimination for manufactured surfaces   | Limited distinction between airplanes/helicopters | High weight in texture feature extraction    |
+| Color Histogram (PCA)   | HELICOPTER       | Widest spread for helicopters, clustered airplanes                     | Moderate discrimination, environmental context           | Less distinctive for primary classification   | Secondary feature for context enhancement    |
+| Statistical Features    | DRONE/AIRPLANE   | High peaks for drones (~0.40) and airplanes (~0.45)                    | Consistent properties for manufactured objects           | Poor discrimination for complex/natural objects | Feature normalization and consistency checks |
+| Texture Features        | DRONE            | Dominant frequency around 0.10–0.12 for drones                         | Excellent manufactured vs. natural distinction           | Minimal bird representation                    | Primary discriminative feature weighting     |
+
+
+### Class Based Analysis:
+| Category    | Distinguishing Features                                              | Classification Difficulty                   |                    |
+|-------------|----------------------------------------------------------------------|----------------------------------------------|---------------------------------------------|
+| AIRPLANE    | Consistent HOG clustering, moderate color clustering, clear statistical peak | Low – Well-separated in multiple features    |
+| DRONE       | Dominates LBP, texture, and statistical features                     | Very Low – Most homogeneous and distinctive  |
+| HELICOPTER  | High variability across all features, widest color spread            | High – High intra-class variance             |
+| BIRD        | Overlaps significantly with aircraft in most features                | Very High – Organic vs. mechanical confusion |
+
+# Record Performance Metrics
+
+Performance Metrics for RandomForest, CNN Classifier, CNN Optimized and CNN Denoised Models
+"""
+
+def record_performance_metrics(dataset_type, model, X_scaled, y_true, model_name='rf'):
+    '''
+    Record performance metrics for models
+    '''
+    # Evaluate on data set
+    y_pred = model.predict(X_scaled)
+
+    if model_name == 'cnn':
+      print("Recording Performance Metrics for CNN:")
+      if y_true.ndim > 1:
+        y_true = np.argmax(y_true, axis=1)
+      if y_pred.ndim > 1:
+        y_pred = np.argmax(y_pred, axis=1)
+    else:
+      print("Recording Performance Metrics for RandomForest:")
+
+    accuracy = accuracy_score(y_true, y_pred)
+    mse = mse_loss(y_true, y_pred)
+    mae = mae_loss(y_true, y_pred)
+    precision = precision_score(y_true, y_pred, average='weighted', zero_division=0)
+    recall = recall_score(y_true, y_pred, average='weighted', zero_division=0)
+    f1 = f1_score(y_true, y_pred, average='weighted', zero_division=0)
+    r2 = r2_score(y_true, y_pred)
+
+    if dataset_type == 'train':
+      mse_train_models.append(float(mse.numpy()))
+      acc_train_models.append(accuracy)
+      mae_train_models.append(float(mae.numpy()))
+      precision_train_models.append(precision)
+      recall_train_models.append(recall)
+      f1_train_models.append(f1)
+      r2_train_models.append(r2)
+      print(f"\nTraining Accuracy: {accuracy:.4f}")
+      print(f"Training MSE: {float(mse.numpy()):.4f}")
+      print(f"Training MAE: {float(mae.numpy()):.4f}")
+      print(f"Training Precision: {precision:.4f}")
+      print(f"Training Recall: {recall:.4f}")
+      print(f"Training F1 Score: {f1:.4f}")
+      print(f"Training R2 Score: {r2:.4f}")
+    elif dataset_type == 'valid':
+      mse_val_models.append(float(mse.numpy()))
+      acc_val_models.append(accuracy)
+      mae_val_models.append(float(mae.numpy()))
+      precision_val_models.append(precision)
+      recall_val_models.append(recall)
+      f1_val_models.append(f1)
+      r2_val_models.append(r2)
+      print(f"\nValidation Accuracy: {accuracy:.4f}")
+      print(f"Validation MSE: {float(mse.numpy()):.4f}")
+      print(f"Validation MAE: {float(mae.numpy()):.4f}")
+      print(f"Validation Precision: {precision:.4f}")
+      print(f"Validation Recall: {recall:.4f}")
+      print(f"Validation F1 Score: {f1:.4f}")
+      print(f"Validation R2 Score: {r2:.4f}")
+    elif dataset_type == 'test':
+      mse_test_models.append(float(mse.numpy()))
+      acc_test_models.append(accuracy)
+      mae_test_models.append(float(mae.numpy()))
+      precision_test_models.append(precision)
+      recall_test_models.append(recall)
+      f1_test_models.append(f1)
+      r2_test_models.append(r2)
+      print(f"\Test Accuracy: {accuracy:.4f}")
+      print(f"Test MSE: {float(mse.numpy()):.4f}")
+      print(f"Test MAE: {float(mae.numpy()):.4f}")
+      print(f"Test Precision: {precision:.4f}")
+      print(f"Test Recall: {recall:.4f}")
+      print(f"Test F1 Score: {f1:.4f}")
+      print(f"Test R2 Score: {r2:.4f}")
+    else:
+        raise ValueError("Invalid dataset_type. Must be 'train', 'val', or 'test'.")
+
+    return accuracy
+
+"""Comprehensive Performance Metrics for RandomForest, CNN Classifier, CNN Optimized, CNN Denoised and CNN Detection Models"""
+
+def record_detection_performance_metrics(dataset_type, model, X_data, Y_true, model_name='cnn_detection'):
+    '''
+    Record performance metrics specifically for CNN detection model
+    '''
+    print(f"Recording Performance Metrics for CNN Detection Model ({dataset_type}):")
+
+    # Make predictions
+    Y_pred = model.predict(X_data, verbose=0)
+
+    # Flatten the arrays for metric calculations
+    Y_true_flat = Y_true.reshape(-1)
+    Y_pred_flat = Y_pred.reshape(-1)
+
+    # Calculate metrics
+    mse = mean_squared_error(Y_true_flat, Y_pred_flat)
+    mae = mean_absolute_error(Y_true_flat, Y_pred_flat)
+    r2 = r2_score(Y_true_flat, Y_pred_flat)
+
+    # For detection models, we don't have traditional accuracy, precision, recall
+    # Instead, we'll use IoU-based metrics and coordinate accuracy
+
+    # Calculate coordinate-wise accuracy (within tolerance)
+    tolerance = 0.1  # 10% tolerance for coordinates
+    coord_accuracy = calculate_coordinate_accuracy(Y_true, Y_pred, tolerance)
+
+    # Calculate bounding box IoU
+    avg_iou = calculate_average_iou(Y_true, Y_pred)
+
+    # Store metrics in global lists based on dataset type
+    if dataset_type == 'train':
+        detection_mse_train.append(mse)
+        detection_mae_train.append(mae)
+        detection_r2_train.append(r2)
+        detection_coord_acc_train.append(coord_accuracy)
+        detection_iou_train.append(avg_iou)
+
+        print(f"Training MSE: {mse:.4f}")
+        print(f"Training MAE: {mae:.4f}")
+        print(f"Training R2 Score: {r2:.4f}")
+        print(f"Training Coordinate Accuracy: {coord_accuracy:.4f}")
+        print(f"Training Average IoU: {avg_iou:.4f}")
+
+    elif dataset_type == 'valid':
+        detection_mse_val.append(mse)
+        detection_mae_val.append(mae)
+        detection_r2_val.append(r2)
+        detection_coord_acc_val.append(coord_accuracy)
+        detection_iou_val.append(avg_iou)
+
+        print(f"Validation MSE: {mse:.4f}")
+        print(f"Validation MAE: {mae:.4f}")
+        print(f"Validation R2 Score: {r2:.4f}")
+        print(f"Validation Coordinate Accuracy: {coord_accuracy:.4f}")
+        print(f"Validation Average IoU: {avg_iou:.4f}")
+
+    elif dataset_type == 'test':
+        detection_mse_test.append(mse)
+        detection_mae_test.append(mae)
+        detection_r2_test.append(r2)
+        detection_coord_acc_test.append(coord_accuracy)
+        detection_iou_test.append(avg_iou)
+
+        print(f"Test MSE: {mse:.4f}")
+        print(f"Test MAE: {mae:.4f}")
+        print(f"Test R2 Score: {r2:.4f}")
+        print(f"Test Coordinate Accuracy: {coord_accuracy:.4f}")
+        print(f"Test Average IoU: {avg_iou:.4f}")
+
+    return coord_accuracy
+
+"""**Calculate Coordinate Accuracy**
+
+Coordinate accuracy refers to how accurately the model predicts the bounding box coordinates of the detected objects relative to their ground truth locations.
+"""
+
+def calculate_coordinate_accuracy(Y_true, Y_pred, tolerance=0.1):
+    '''
+    Calculate coordinate accuracy for detection model
+    '''
+    # Only consider valid boxes (non-zero boxes)
+    valid_mask = np.sum(np.abs(Y_true), axis=-1) > 0
+
+    if np.sum(valid_mask) == 0:
+        return 0.0
+
+    # Extract valid predictions and ground truth
+    valid_true = Y_true[valid_mask]
+    valid_pred = Y_pred[valid_mask]
+
+    # Calculate absolute differences
+    abs_diff = np.abs(valid_true - valid_pred)
+
+    # Check if coordinates are within tolerance
+    within_tolerance = abs_diff <= tolerance
+
+    # Calculate accuracy as percentage of coordinates within tolerance
+    accuracy = np.mean(within_tolerance)
+
+    return accuracy
+
+"""**Calculate average Intersection over Union (IoU) for bounding boxes**
+
+Average Intersection over Union (IoU) is a key metric in object detection tasks that quantifies how well the predicted bounding boxes align with the ground truth boxes over an entire dataset or a batch of predictions.
+"""
+
+def calculate_average_iou(Y_true, Y_pred, threshold=0.5):
+    '''
+    Calculate average Intersection over Union (IoU) for bounding boxes
+    '''
+    ious = []
+
+    for i in range(len(Y_true)):
+        true_boxes = Y_true[i]
+        pred_boxes = Y_pred[i]
+
+        # Find valid boxes
+        valid_true_mask = np.sum(np.abs(true_boxes), axis=-1) > 0
+        valid_pred_mask = np.sum(np.abs(pred_boxes), axis=-1) > threshold
+
+        valid_true_boxes = true_boxes[valid_true_mask]
+        valid_pred_boxes = pred_boxes[valid_pred_mask]
+
+        if len(valid_true_boxes) == 0 and len(valid_pred_boxes) == 0:
+            ious.append(1.0)  # Perfect match when both have no boxes
+        elif len(valid_true_boxes) == 0 or len(valid_pred_boxes) == 0:
+            ious.append(0.0)  # No overlap when one has boxes and other doesn't
+        else:
+            # Calculate IoU for each true box with best matching predicted box
+            sample_ious = []
+            for true_box in valid_true_boxes:
+                best_iou = 0.0
+                for pred_box in valid_pred_boxes:
+                    iou = calculate_box_iou(true_box, pred_box)
+                    best_iou = max(best_iou, iou)
+                sample_ious.append(best_iou)
+
+            ious.append(np.mean(sample_ious) if sample_ious else 0.0)
+
+    return np.mean(ious) if ious else 0.0
+
+"""**Calculate IoU between two bounding boxes**
+
+IoU (Intersection over Union) is a metric used to evaluate how closely two bounding boxes match. It is commonly used in object detection tasks to compare a predicted bounding box with a ground truth (true) bounding box.
+"""
+
+def calculate_box_iou(box1, box2):
+    '''
+    Calculate IoU between two boxes in format [class, x_center, y_center, width, height]
+    '''
+    # Extract coordinates (ignore class)
+    _, x1_center, y1_center, w1, h1 = box1
+    _, x2_center, y2_center, w2, h2 = box2
+
+    # Convert center coordinates to corner coordinates
+    x1_min, y1_min = x1_center - w1/2, y1_center - h1/2
+    x1_max, y1_max = x1_center + w1/2, y1_center + h1/2
+
+    x2_min, y2_min = x2_center - w2/2, y2_center - h2/2
+    x2_max, y2_max = x2_center + w2/2, y2_center + h2/2
+
+    # Calculate intersection
+    inter_x_min = max(x1_min, x2_min)
+    inter_y_min = max(y1_min, y2_min)
+    inter_x_max = min(x1_max, x2_max)
+    inter_y_max = min(y1_max, y2_max)
+
+    if inter_x_max <= inter_x_min or inter_y_max <= inter_y_min:
+        return 0.0
+
+    intersection = (inter_x_max - inter_x_min) * (inter_y_max - inter_y_min)
+
+    # Calculate union
+    area1 = w1 * h1
+    area2 = w2 * h2
+    union = area1 + area2 - intersection
+
+    if union <= 0:
+        return 0.0
+
+    return intersection / union
+
+"""**Comprehensive performance metrics table including CNN detection model**"""
+
+def create_comprehensive_results_table():
+    '''
+    Create a comprehensive results table including CNN detection model
+    '''
+
+    # Create DataFrame with all models
+    metrics_df = pd.DataFrame(index=[
+        'RandomForestClassifier',
+        'Optimized RandomForest',
+        'CNN Classification',
+        'CNN Classification Denoised',
+        'CNN Detection Model'
+    ], columns=[
+        'Training Time (Seconds)',
+        'Accuracy/Coord_Acc Train', 'Accuracy/Coord_Acc Validation', 'Accuracy/Coord_Acc Test',
+        'MSE Train', 'MSE Validation', 'MSE Test',
+        'MAE Train', 'MAE Validation', 'MAE Test',
+        'Precision/IoU Train', 'Precision/IoU Validation', 'Precision/IoU Test',
+        'Recall Train', 'Recall Validation', 'Recall Test',
+        'F1-Score Train', 'F1-Score Validation', 'F1-Score Test',
+        'R2 Score Train', 'R2 Score Validation', 'R2 Score Test'
+    ])
+
+    try:
+        # Training times
+        metrics_df.loc['RandomForestClassifier', 'Training Time (Seconds)'] = model_training_time[0] if len(model_training_time) > 0 else 0
+        metrics_df.loc['Optimized RandomForest', 'Training Time (Seconds)'] = model_training_time[1] if len(model_training_time) > 1 else 0
+        metrics_df.loc['CNN Classification', 'Training Time (Seconds)'] = model_training_time[2] if len(model_training_time) > 2 else 0
+        metrics_df.loc['CNN Classification Denoised', 'Training Time (Seconds)'] = model_training_time[3] if len(model_training_time) > 3 else 0
+
+        # Classification models data
+        for i, model_name in enumerate(['RandomForestClassifier', 'Optimized RandomForest', 'CNN Classification', 'CNN Classification Denoised']):
+            if i < len(acc_train_models):
+                metrics_df.loc[model_name, 'Accuracy/Coord_Acc Train'] = acc_train_models[i]
+                metrics_df.loc[model_name, 'Accuracy/Coord_Acc Validation'] = acc_val_models[i] if i < len(acc_val_models) else None
+                metrics_df.loc[model_name, 'Accuracy/Coord_Acc Test'] = acc_test_models[i] if i < len(acc_test_models) else None
+
+                metrics_df.loc[model_name, 'MSE Train'] = mse_train_models[i] if i < len(mse_train_models) else None
+                metrics_df.loc[model_name, 'MSE Validation'] = mse_val_models[i] if i < len(mse_val_models) else None
+                metrics_df.loc[model_name, 'MSE Test'] = mse_test_models[i] if i < len(mse_test_models) else None
+
+                metrics_df.loc[model_name, 'MAE Train'] = mae_train_models[i] if i < len(mae_train_models) else None
+                metrics_df.loc[model_name, 'MAE Validation'] = mae_val_models[i] if i < len(mae_val_models) else None
+                metrics_df.loc[model_name, 'MAE Test'] = mae_test_models[i] if i < len(mae_test_models) else None
+
+                metrics_df.loc[model_name, 'Precision/IoU Train'] = precision_train_models[i] if i < len(precision_train_models) else None
+                metrics_df.loc[model_name, 'Precision/IoU Validation'] = precision_val_models[i] if i < len(precision_val_models) else None
+                metrics_df.loc[model_name, 'Precision/IoU Test'] = precision_test_models[i] if i < len(precision_test_models) else None
+
+                metrics_df.loc[model_name, 'Recall Train'] = recall_train_models[i] if i < len(recall_train_models) else None
+                metrics_df.loc[model_name, 'Recall Validation'] = recall_val_models[i] if i < len(recall_val_models) else None
+                metrics_df.loc[model_name, 'Recall Test'] = recall_test_models[i] if i < len(recall_test_models) else None
+
+                metrics_df.loc[model_name, 'F1-Score Train'] = f1_train_models[i] if i < len(f1_train_models) else None
+                metrics_df.loc[model_name, 'F1-Score Validation'] = f1_val_models[i] if i < len(f1_val_models) else None
+                metrics_df.loc[model_name, 'F1-Score Test'] = f1_test_models[i] if i < len(f1_test_models) else None
+
+                metrics_df.loc[model_name, 'R2 Score Train'] = r2_train_models[i] if i < len(r2_train_models) else None
+                metrics_df.loc[model_name, 'R2 Score Validation'] = r2_val_models[i] if i < len(r2_val_models) else None
+                metrics_df.loc[model_name, 'R2 Score Test'] = r2_test_models[i] if i < len(r2_test_models) else None
+    except:
+        print("Warning: Some original model metrics may not be available")
+
+    # Fill in detection model data
+    if len(detection_training_time) > 0:
+        metrics_df.loc['CNN Detection Model', 'Training Time (Seconds)'] = detection_training_time[0]
+
+        if len(detection_coord_acc_train) > 0:
+            metrics_df.loc['CNN Detection Model', 'Accuracy/Coord_Acc Train'] = detection_coord_acc_train[0]
+            metrics_df.loc['CNN Detection Model', 'Accuracy/Coord_Acc Validation'] = detection_coord_acc_val[0] if len(detection_coord_acc_val) > 0 else None
+            metrics_df.loc['CNN Detection Model', 'Accuracy/Coord_Acc Test'] = detection_coord_acc_test[0] if len(detection_coord_acc_test) > 0 else None
+
+            metrics_df.loc['CNN Detection Model', 'MSE Train'] = detection_mse_train[0]
+            metrics_df.loc['CNN Detection Model', 'MSE Validation'] = detection_mse_val[0] if len(detection_mse_val) > 0 else None
+            metrics_df.loc['CNN Detection Model', 'MSE Test'] = detection_mse_test[0] if len(detection_mse_test) > 0 else None
+
+            metrics_df.loc['CNN Detection Model', 'MAE Train'] = detection_mae_train[0]
+            metrics_df.loc['CNN Detection Model', 'MAE Validation'] = detection_mae_val[0] if len(detection_mae_val) > 0 else None
+            metrics_df.loc['CNN Detection Model', 'MAE Test'] = detection_mae_test[0] if len(detection_mae_test) > 0 else None
+
+            metrics_df.loc['CNN Detection Model', 'Precision/IoU Train'] = detection_iou_train[0]
+            metrics_df.loc['CNN Detection Model', 'Precision/IoU Validation'] = detection_iou_val[0] if len(detection_iou_val) > 0 else None
+            metrics_df.loc['CNN Detection Model', 'Precision/IoU Test'] = detection_iou_test[0] if len(detection_iou_test) > 0 else None
+
+            # For detection models, Recall and F1-Score are not applicable, so we'll use placeholders
+            metrics_df.loc['CNN Detection Model', 'Recall Train'] = 'N/A'
+            metrics_df.loc['CNN Detection Model', 'Recall Validation'] = 'N/A'
+            metrics_df.loc['CNN Detection Model', 'Recall Test'] = 'N/A'
+
+            metrics_df.loc['CNN Detection Model', 'F1-Score Train'] = 'N/A'
+            metrics_df.loc['CNN Detection Model', 'F1-Score Validation'] = 'N/A'
+            metrics_df.loc['CNN Detection Model', 'F1-Score Test'] = 'N/A'
+
+            metrics_df.loc['CNN Detection Model', 'R2 Score Train'] = detection_r2_train[0]
+            metrics_df.loc['CNN Detection Model', 'R2 Score Validation'] = detection_r2_val[0] if len(detection_r2_val) > 0 else None
+            metrics_df.loc['CNN Detection Model', 'R2 Score Test'] = detection_r2_test[0] if len(detection_r2_test) > 0 else None
+
+    return metrics_df
+
+def display_performance_summary():
+    '''
+    Display a comprehensive performance summary
+    '''
+    print("="*100)
+    print("Comprehensive Model Performance Summary")
+    print("="*100)
+
+    metrics_df = create_comprehensive_results_table()
+
+    # Round numerical values for better display
+    numeric_columns = metrics_df.select_dtypes(include=[np.number]).columns
+    metrics_df[numeric_columns] = metrics_df[numeric_columns].round(4)
+
+    print("\nDetailed Performance Metrics:")
+    print("-" * 100)
+    print(metrics_df.to_string())
+
+    # Create summary table with key metrics
+    summary_df = pd.DataFrame(index=metrics_df.index, columns=[
+        'Training Time (s)', 'Test Accuracy/Coord_Acc', 'Test MSE', 'Test MAE', 'Test R2'
+    ])
+
+    summary_df['Training Time (s)'] = metrics_df['Training Time (Seconds)']
+    summary_df['Test Accuracy/Coord_Acc'] = metrics_df['Accuracy/Coord_Acc Test']
+    summary_df['Test MSE'] = metrics_df['MSE Test']
+    summary_df['Test MAE'] = metrics_df['MAE Test']
+    summary_df['Test R2'] = metrics_df['R2 Score Test']
+
+    print("\n" + "="*80)
+    print("Key Performance Metrics Summary")
+    print("="*80)
+    print(summary_df.to_string())
+
+    return metrics_df, summary_df
+
+def run_detection_model_evaluation():
+    '''
+    Function to run the evaluation of the detection model
+    '''
+    print("Running CNN Detection Model evaluation...")
+
+    try:
+        metrics_df, summary_df = display_performance_summary()
+        return metrics_df, summary_df
+    except Exception as e:
+        print(f"Error in detection model evaluation: {e}")
+        return None, None
+
+print("CNN Detection Model Performance Metrics Extension loaded successfully!")
+print("Use run_detection_model_evaluation() to execute the evaluation.")
 
 """# Model Training
 
@@ -1833,92 +2347,15 @@ def visualize_grid_search_results(results_df, param_grid):
     plt.tight_layout()
     plt.show()
 
-def record_performance_metrics(dataset_type, model, X_scaled, y_true, model_name='rf'):
-    '''
-    Record performance metrics for models
-    '''
-    # Evaluate on data set
-    y_pred = model.predict(X_scaled)
-
-    if model_name == 'cnn' or model_name == 'cnn-d':
-      print("Recording Performance Metrics for CNN:")
-      if y_true.ndim > 1:
-        y_true = np.argmax(y_true, axis=1)
-      if y_pred.ndim > 1:
-        y_pred = np.argmax(y_pred, axis=1)
-    else:
-      print("Recording Performance Metrics for RandomForest:")
-
-    if model_name == 'cnn-d':
-      accuracy = np.mean(y_true == y_pred)
-    else:
-      accuracy = accuracy_score(y_true, y_pred)
-
-    mse = mse_loss(y_true, y_pred)
-    mae = mae_loss(y_true, y_pred)
-    precision = precision_score(y_true, y_pred, average='weighted', zero_division=0)
-    recall = recall_score(y_true, y_pred, average='weighted', zero_division=0)
-    f1 = f1_score(y_true, y_pred, average='weighted', zero_division=0)
-
-    if dataset_type == 'train':
-      mse_train_models.append(mse)
-      acc_train_models.append(accuracy)
-      mae_train_models.append(mae)
-      precision_train_models.append(precision)
-      recall_train_models.append(recall)
-      f1_train_models.append(f1)
-      print(f"\nTraining Accuracy: {accuracy:.4f}")
-      print(f"Training MSE: {mse:.4f}")
-      print(f"Training MAE: {mae:.4f}")
-      print(f"Training Precision: {precision:.4f}")
-      print(f"Training Recall: {recall:.4f}")
-      print(f"Training F1 Score: {f1:.4f}")
-    elif dataset_type == 'valid':
-      mse_val_models.append(mse)
-      acc_val_models.append(accuracy)
-      mae_val_models.append(mae)
-      precision_val_models.append(precision)
-      recall_val_models.append(recall)
-      f1_val_models.append(f1)
-      print(f"\nValidation Accuracy: {accuracy:.4f}")
-      print(f"Validation MSE: {mse:.4f}")
-      print(f"Validation MAE: {mae:.4f}")
-      print(f"Validation Precision: {precision:.4f}")
-      print(f"Validation Recall: {recall:.4f}")
-      print(f"Validation F1 Score: {f1:.4f}")
-    elif dataset_type == 'test':
-      mse_test_models.append(mse)
-      acc_test_models.append(accuracy)
-      mae_test_models.append(mae)
-      precision_test_models.append(precision)
-      recall_test_models.append(recall)
-      f1_test_models.append(f1)
-      print(f"\Test Accuracy: {accuracy:.4f}")
-      print(f"Test MSE: {mse:.4f}")
-      print(f"Test MAE: {mae:.4f}")
-      print(f"Test Precision: {precision:.4f}")
-      print(f"Test Recall: {recall:.4f}")
-      print(f"Test F1 Score: {f1:.4f}")
-    else:
-        raise ValueError("Invalid dataset_type. Must be 'train', 'val', or 'test'.")
-
-    return accuracy
-
-def train_baseline_random_forest(X_train_features, y_train, feature_names, X_val_features=None, y_val=None):
+def train_baseline_random_forest(X_train_features, y_train, feature_names, X_val_features, y_val, X_test_features, y_test):
     '''
     Train baseline Random Forest model for comparison with GridSearchCV
     '''
     # Scale features
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train_features)
-
-    if X_val_features is not None:
-        X_val_scaled = scaler.transform(X_val_features)
-    else:
-        # Create validation split if not provided
-        X_train_scaled, X_val_scaled, y_train, y_val = train_test_split(
-            X_train_scaled, y_train, test_size=0.2, random_state=42, stratify=y_train
-        )
+    X_val_scaled = scaler.transform(X_val_features)
+    X_test_scaled = scaler.transform(X_test_features)
 
     print(f"Training samples: {len(X_train_scaled)}")
     print(f"Validation samples: {len(X_val_scaled)}")
@@ -1950,12 +2387,13 @@ def train_baseline_random_forest(X_train_features, y_train, feature_names, X_val
 
     # Evaluate on train set
     train_accuracy = record_performance_metrics('train', baseline_rf, X_train_scaled, y_train)
-
     # Evaluate on validation set
     valid_accuracy = record_performance_metrics('valid', baseline_rf, X_val_scaled, y_val)
+    # Evaluate on test set
+    test_accuracy = record_performance_metrics('test', baseline_rf, X_test_scaled, y_test)
 
 
-    return baseline_rf, scaler, train_accuracy, valid_accuracy, baseline_params
+    return baseline_rf, scaler, train_accuracy, valid_accuracy, test_accuracy, baseline_params
 
 # Commented out IPython magic to ensure Python compatibility.
 # %%time
@@ -1965,16 +2403,16 @@ def train_baseline_random_forest(X_train_features, y_train, feature_names, X_val
 # # Train baseline model for comparison
 # rf_base_start_time = time.time()
 # try:
-#     baseline_rf, baseline_scaler, train_accuracy, baseline_accuracy, baseline_params = train_baseline_random_forest(
-#         X_train_features, y_train_cls, feature_names, X_val_features, y_val_cls
+#     baseline_rf, baseline_scaler, train_accuracy, valid_accuracy, test_accuracy, baseline_params = train_baseline_random_forest(
+#         X_train_features, y_train_cls, feature_names, X_val_features, y_val_cls, X_test_features, y_test_cls
 #     )
 # 
 #     print(f"Baseline Random Forest Training Accuracy: {train_accuracy:.4f}")
-#     print(f"Baseline Random Forest Validation Accuracy: {baseline_accuracy:.4f}")
+#     print(f"Baseline Random Forest Validation Accuracy: {valid_accuracy:.4f}")
+#     print(f"Baseline Random Forest Test Accuracy: {test_accuracy:.4f}")
 # 
 # except Exception as e:
 #     print(f"Error during baseline Random Forest training: {e}")
-#     import traceback
 #     traceback.print_exc()
 # rf_base_end_time = time.time()
 # model_training_time.append(rf_base_end_time - rf_base_start_time)
@@ -2051,12 +2489,6 @@ def perform_grid_search(X_train_features, y_train, feature_names, cv_folds=3, n_
     best_score = grid_search.best_score_
     best_estimator = grid_search.best_estimator_
 
-    # # Evaluate on train set
-    # train_accuracy = record_performance_metrics('train', best_estimator, X_train_scaled, y_train)
-
-    # # Evaluate on validation set
-    # valid_accuracy = record_performance_metrics('valid', best_estimator, X_val_scaled, y_val)
-
     print(f"\nBest Cross-Validation Score: {best_score:.4f}")
     print("\nBest Parameters:")
     for param, value in best_params.items():
@@ -2092,35 +2524,24 @@ def perform_grid_search(X_train_features, y_train, feature_names, cv_folds=3, n_
 # try:
 #     if run_grid_search:
 #       grid_search, grid_scaler, best_params, best_score, results_df = perform_grid_search(
-#           X_train_features, y_train_cls, feature_names, cv_folds=3, n_jobs=-1
+#           X_train_features, y_train_cls, feature_names, cv_folds=2, n_jobs=-1
 #       )
 # 
 #       print(f"GridSearchCV Best Cross-Validation Score: {best_score:.4f}")
 # except Exception as e:
 #     print(f"Error during GridSearchCV: {e}")
-#     import traceback
 #     traceback.print_exc()
 # rf_grid_end_time = time.time()
 
 def train_optimized_random_forest_model(X_train_features, y_train, best_params, feature_names,
-                                       X_val_features=None, y_val=None, scaler=None):
+                                       X_val_features, y_val, X_test_features, y_test):
     '''
     Train Random Forest model with optimized hyperparameters
     '''
-    # Use provided scaler or create new one
-    if scaler is None:
-        scaler = StandardScaler()
-        X_train_scaled = scaler.fit_transform(X_train_features)
-    else:
-        X_train_scaled = scaler.transform(X_train_features)
-
-    if X_val_features is not None:
-        X_val_scaled = scaler.transform(X_val_features)
-    else:
-        # Create validation split if not provided
-        X_train_scaled, X_val_scaled, y_train, y_val = train_test_split(
-            X_train_scaled, y_train, test_size=0.2, random_state=42, stratify=y_train
-        )
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train_features)
+    X_val_scaled = scaler.transform(X_val_features)
+    X_test_scaled = scaler.transform(X_test_features)
 
     print(f"Training samples: {len(X_train_scaled)}")
     print(f"Validation samples: {len(X_val_scaled)}")
@@ -2145,9 +2566,10 @@ def train_optimized_random_forest_model(X_train_features, y_train, best_params, 
 
     # Evaluate on train set
     train_accuracy = record_performance_metrics('train', rf_model, X_train_scaled, y_train)
-
     # Evaluate on validation set
     valid_accuracy = record_performance_metrics('valid', rf_model, X_val_scaled, y_val)
+    # Evaluate on test set
+    test_accuracy = record_performance_metrics('test', rf_model, X_test_scaled, y_test)
 
     # Print classification report
     print("\nValidation Classification Report:")
@@ -2185,7 +2607,7 @@ def train_optimized_random_forest_model(X_train_features, y_train, best_params, 
     plt.ylabel('Actual')
     plt.show()
 
-    return rf_model, scaler, train_accuracy, valid_accuracy, feature_importance
+    return rf_model, scaler, train_accuracy, valid_accuracy, test_accuracy, feature_importance
 
 # Commented out IPython magic to ensure Python compatibility.
 # %%time
@@ -2196,17 +2618,16 @@ def train_optimized_random_forest_model(X_train_features, y_train, best_params, 
 # # Train optimized model with best parameters
 # rf_opti_start_time = time.time()
 # try:
-#     optimized_rf, optimized_scaler, optimized_train_accuracy, optimized_valid_accuracy, feature_importance = train_optimized_random_forest_model(
-#         X_train_features, y_train_cls, best_params, feature_names, X_val_features, y_val_cls, grid_scaler
+#     optimized_rf, optimized_scaler, optimized_train_accuracy, optimized_valid_accuracy, optimized_test_accuracy, feature_importance = train_optimized_random_forest_model(
+#         X_train_features, y_train_cls, best_params, feature_names, X_val_features, y_val_cls, X_test_features, y_test_cls
 #     )
 # 
-#     # print(f"Optimized Random Forest Validation Accuracy: {optimized_accuracy:.4f}")
+#     print(f"Optimized Random Forest Test Accuracy: {optimized_test_accuracy:.4f}")
 #     print(f"Optimized Random Forest Training Accuracy: {optimized_train_accuracy:.4f}")
 #     print(f"Optimized Random Forest Validation Accuracy: {optimized_valid_accuracy:.4f}")
 # 
 # except Exception as e:
 #     print(f"Error during optimized Random Forest training: {e}")
-#     import traceback
 #     traceback.print_exc()
 # rf_opti_end_time = time.time()
 # 
@@ -2288,7 +2709,7 @@ print("Baseline Vs Optimized Model Comparision")
 print("="*80)
 
 # Compare baseline vs optimized model
-compare_baseline_vs_optimized(baseline_accuracy, optimized_valid_accuracy, baseline_params, best_params)
+compare_baseline_vs_optimized(valid_accuracy, optimized_valid_accuracy, baseline_params, best_params)
 
 """## RandomForest Model Evaluation"""
 
@@ -2302,14 +2723,6 @@ def evaluate_random_forest_model(model, scaler, X_test_features, y_test, feature
     # Make predictions
     y_test_pred = model.predict(X_test_scaled)
     y_test_proba = model.predict_proba(X_test_scaled)
-
-    # Calculate accuracy
-    # test_accuracy = accuracy_score(y_test, y_test_pred)
-    # print(f"Test Accuracy: {test_accuracy:.4f}")
-
-    # Evaluate on test set
-    test_accuracy = record_performance_metrics('test', model, X_test_scaled, y_test)
-    print(f"Test Accuracy: {test_accuracy:.4f}")
 
     # Classification report
     print("\nTest Classification Report:")
@@ -2466,7 +2879,7 @@ def create_classification_model(input_shape=(224, 224, 3), num_classes=4):
 
     return model
 
-def train_classification_model(X_train, y_train, X_val=None, y_val=None):
+def train_classification_model(X_train, y_train, X_val=None, y_val=None, X_test=None, y_test=None):
     '''
     Train classification model
     '''
@@ -2493,12 +2906,6 @@ def train_classification_model(X_train, y_train, X_val=None, y_val=None):
         ModelCheckpoint('best_classification_model.h5', save_best_only=True, monitor='val_loss')
     ]
 
-    # Prepare validation data
-    if X_val is None or y_val is None:
-        X_train, X_val, y_train, y_val = train_test_split(
-            X_train, y_train, test_size=0.2, random_state=42, stratify=y_train
-        )
-
     print(f"Training samples: {len(X_train)}")
     print(f"Validation samples: {len(X_val)}")
     print(f"Classes distribution in training: {Counter(y_train)}")
@@ -2513,9 +2920,15 @@ def train_classification_model(X_train, y_train, X_val=None, y_val=None):
         verbose=1
     )
     training_accuracy = record_performance_metrics('train', model, X_train, y_train, model_name='cnn')
-    validation_accuracy = record_performance_metrics('valid', model, X_val, y_val, model_name='cnn')
+    if X_val is not None and len(X_val) > 0:
+      validation_accuracy = record_performance_metrics('valid', model, X_val, y_val, model_name='cnn')
+      print(f"Validation Accuracy - CNN: {validation_accuracy:.4f}")
+    if X_test is not None and len(X_test) > 0:
+      test_accuracy = record_performance_metrics('test', model, X_test, y_test, model_name='cnn')
+      print(f"Test Accuracy - CNN: {test_accuracy:.4f}")
+
     print(f"Training Accuracy - CNN: {training_accuracy:.4f}")
-    print(f"Validation Accuracy - CNN: {validation_accuracy:.4f}")
+
 
     return model, history
 
@@ -2603,8 +3016,10 @@ def evaluate_classification_model(model, X_test, y_test, filename="cnn_confusion
 #     '''
 #     print("\nStarting classification model training on original data...")
 #     try:
+#         if X_val is not None:
+#           X_val_cls, y_val_cls = create_classification_data(X_val, Y_val)
 #         cls_model, cls_history = train_classification_model(
-#             X_train_cls, y_train_cls, X_val_cls, y_val_cls
+#             X_train_cls, y_train_cls, X_val_cls, y_val_cls, X_test_cls, y_test_cls
 #         )
 # 
 #         # Plot training history
@@ -2617,7 +3032,6 @@ def evaluate_classification_model(model, X_test, y_test, filename="cnn_confusion
 #         return cls_model, cls_history
 #     except Exception as e:
 #         print(f"Error during classification training: {e}")
-#         import traceback
 #         traceback.print_exc()
 #         cls_model = None
 # 
@@ -2637,14 +3051,7 @@ def evaluate_classification_model(model, X_test, y_test, filename="cnn_confusion
 #     '''
 #     print("\nStarting classification model training on denoised data...")
 #     try:
-#         cls_model_denoised, cls_history_denoised = train_classification_model(
-#             X_train_denoised, y_train_cls, X_val_cls, y_val_cls
-#         )
-# 
-#         # Plot training history
-#         plot_training_history(cls_history_denoised, "Classification Model Training (Denoised)", "cnn_denoised_training_history")
-# 
-#         # Evaluate on test set
+#       # Evaluate on test set
 #         if X_test_cls is not None and len(X_test_cls) > 0:
 #             # Apply denoising to test set
 #             X_test_denoised = np.zeros_like(X_test_cls)
@@ -2653,13 +3060,19 @@ def evaluate_classification_model(model, X_test, y_test, filename="cnn_confusion
 #                 blurred = cv2.GaussianBlur(img_uint8, (3, 3), 0)
 #                 X_test_denoised[i] = blurred / 255.0
 # 
-#             accuracy_denoised = evaluate_classification_model(cls_model_denoised, X_test_denoised, y_test_cls, "cnn_denoised_confusion_matrix")
-#             print(f"Final Classification Test Accuracy (Denoised): {accuracy_denoised:.4f}")
+#         cls_model_denoised, cls_history_denoised = train_classification_model(
+#             X_train_denoised, y_train_cls, X_val_denoised, y_val_cls, X_test_denoised, y_test_cls
+#         )
 # 
-#             return cls_model_denoised, cls_history_denoised
+#         # Plot training history
+#         plot_training_history(cls_history_denoised, "Classification Model Training (Denoised)", "cnn_denoised_training_history")
+# 
+#         accuracy_denoised = evaluate_classification_model(cls_model_denoised, X_test_denoised, y_test_cls, "cnn_denoised_confusion_matrix")
+#         print(f"Final Classification Test Accuracy (Denoised): {accuracy_denoised:.4f}")
+# 
+#         return cls_model_denoised, cls_history_denoised
 #     except Exception as e:
 #         print(f"Error during denoised classification training: {e}")
-#         import traceback
 #         traceback.print_exc()
 #         cls_model_denoised = None
 # 
@@ -2668,9 +3081,12 @@ def evaluate_classification_model(model, X_test, y_test, filename="cnn_confusion
 # cnn_denoised_end_time = time.time()
 # model_training_time.append(cnn_denoised_end_time - cnn_denoised_start_time)
 
-"""## Train Detection Model"""
+"""## Train Detection Model
 
-# Model creation functions (keeping original functions)
+**Detection model creation function**
+"""
+
+# Detection model creation function
 def create_detection_model(input_shape=(224, 224, 3), num_classes=4, max_boxes=10):
     '''
     Create a simplified detection model that predicts class + bounding box for multiple objects
@@ -2713,11 +3129,13 @@ def create_detection_model(input_shape=(224, 224, 3), num_classes=4, max_boxes=1
     model = Model(inputs=inputs, outputs=outputs)
     return model
 
-def visualize_detection_predictions(X_test, Y_true, Y_pred, num_samples=6):
+"""**Visualize detection model predictions**"""
+
+def visualize_detection_predictions(X_test, Y_true, Y_pred, num_samples=12):
     '''
     Visualize detection predictions
     '''
-    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+    fig, axes = plt.subplots(4, 3, figsize=(18, 12))
     fig.suptitle('Detection Model Predictions vs Ground Truth', fontsize=16, fontweight='bold')
     axes = axes.flatten()
 
@@ -2796,28 +3214,7 @@ def visualize_detection_predictions(X_test, Y_true, Y_pred, num_samples=6):
     plt.savefig("images/detection_predictions.png")
     plt.show()
 
-def evaluate_detection_model(model, X_test, Y_test):
-    '''
-    Evaluate detection model
-    '''
-    print("="*60)
-    print("EVALUATING DETECTION MODEL")
-    print("="*60)
-
-    # Make predictions
-    predictions = model.predict(X_test)
-
-    # Calculate various metrics
-    mae = mae_loss(Y_test, predictions)
-    mse = mse_loss(Y_test, predictions)
-
-    print(f"Test MAE: {tf.reduce_mean(mae):.4f}")
-    print(f"Test MSE: {tf.reduce_mean(mse):.4f}")
-
-    # Visualize some predictions
-    visualize_detection_predictions(X_test, Y_test, predictions, num_samples=6)
-
-    return tf.reduce_mean(mae).numpy()
+"""**Detection model loss using MSE**"""
 
 def detection_loss(y_true, y_pred):
     '''
@@ -2841,12 +3238,14 @@ def detection_loss(y_true, y_pred):
 
     return tf.reduce_mean(sample_loss)
 
-def train_detection_model(X_train, Y_train, X_val=None, Y_val=None):
+"""Train CNN detection model"""
+
+def train_detection_model(X_train, Y_train, X_val, Y_val):
     '''
     Train detection model
     '''
     print("="*60)
-    print("TRAINING DETECTION MODEL")
+    print("Training Detection Model")
     print("="*60)
 
     model = create_detection_model()
@@ -2868,12 +3267,6 @@ def train_detection_model(X_train, Y_train, X_val=None, Y_val=None):
         ModelCheckpoint('best_detection_model.h5', save_best_only=True, monitor='val_loss')
     ]
 
-    # Prepare validation data
-    if X_val is None or Y_val is None:
-        X_train, X_val, Y_train, Y_val = train_test_split(
-            X_train, Y_train, test_size=0.2, random_state=42
-        )
-
     print(f"Training samples: {len(X_train)}")
     print(f"Validation samples: {len(X_val)}")
     print(f"Input shape: {X_train.shape}")
@@ -2883,19 +3276,21 @@ def train_detection_model(X_train, Y_train, X_val=None, Y_val=None):
     history = model.fit(
         X_train, Y_train,
         validation_data=(X_val, Y_val),
-        epochs=EPOCHS,  # Reduced epochs for initial training
-        batch_size=SMALL_BATCH_SIZE,   # Smaller batch size
+        epochs=EPOCHS,
+        batch_size=SMALL_BATCH_SIZE,
         callbacks=callbacks,
         verbose=1
     )
     return model, history
 
+"""**Train and evaluate CNN detection model**"""
+
 # Commented out IPython magic to ensure Python compatibility.
 # %%time
-# # Train and evaluate detection model (simplified)
-# def train_and_evaluate_detection_model(X_train, Y_train, X_val=None, Y_val=None):
+# # Train and evaluate detection model
+# def train_and_evaluate_detection_model(X_train, Y_train, X_val, Y_val):
 #     '''
-#     Train detection model (simplified)
+#     Train detection model
 #     '''
 #     print("\nStarting detection model training...")
 #     try:
@@ -2903,25 +3298,52 @@ def train_detection_model(X_train, Y_train, X_val=None, Y_val=None):
 #             X_train, Y_train, X_val, Y_val
 #         )
 # 
-#         # Plot training history
-#         plot_training_history(det_history, "Detection Model Training")
-# 
-#         # Evaluate on test set
-#         if X_test is not None and len(X_test) > 0:
-#             mae = evaluate_detection_model(det_model, X_test, Y_test)
-#             print(f"Final Detection Test MAE: {mae:.4f}")
-# 
 #         return det_model, det_history
 #     except Exception as e:
 #         print(f"Error during detection training: {e}")
-#         import traceback
 #         traceback.print_exc()
 #         det_model = None
 # 
 # cnn_detection_start_time = time.time()
 # det_model, det_history = train_and_evaluate_detection_model(X_train, Y_train, X_val, Y_val)
 # cnn_detection_end_time = time.time()
-# model_training_time.append(cnn_detection_end_time - cnn_detection_start_time)
+
+"""### Plot detection model training history"""
+
+plot_training_history(det_history, "Detection Model Training", "cnn_detection_training_history")
+
+"""### Evaluate CNN detection model"""
+
+print("\n" + "="*80)
+print("CNN Detection Model Evaluation")
+print("="*80)
+
+# Calculate the actual training time for detection model
+detection_model_training_time = cnn_detection_end_time - cnn_detection_start_time
+
+# Evaluate detection model
+if det_model is not None:
+    try:
+        # Evaluate on all datasets
+        print("\n--- Training Set Evaluation ---")
+        train_coord_acc = record_detection_performance_metrics('train', det_model, X_train, Y_train)
+
+        print("\n--- Validation Set Evaluation ---")
+        val_coord_acc = record_detection_performance_metrics('valid', det_model, X_val, Y_val)
+
+        print("\n--- Test Set Evaluation ---")
+        test_coord_acc = record_detection_performance_metrics('test', det_model, X_test, Y_test)
+
+
+        # Store training time
+        detection_training_time.append(detection_model_training_time)
+
+        print(f"\nDetection Model Training Time: {detection_model_training_time:.2f} seconds")
+        print(f"Final Detection Coordinate Accuracy (Test): {test_coord_acc:.4f}")
+
+    except Exception as e:
+        print(f"Error in detection model evaluation: {e}")
+        traceback.print_exc()
 
 print(f"🕒 Base Model Training Duration (seconds): {(rf_base_end_time - rf_base_start_time):.2f}")
 print(f"🕒 GridSearch + RandomForest Model Training Duration (seconds): {(rf_grid_end_time - rf_grid_start_time):.2f}")
@@ -2930,3 +3352,37 @@ print(f"🕒 RandomForest Optimized Training Duration (seconds): {(rf_opti_end_t
 print(f"🕒 CNN Model Training Duration (seconds): {(cnn_end_time - cnn_start_time):.2f}")
 print(f"🕒 CNN Denoised Model Training Duration (seconds): {(cnn_denoised_end_time - cnn_denoised_start_time):.2f}")
 print(f"🕒 CNN Detection Model Training Duration (seconds): {(cnn_detection_end_time - cnn_detection_start_time):.2f}")
+
+# Create and display results including CNN Detection Model
+print("\n" + "="*100)
+print("Model Performance Comparision")
+print("="*100)
+
+try:
+    results_df = create_comprehensive_results_table()
+
+    # Round numerical values for better display
+    numeric_columns = results_df.select_dtypes(include=[np.number]).columns
+    results_df[numeric_columns] = results_df[numeric_columns].round(4)
+
+    transposed_df = results_df.T
+    print(transposed_df.to_string())
+
+    # Create and display summary table
+    print("\n" + "="*80)
+    print("Key Performance Metrics Summary")
+    print("="*80)
+
+    summary_metrics = ['Training Time (Seconds)', 'Accuracy/Coord_Acc Test', 'MSE Test', 'MAE Test', 'R2 Score Test']
+    summary_df = results_df[summary_metrics].copy()
+
+    print(summary_df.to_string())
+
+    # Save results
+    results_df.to_csv('data/comprehensive_model_results.csv')
+    summary_df.to_csv('data/model_performance_summary.csv')
+    print("\nResults saved to CSV files")
+
+except Exception as e:
+    print(f"Error creating comprehensive results table: {e}")
+    traceback.print_exc()
