@@ -90,8 +90,6 @@ The trained model should achieve:
 # %pip install opencv-python
 # %pip install zipfile
 # %pip install scikit-image
-# # %pip install pyyaml
-# # %pip install ultralytics
 
 import zipfile
 import io
@@ -1661,12 +1659,17 @@ def visualize_cnn_feature_distributions(features_dict, y_labels=None):
     plt.savefig("images/cnn_features_distribution.png")
     plt.show()
 
-"""**Extract image features**
+"""**We applied below techniques to extract image features for CNN Model**
 
 *   HOG (Histogram of Oriented Gradients) Features
 *   LBP (Local Binary Pattern) Features
 *   Color Histogram Features
 *   Statistical Features
+*   Texture Features
+    * Standard deviation
+    * Gradient-based texture measures
+    * Local variance (texture complexity)
+    * Edge density using Sobel filter
 """
 
 def extract_cnn_features(X, y_labels=None):
@@ -1780,22 +1783,21 @@ def extract_cnn_features(X, y_labels=None):
     features_dict['Statistical'] = statistical_features
     print(f"Statistical features shape: {statistical_features.shape}")
 
-    # 5. Texture Features (Alternative implementation without GLCM)
+    # Texture Features
     print("Extracting texture features...")
     texture_features = []
     for i, img in enumerate(X_subset):
         gray = rgb2gray(img)
 
-        # Alternative texture measures without GLCM
-        # 1. Standard deviation (simple texture measure)
+        # Standard deviation
         texture_std = np.std(gray)
 
-        # 2. Gradient-based texture measures
+        # Gradient-based texture measures
         grad_x = np.gradient(gray, axis=1)
         grad_y = np.gradient(gray, axis=0)
         gradient_magnitude = np.sqrt(grad_x**2 + grad_y**2)
 
-        # 3. Local variance (texture complexity)
+        # Local variance (texture complexity)
         kernel_size = 5
         h, w = gray.shape
         local_vars = []
@@ -1807,7 +1809,7 @@ def extract_cnn_features(X, y_labels=None):
 
         local_var_mean = np.mean(local_vars) if local_vars else 0
 
-        # 4. Edge density using Sobel filter
+        # Edge density using Sobel filter
         try:
             edge_density = np.sum(filters.sobel(gray))
         except:
@@ -2268,7 +2270,6 @@ def run_detection_model_evaluation():
         return None, None
 
 print("CNN Detection Model Performance Metrics Extension loaded successfully!")
-print("Use run_detection_model_evaluation() to execute the evaluation.")
 
 """# Model Training
 
@@ -2524,7 +2525,7 @@ def perform_grid_search(X_train_features, y_train, feature_names, cv_folds=3, n_
 # try:
 #     if run_grid_search:
 #       grid_search, grid_scaler, best_params, best_score, results_df = perform_grid_search(
-#           X_train_features, y_train_cls, feature_names, cv_folds=2, n_jobs=-1
+#           X_train_features, y_train_cls, feature_names, cv_folds=3, n_jobs=-1
 #       )
 # 
 #       print(f"GridSearchCV Best Cross-Validation Score: {best_score:.4f}")
@@ -2532,6 +2533,85 @@ def perform_grid_search(X_train_features, y_train, feature_names, cv_folds=3, n_
 #     print(f"Error during GridSearchCV: {e}")
 #     traceback.print_exc()
 # rf_grid_end_time = time.time()
+
+def create_feature_importance_df(top_features, top_importance):
+    """
+    Create DataFrame with feature categories
+    """
+
+    def categorize_feature(feature_name):
+        feature_lower = feature_name.lower()
+        if any(x in feature_lower for x in ['_r_', 'r_mean', 'r_std', 'r_min', 'r_max', 'r_median', 'r_skew', 'r_kurtosis', 'r_q25', 'r_q75', 'r_hist']):
+            return 'Red Channel'
+        elif any(x in feature_lower for x in ['_g_', 'g_mean', 'g_std', 'g_min', 'g_max', 'g_median', 'g_skew', 'g_kurtosis', 'g_q25', 'g_q75', 'g_hist']):
+            return 'Green Channel'
+        elif any(x in feature_lower for x in ['_b_', 'b_mean', 'b_std', 'b_min', 'b_max', 'b_median', 'b_skew', 'b_kurtosis', 'b_q25', 'b_q75', 'b_hist']):
+            return 'Blue Channel'
+        elif 'gray' in feature_lower:
+            return 'Grayscale'
+        elif any(x in feature_lower for x in ['lbp', 'local_binary']):
+            return 'Texture (LBP)'
+        elif any(x in feature_lower for x in ['grad', 'edge']):
+            return 'Gradient/Edge'
+        elif any(x in feature_lower for x in ['center', 'symmetry', 'spatial']):
+            return 'Spatial'
+        elif 'hog' in feature_lower:
+            return 'HOG'
+        else:
+            return 'Other'
+
+    df = pd.DataFrame({
+        'Feature': top_features,
+        'Importance': top_importance,
+        'Category': [categorize_feature(feat) for feat in top_features]
+    })
+
+    df = df.sort_values('Importance', ascending=True)
+    return df
+
+def plot_most_important_features(top_features, top_importance):
+    '''
+    Plot the most important features
+    '''
+    feature_df = create_feature_importance_df(top_features, top_importance)
+
+    plt.figure(figsize=(12, 8))
+    sns.set_style("whitegrid")
+
+    custom_palette = {
+        'Red Channel': '#FF6B6B',
+        'Green Channel': '#4ECDC4',
+        'Blue Channel': '#45B7D1',
+        'Grayscale': '#95A5A6',
+        'Texture (LBP)': '#9B59B6',
+        'Gradient/Edge': '#2ECC71',
+        'Spatial': '#F39C12',
+        'HOG': '#E74C3C',
+        'Other': '#34495E'
+    }
+
+    ax = sns.barplot(
+        data=feature_df,
+        y='Feature',
+        x='Importance',
+        hue='Category',
+        palette=custom_palette,
+        orient='h',
+        dodge=False,
+        alpha=0.8
+    )
+
+    plt.xlabel('Feature Importance', fontsize=12, fontweight='bold')
+    plt.ylabel('Features', fontsize=12, fontweight='bold')
+    plt.title('Top 20 Feature Importance (Optimized Random Forest)', fontsize=14, fontweight='bold', pad=20)
+    for i, (idx, row) in enumerate(feature_df.iterrows()):
+        plt.text(row['Importance'] + 0.001, i, f'{row["Importance"]:.3f}',
+                va='center', fontsize=9, fontweight='bold')
+    plt.legend(title='Feature Category', bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10)
+    sns.despine()
+    plt.tight_layout()
+    plt.savefig("images/opti_rf_features_distribution.png", dpi=300, bbox_inches='tight')
+    plt.show()
 
 def train_optimized_random_forest_model(X_train_features, y_train, best_params, feature_names,
                                        X_val_features, y_val, X_test_features, y_test):
@@ -2571,11 +2651,9 @@ def train_optimized_random_forest_model(X_train_features, y_train, best_params, 
     # Evaluate on test set
     test_accuracy = record_performance_metrics('test', rf_model, X_test_scaled, y_test)
 
-    # Print classification report
     print("\nValidation Classification Report:")
     print(classification_report(y_val, y_val_pred, target_names=class_names))
 
-    # Feature importance analysis
     feature_importance = rf_model.feature_importances_
 
     # Get top 20 most important features
@@ -2587,16 +2665,6 @@ def train_optimized_random_forest_model(X_train_features, y_train, best_params, 
     for feat, imp in zip(reversed(top_features), reversed(top_importance)):
         print(f"  {feat}: {imp:.4f}")
 
-    # Visualize feature importance
-    plt.figure(figsize=(12, 8))
-    plt.barh(range(len(top_features)), top_importance)
-    plt.yticks(range(len(top_features)), top_features)
-    plt.xlabel('Feature Importance')
-    plt.title('Top 20 Feature Importance (Optimized Random Forest)')
-    plt.tight_layout()
-    plt.savefig("images/opti_rf_features_distribution.png")
-    plt.show()
-
     # Confusion matrix
     cm = confusion_matrix(y_val, y_val_pred)
     plt.figure(figsize=(8, 6))
@@ -2605,9 +2673,10 @@ def train_optimized_random_forest_model(X_train_features, y_train, best_params, 
     plt.title('Validation Confusion Matrix (Optimized Model)')
     plt.xlabel('Predicted')
     plt.ylabel('Actual')
+    plt.savefig("images/opti_rf_confusion_matrix.png")
     plt.show()
 
-    return rf_model, scaler, train_accuracy, valid_accuracy, test_accuracy, feature_importance
+    return rf_model, scaler, train_accuracy, valid_accuracy, test_accuracy, feature_importance, top_features, top_importance
 
 # Commented out IPython magic to ensure Python compatibility.
 # %%time
@@ -2618,7 +2687,7 @@ def train_optimized_random_forest_model(X_train_features, y_train, best_params, 
 # # Train optimized model with best parameters
 # rf_opti_start_time = time.time()
 # try:
-#     optimized_rf, optimized_scaler, optimized_train_accuracy, optimized_valid_accuracy, optimized_test_accuracy, feature_importance = train_optimized_random_forest_model(
+#     optimized_rf, optimized_scaler, optimized_train_accuracy, optimized_valid_accuracy, optimized_test_accuracy, feature_importance, top_features, top_importance = train_optimized_random_forest_model(
 #         X_train_features, y_train_cls, best_params, feature_names, X_val_features, y_val_cls, X_test_features, y_test_cls
 #     )
 # 
@@ -2632,6 +2701,9 @@ def train_optimized_random_forest_model(X_train_features, y_train, best_params, 
 # rf_opti_end_time = time.time()
 # 
 # model_training_time.append(rf_opti_end_time - rf_opti_start_time)
+
+# Visualize feature importance
+plot_most_important_features(top_features, top_importance)
 
 """## RandomForest Model Comparision"""
 
@@ -2736,7 +2808,7 @@ def evaluate_random_forest_model(model, scaler, X_test_features, y_test, feature
     plt.title('Test Confusion Matrix (Optimized Model)')
     plt.xlabel('Predicted')
     plt.ylabel('Actual')
-    plt.savefig("images/rf_confusion_matrix.png")
+    plt.savefig("images/rf_optimized_confusion_matrix.png")
     plt.show()
 
     # Per-class accuracy
@@ -2748,6 +2820,8 @@ def evaluate_random_forest_model(model, scaler, X_test_features, y_test, feature
             print(f"  {class_name}: {class_accuracy:.4f} ({np.sum(class_mask)} samples)")
 
     return test_accuracy, y_test_pred, y_test_proba
+
+"""**RandomForest - Analyze and visualize prediction errors**"""
 
 def analyze_prediction_errors(X_test, y_test, y_pred, y_proba, num_samples=8):
     '''
@@ -2800,7 +2874,7 @@ def analyze_prediction_errors(X_test, y_test, y_pred, y_proba, num_samples=8):
 
     plt.suptitle('Misclassified Samples (Optimized Model)', fontsize=16)
     plt.tight_layout()
-    plt.savefig("images/rf_prediction_errors_analysis.png")
+    plt.savefig("images/rf_optimized_prediction_errors_analysis.png")
     plt.show()
 
     # Analyze error patterns
@@ -3386,3 +3460,27 @@ try:
 except Exception as e:
     print(f"Error creating comprehensive results table: {e}")
     traceback.print_exc()
+
+run_detection_model_evaluation()
+
+# Create Line Plot for Error Metrics for all models
+def plot_models_loss_function(df, ylabel, title, file_name, metric_train, metric_test, metric_valid):
+    plt.figure(figsize=(12,5))
+    plt.plot(df.index, df[metric_train], marker='o', linestyle='-', label=metric_train, color='blue')
+    plt.plot(df.index, df[metric_test], marker='s', linestyle='--', label=metric_test, color='yellow')
+    plt.plot(df.index, df[metric_valid], marker='^', linestyle='-', label=metric_valid, color='green')
+
+    # Add Labels & Title
+    plt.xlabel("Models", fontsize=12)
+    # wrap_labels(plt.gca(), 20, len(df))
+    plt.ylabel(ylabel, fontsize=12)
+    plt.title(title, fontsize=14)
+    plt.legend()
+    plt.grid(True)
+    plt.xticks(rotation=10)
+    plt.savefig(f'images/{file_name}')
+    plt.show()
+
+plot_models_loss_function(results_df, 'Mean Squared Error (MSE)',
+                          'MSE Train vs MSE Test vs MSE Validation', 'mse_evaluation_for_models.png',
+                          'MSE Train', 'MSE Test', 'MSE Validation')
