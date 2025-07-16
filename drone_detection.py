@@ -143,7 +143,7 @@ img_size = (224, 224)
 MAX_BOXES = 10
 class_names = ['AIRPLANE', 'DRONE', 'HELICOPTER', 'BIRD']
 NUM_CLASSES = len(class_names)
-EPOCHS = 10
+EPOCHS = 30
 BATCH_SIZE = 32
 SMALL_BATCH_SIZE = 8
 run_grid_search = True
@@ -552,18 +552,67 @@ eda_results['pixel_statistics'] = pixel_stats
 
 """### Image Pixel Statistics Summary (with Class-wise Insights)
 
-| **Visualization**                             | **What it Shows**                                                                                                                                              | **Insights**                                                                                                                                               |
-|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Overall & Channel-wise Pixel Distribution** | Shows the overall histogram of pixel values across all images and distributions for each color channel (Red, Green, Blue).                                     | Mean pixel values (~0.51 to 0.53) are similar across classes, indicating a consistent brightness and color balance throughout the dataset.                                        |
-| **Image Brightness Distribution**             | Histogram showing the average brightness per image, helping assess lighting consistency.                                                                      | AIRPLANE (0.5306) and HELICOPTER (0.5301) images are slightly brighter on average than DRONE (0.5169) and BIRD (0.5162), but all are close, showing good brightness uniformity. |
-| **Image Contrast Distribution**               | Distribution of contrast (standard deviation of pixel values) per image, showing variation in texture and detail.                                              | DRONE images have the highest average contrast (0.1824), indicating sharper features or greater intensity variation. HELICOPTER images have the lowest contrast (0.1169), suggesting smoother appearances. |
+| Category | Metric | Value | Description |
+|----------|--------|-------|-------------|
+| **Pixel Value Distribution** | Bimodal Distribution | Peaks at ~0.5 and ~0.7 | Distinct visual patterns across aircraft classes |
+| | Full Range Coverage | 0.0-1.0 | Rich feature diversity |
+| | Concentrated Range | 0.3-0.8 | Avoiding extreme dark/bright regions |
 
----
+### Channel-wise Analysis
 
-**Summary**:  
-While overall pixel distributions are consistent across classes in brightness and color balance, **contrast** reveals distinct characteristics:  
-- **DRONE** and **BIRD** images show **higher contrast**, suggesting more detailed or textured appearances.  
-- **HELICOPTER** images show **lower contrast**, suggesting smoother textures or more uniform scenes.
+| Channel | Frequency | Peak Range | Characteristics |
+|---------|-----------|------------|----------------|
+| **Blue** | ~1.4×10⁷ (Highest) | 0.7-0.8 | Significant sky background across all aircraft classes |
+| **Green** | Moderate | ~0.6 | Vegetation/terrain backgrounds in some images |
+| **Red** | Lowest | 0.4-0.6 | Minimal red content across aircraft imagery |
+
+### Image Quality Metrics
+
+| Metric | Range/Value | Peak/Optimal | Quality Indicator |
+|--------|-------------|--------------|------------------|
+| **Mean Brightness** | 0.50-0.55 | ~650 images | Well-exposed images, standardized capture conditions |
+| **Contrast (Std Dev)** | 0.05-0.30 | 0.15-0.17 | High-quality data, good contrast for feature extraction |
+
+### Class-wise Insights
+
+| Class | Key Characteristics | Background Context | Technical Notes |
+|-------|-------------------|-------------------|-----------------|
+| **AIRPLANE** | Sky dominance, size variation, consistent lighting | High-altitude captures with clear sky backgrounds | Bimodal distribution: close-up and distant shots |
+| **BIRD** | Natural environment, variable contrast | Outdoor/natural backgrounds | Motion blur potential, lighting variations |
+| **DRONE** | Mixed backgrounds, technical clarity | Diverse operational environments | Scale variations: detail shots and operational distance |
+| **HELICOPTER** | Operational context, distinctive features | Aerial operations over varied terrain | Rotor blade visibility, environmental diversity |
+
+### Classification Implications
+
+| Category | Feature | Application | Benefit |
+|----------|---------|-------------|---------|
+| **Feature Discrimination** | Sky vs. Ground Context | Blue channel intensity analysis | Distinguish operational environments |
+| | Scale Recognition | Pixel brightness distribution | Indicate relative aircraft size/distance |
+| | Background Separation | Channel-wise distribution | Enable background subtraction techniques |
+
+### Data Quality Assessment
+
+| Quality Aspect | Status | Description |
+|----------------|--------|-------------|
+| **Balance** | Excellent | No class appears over/under-exposed |
+| **Feature Richness** | High | Sufficient contrast across all classes for CNN feature extraction |
+| **Processing** | Standardized | Consistent distributions suggest proper preprocessing |
+
+### Model Training Considerations
+
+| Consideration | Recommendation | Rationale |
+|---------------|----------------|-----------|
+| **Color Normalization** | Channel-wise normalization required | Blue channel dominance |
+| **Augmentation Strategy** | Effective techniques applicable | Good base contrast |
+| **Class Balance** | Balanced representation confirmed | Similar pixel distributions across classes |
+
+### Conclusion
+
+| Assessment | Result |
+|------------|--------|
+| **Dataset Quality** | High-quality dataset well-suited for multi-class aircraft classification |
+| **Feature Learning** | Distinct pixel characteristics enable effective feature learning |
+| **Classification Performance** | Expected good performance due to balanced and feature-rich data |
 
 # EDA - Image Quality Metrics
 
@@ -693,16 +742,76 @@ eda_results['quality_metrics'] = quality_metrics
 
 """### Class-Wise Image Quality Feature Distributions
 
-| **Visualization**                          | **What it Shows**                                                                                                   | **Insights**                                                                                                                                                                    |
-|--------------------------------------------|---------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Brightness Distribution (Colored by Class)** | Histogram of average image brightness, colored by class.                                                            | DRONE images exhibit higher average brightness than BIRD images, indicating they are typically captured against brighter skies.                                                                      |
-| **Contrast Distribution (Colored by Class)**    | Histogram of contrast (standard deviation of pixel intensities), per class.                                         | HELICOPTER images show lower contrast than AIRPLANE images, confirming they are often captured in more uniform lighting environments or have smoother textures.                                       |
-| **Sharpness Distribution (Colored by Class)**   | Histogram of sharpness using Laplacian variance, indicating image clarity and edge detail.                          | BIRD images show higher sharpness than DRONE images, demonstrating that birds often present finer edge details and textures.                                                                          |
-| **Entropy Distribution (Colored by Class)**     | Histogram of image entropy—measuring randomness or information content—across classes.                              | BIRD images exhibit higher entropy than DRONE images, reflecting more complex backgrounds or intricate textures (e.g., feathers or trees).                                                           |
-| **Noise Level Distribution (Colored by Class)** | Histogram of estimated noise levels, showing the amount of random variations in the image.                          | DRONE images display higher noise levels compared to BIRD images, suggesting they may be captured from farther distances or under poor lighting conditions.                                           |
-| **Color Richness Distribution (Colored by Class)** | Histogram of normalized unique colors in each image, indicating visual diversity.                                   | BIRD images demonstrate higher color richness than DRONE images, confirming that birds often have vibrant plumage and appear in colorful environments like forests or gardens.                        |
+A compact overview of pixel-based quality metrics for aircraft image classification across four classes: **AIRPLANE**, **DRONE**, **HELICOPTER**, **BIRD**.
+
+### Brightness
+| Class        | Peak Range | Insights                             |
+|--------------|------------|--------------------------------------|
+| AIRPLANE     | 0.5–0.6    | Consistent exposure, sky backgrounds |
+| DRONE        | 0.5–0.55   | Most stable lighting                 |
+| HELICOPTER   | 0.4–0.6    | Varies with operational context      |
+| BIRD         | 0.5–0.6    | Natural light variability            |
+
+### Contrast
+| Class        | Peak Range | Insights                                 |
+|--------------|------------|------------------------------------------|
+| AIRPLANE     | 0.05–0.10  | Low contrast due to sky                 |
+| DRONE        | 0.08–0.12  | Strong subject separation               |
+| HELICOPTER   | 0.05–0.15  | Background & rotor diversity            |
+| BIRD         | 0.05–0.20  | Broad due to motion/nature variation    |
+
+### Sharpness
+| Class        | Range    | Notes                                      |
+|--------------|----------|--------------------------------------------|
+| AIRPLANE     | 50–100   | Atmospheric haze effect                    |
+| DRONE        | 100–150  | Technically sharp, clear details           |
+| HELICOPTER   | 0–100    | Motion blur from rotors                    |
+| BIRD         | 50–200   | Motion artifacts, variable sharpness       |
+
+### Entropy
+| Class        | Range         | Description                        |
+|--------------|---------------|------------------------------------|
+| AIRPLANE     | –2000 to 0    | Moderate structure features        |
+| DRONE        | –2000 to 0    | High pattern consistency           |
+| HELICOPTER   | –4000 to 0    | Complex configurations             |
+| BIRD         | –6000 to 0    | Rich in texture & variation        |
+
+### Noise Level
+| Class        | Range   | Observations                                 |
+|--------------|---------|----------------------------------------------|
+| AIRPLANE     | 5–15    | Low noise, controlled environments           |
+| DRONE        | 12–18   | Consistent across diverse scenes             |
+| HELICOPTER   | 8–20    | Varies with outdoor ops                      |
+| BIRD         | 10–25   | High noise due to natural image capture      |
+
+### Color Richness
+| Class        | Range     | Notes                                          |
+|--------------|-----------|-----------------------------------------------|
+| AIRPLANE     | 0.1–0.2   | Sky blue/metallic hues                        |
+| DRONE        | 0.15–0.25 | Technically diverse color range               |
+| HELICOPTER   | 0.1–0.3   | Military/civil designs                        |
+| BIRD         | 0.1–0.4   | Natural plumage diversity                     |
 
 ---
+
+### Key Takeaways for Model Training
+
+| Metric            | Best Class | Worst Class | Recommendation                        |
+|------------------|------------|-------------|----------------------------------------|
+| **Consistency**   | DRONE      | BIRD        | Augment BIRD class                     |
+| **Contrast**      | DRONE      | AIRPLANE    | Improve edge detection for AIRPLANE    |
+| **Sharpness**     | DRONE      | HELICOPTER  | Apply deblurring to HELICOPTER         |
+| **Noise Level**   | AIRPLANE   | BIRD        | Use denoising on BIRD images           |
+| **Richness**      | BIRD       | AIRPLANE    | Boost texture features for BIRD        |
+
+---
+
+### Classification Insights
+
+- **DRONE**: Most consistent and easiest to classify
+- **AIRPLANE**: Clear skies aid context, but low contrast is limiting
+- **HELICOPTER**: Needs blur-resistant features due to motion
+- **BIRD**: High variation requires strong augmentation and denoising
 
 ## EDA - Dimensionality Analysis
 
@@ -1099,26 +1208,39 @@ eda_results['spatial_patterns'] = spatial_patterns
 
 """### Spatial Patterns Analysis Summary
 
-These plots offer a visual understanding of the structural and textural characteristics of the drone dataset. Below is a table summarizing each analysis and key insights derived from the visual patterns.
+| Spatial Feature        | Most Distinctive Class | Least Distinctive Class | Recommendation                          |
+|------------------------|------------------------|--------------------------|------------------------------------------|
+| **Center Positioning** | AIRPLANE               | BIRD                     | Use spatial attention for AIRPLANE       |
+| **Edge Definition**    | DRONE                  | BIRD                     | Enhance edge detection for DRONE         |
+| **Corner Features**    | BIRD                   | AIRPLANE                 | Extract corner features for BIRD         |
+| **Symmetry**           | AIRPLANE               | BIRD                     | Use symmetry features for aircraft       |
+| **Texture Complexity** | BIRD                   | AIRPLANE                 | Focus on texture for BIRD classification |
 
-| **Analysis Type**              | **What the Plot Shows**                                                                                  | **Observed Insight from Plot**                                                                                      |
-|-------------------------------|-----------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
-| **1. Center vs Edge Intensity** | Scatter plot of center vs edge intensity with a reference diagonal.                                       | Most points lie below the diagonal, suggesting **edges are generally brighter than centers** in the images.         |
-| **2. Gradient Magnitude**       | Histogram of mean gradient magnitude per image (edge strength).                                           | The majority of images have a gradient magnitude around **0.006–0.008**, indicating moderate edge detail.            |
-| **3. Corner Detection**         | Histogram of number of corners detected using Harris method.                                              | Most images contain **100–400 corners**, suggesting the presence of structured objects with some variation.         |
-| **4. Vertical Symmetry**        | Histogram of symmetry scores comparing left vs right halves.                                              | High scores (most > 0.95) suggest **strong vertical symmetry**, expected for man-made objects like drones/planes.    |
-| **5. Frequency Domain**         | Histogram of high-frequency energy from FFT.                                                              | Clear peak around **40,000**, with several images showing high values, indicating **sharper textures and edges**.    |
-| **6. Texture Complexity**       | Histogram of local variance (texture).                                                                    | Most images have low complexity, but some exhibit high variance, indicating **mixture of smooth and detailed images**.|
 
----
+### Classification Strategy Implications
+
+- **AIRPLANE**: Leverage high symmetry and center positioning
+- **DRONE**: Utilize geometric corner patterns and edge definition
+- **HELICOPTER**: Focus on complex rotor blade spatial patterns
+- **BIRD**: Extract rich texture and natural shape variations
+
+
+### Summary Table
+
+| Class       | Most Helpful Features                     | Weakest Feature(s)       | Suggested Strategy                                      |
+|-------------|--------------------------------------------|---------------------------|----------------------------------------------------------|
+| **AIRPLANE**| Center Positioning, Symmetry               | Texture Complexity        | Use symmetry + spatial attention                         |
+| **DRONE**   | Edge Definition                            | —                         | Enhance edge detection with geometric filters            |
+| **HELICOPTER** | —                                       | —                         | Focus on unique rotor-based spatial patterns             |
+| **BIRD**    | Corner Features, Texture Complexity        | Center Positioning, Symmetry | Boost texture extraction and corner detection         |
+
 
 ### General Observations
 
-- **Symmetry & Structure:** Strong symmetry and moderate to high corner counts point toward structured objects like drones or airplanes dominating the dataset.
-- **Edge Detail:** Most images show moderate edge strength (gradient) and frequency content, useful for distinguishing flying objects from the background.
-- **Brightness Contrast:** Center regions are typically darker than edges, which could indicate drones often appear against brighter skies.
-
----
+- **AIRPLANE** class benefits from structural uniformity (centered, symmetrical aircraft), making spatial attention and symmetry-based features particularly effective.
+- **DRONE** detection thrives on strong edge features, thanks to their distinct shapes and technical structure.
+- **BIRD** is the most challenging due to irregular shapes and motion blur. It relies heavily on texture and corner features to distinguish from mechanical objects.
+- **HELICOPTER** shows no clear dominant spatial feature but may benefit from focusing on rotor complexity and irregular symmetry patterns.
 
 # Image Preprocessing
 
@@ -1924,7 +2046,7 @@ def record_performance_metrics(dataset_type, model, X_scaled, y_true, model_name
       recall_test_models.append(recall)
       f1_test_models.append(f1)
       r2_test_models.append(r2)
-      print(f"\Test Accuracy: {accuracy:.4f}")
+      print(f"\nTest Accuracy: {accuracy:.4f}")
       print(f"Test MSE: {float(mse.numpy()):.4f}")
       print(f"Test MAE: {float(mae.numpy()):.4f}")
       print(f"Test Precision: {precision:.4f}")
@@ -2324,7 +2446,8 @@ def visualize_grid_search_results(results_df, param_grid):
 
         if param_scores:
             # Create bar plot
-            bars = ax.bar(range(len(param_values)), param_scores, alpha=0.7)
+            colors = sns.color_palette("husl", len(param_values))
+            bars = ax.bar(range(len(param_values)), param_scores, alpha=0.7, color=colors)
             ax.set_xlabel(param)
             ax.set_ylabel('Mean CV Score')
             ax.set_title(f'Effect of {param}')
@@ -2346,6 +2469,9 @@ def visualize_grid_search_results(results_df, param_grid):
         ax.axis('off')
 
     plt.tight_layout()
+    plt.subplots_adjust(top=0.9)
+    plt.suptitle('Effect of Parameters on Model Performance', fontsize=16)
+    plt.savefig('images/grid_search_param_effect.png')
     plt.show()
 
 def train_baseline_random_forest(X_train_features, y_train, feature_names, X_val_features, y_val, X_test_features, y_test):
@@ -2432,28 +2558,32 @@ def perform_grid_search(X_train_features, y_train, feature_names, cv_folds=3, n_
     print(f"Classes distribution: {Counter(y_train)}")
     print(f"Cross-validation folds: {cv_folds}")
 
-    # Define comprehensive parameter grid
+    class_counts = Counter(y_train)
+    total_samples = len(y_train)
+    class_weights = {cls: total_samples / (len(class_counts) * count)
+                    for cls, count in class_counts.items()}
+
+    print(f"Calculated class weights: {class_weights}")
+
     param_grid = {
         # Number of trees
-        'n_estimators': [100, 200, 300],
-
-        # Maximum depth of trees
-        'max_depth': [10, 15, 20, None],
-
-        # Minimum samples required to split a node
+        'n_estimators': [150, 300, 500],
+        # Tree depth - prevent overfitting while capturing complexity
+        'max_depth': [15, 20, None],
+        # Split criteria
+        'criterion': ['gini', 'entropy'],
+        # Minimum samples to split - control overfitting
         'min_samples_split': [2, 5, 10],
-
-        # Minimum samples required at a leaf node
+        # Minimum samples per leaf - generalization control
         'min_samples_leaf': [1, 2, 4],
-
-        # Number of features to consider for best split
-        'max_features': ['sqrt', 'log2', None],
-
-        # Class weight strategy
-        'class_weight': ['balanced', None],
-
-        # Bootstrap sampling
-        'bootstrap': [True, False]
+        # Feature selection strategy
+        'max_features': ['sqrt', 'log2'],
+        # Sampling strategy
+        'bootstrap': [True],
+        # Class balancing
+        'class_weight': [class_weights],
+        # Maximum leaf nodes - tree complexity control
+        'max_leaf_nodes': [None, 50, 100]
     }
 
     # Calculate total combinations
@@ -2509,10 +2639,7 @@ def perform_grid_search(X_train_features, y_train, feature_names, cv_folds=3, n_
         for param, value in row['params'].items():
             print(f"    {param}: {value}")
 
-    # Visualize parameter importance
-    visualize_grid_search_results(results_df, param_grid)
-
-    return grid_search, scaler, best_params, best_score, results_df
+    return grid_search, scaler, best_params, best_score, results_df, param_grid
 
 # Commented out IPython magic to ensure Python compatibility.
 # %%time
@@ -2524,7 +2651,7 @@ def perform_grid_search(X_train_features, y_train, feature_names, cv_folds=3, n_
 # rf_grid_start_time = time.time()
 # try:
 #     if run_grid_search:
-#       grid_search, grid_scaler, best_params, best_score, results_df = perform_grid_search(
+#       grid_search, grid_scaler, best_params, best_score, results_df, param_grid = perform_grid_search(
 #           X_train_features, y_train_cls, feature_names, cv_folds=3, n_jobs=-1
 #       )
 # 
@@ -2533,6 +2660,11 @@ def perform_grid_search(X_train_features, y_train, feature_names, cv_folds=3, n_
 #     print(f"Error during GridSearchCV: {e}")
 #     traceback.print_exc()
 # rf_grid_end_time = time.time()
+
+"""**Visualize GridSearch Hyperparameters Importance**"""
+
+# Visualize parameter importance
+visualize_grid_search_results(results_df, param_grid)
 
 def create_feature_importance_df(top_features, top_importance):
     """
@@ -2601,6 +2733,10 @@ def plot_most_important_features(top_features, top_importance):
         alpha=0.8
     )
 
+    print("\nTop 20 Most Important Features:")
+    for feat, imp in zip(reversed(top_features), reversed(top_importance)):
+        print(f"  {feat}: {imp:.4f}")
+
     plt.xlabel('Feature Importance', fontsize=12, fontweight='bold')
     plt.ylabel('Features', fontsize=12, fontweight='bold')
     plt.title('Top 20 Feature Importance (Optimized Random Forest)', fontsize=14, fontweight='bold', pad=20)
@@ -2661,10 +2797,35 @@ def train_optimized_random_forest_model(X_train_features, y_train, best_params, 
     top_features = [feature_names[i] for i in top_indices]
     top_importance = feature_importance[top_indices]
 
-    print("\nTop 20 Most Important Features:")
-    for feat, imp in zip(reversed(top_features), reversed(top_importance)):
-        print(f"  {feat}: {imp:.4f}")
+    print(f"Optimized Random Forest Test Accuracy: {test_accuracy:.4f}")
+    print(f"Optimized Random Forest Training Accuracy: {train_accuracy:.4f}")
+    print(f"Optimized Random Forest Validation Accuracy: {valid_accuracy:.4f}")
+    return rf_model, scaler, y_val_pred, valid_accuracy, feature_importance, top_features, top_importance
 
+# Commented out IPython magic to ensure Python compatibility.
+# %%time
+# print("\n" + "="*80)
+# print("Training Optimized RandomForest")
+# print("="*80)
+# 
+# # Train optimized model with best parameters
+# rf_opti_start_time = time.time()
+# try:
+#     optimized_rf, optimized_scaler, y_val_pred, optimized_valid_accuracy, feature_importance, top_features, top_importance = train_optimized_random_forest_model(
+#         X_train_features, y_train_cls, best_params, feature_names, X_val_features, y_val_cls, X_test_features, y_test_cls
+#     )
+# 
+# except Exception as e:
+#     print(f"Error during optimized Random Forest training: {e}")
+#     traceback.print_exc()
+# rf_opti_end_time = time.time()
+# 
+# model_training_time.append(rf_opti_end_time - rf_opti_start_time)
+
+def plot_confusion_matrix(y_val, y_val_pred):
+    '''
+    Plot confusion matrix
+    '''
     # Confusion matrix
     cm = confusion_matrix(y_val, y_val_pred)
     plt.figure(figsize=(8, 6))
@@ -2676,31 +2837,7 @@ def train_optimized_random_forest_model(X_train_features, y_train, best_params, 
     plt.savefig("images/opti_rf_confusion_matrix.png")
     plt.show()
 
-    return rf_model, scaler, train_accuracy, valid_accuracy, test_accuracy, feature_importance, top_features, top_importance
-
-# Commented out IPython magic to ensure Python compatibility.
-# %%time
-# print("\n" + "="*80)
-# print("Training Optimized RandomForest")
-# print("="*80)
-# 
-# # Train optimized model with best parameters
-# rf_opti_start_time = time.time()
-# try:
-#     optimized_rf, optimized_scaler, optimized_train_accuracy, optimized_valid_accuracy, optimized_test_accuracy, feature_importance, top_features, top_importance = train_optimized_random_forest_model(
-#         X_train_features, y_train_cls, best_params, feature_names, X_val_features, y_val_cls, X_test_features, y_test_cls
-#     )
-# 
-#     print(f"Optimized Random Forest Test Accuracy: {optimized_test_accuracy:.4f}")
-#     print(f"Optimized Random Forest Training Accuracy: {optimized_train_accuracy:.4f}")
-#     print(f"Optimized Random Forest Validation Accuracy: {optimized_valid_accuracy:.4f}")
-# 
-# except Exception as e:
-#     print(f"Error during optimized Random Forest training: {e}")
-#     traceback.print_exc()
-# rf_opti_end_time = time.time()
-# 
-# model_training_time.append(rf_opti_end_time - rf_opti_start_time)
+plot_confusion_matrix(y_val_cls, y_val_pred)
 
 # Visualize feature importance
 plot_most_important_features(top_features, top_importance)
@@ -3259,7 +3396,7 @@ def visualize_detection_predictions(X_test, Y_true, Y_pred, num_samples=12):
 
         # Draw predicted boxes in red
         for j, box in enumerate(pred_boxes):
-            if np.sum(np.abs(box)) > 0.1:  # Valid prediction (threshold)
+            if np.sum(np.abs(box)) > 0.1:
                 class_id, x_center, y_center, width, height = box
 
                 # Convert to pixel coordinates
@@ -3419,13 +3556,7 @@ if det_model is not None:
         print(f"Error in detection model evaluation: {e}")
         traceback.print_exc()
 
-print(f"🕒 Base Model Training Duration (seconds): {(rf_base_end_time - rf_base_start_time):.2f}")
-print(f"🕒 GridSearch + RandomForest Model Training Duration (seconds): {(rf_grid_end_time - rf_grid_start_time):.2f}")
-print(f"🕒 RandomForest Optimized Training Duration (seconds): {(rf_opti_end_time - rf_opti_start_time):.2f}")
-
-print(f"🕒 CNN Model Training Duration (seconds): {(cnn_end_time - cnn_start_time):.2f}")
-print(f"🕒 CNN Denoised Model Training Duration (seconds): {(cnn_denoised_end_time - cnn_denoised_start_time):.2f}")
-print(f"🕒 CNN Detection Model Training Duration (seconds): {(cnn_detection_end_time - cnn_detection_start_time):.2f}")
+run_detection_model_evaluation()
 
 # Create and display results including CNN Detection Model
 print("\n" + "="*100)
@@ -3461,26 +3592,46 @@ except Exception as e:
     print(f"Error creating comprehensive results table: {e}")
     traceback.print_exc()
 
-run_detection_model_evaluation()
-
 # Create Line Plot for Error Metrics for all models
-def plot_models_loss_function(df, ylabel, title, file_name, metric_train, metric_test, metric_valid):
-    plt.figure(figsize=(12,5))
-    plt.plot(df.index, df[metric_train], marker='o', linestyle='-', label=metric_train, color='blue')
-    plt.plot(df.index, df[metric_test], marker='s', linestyle='--', label=metric_test, color='yellow')
-    plt.plot(df.index, df[metric_valid], marker='^', linestyle='-', label=metric_valid, color='green')
+def plot_models_loss_function(df, ax, params):
+    ylabel, title, metric_train, metric_test, metric_valid = params
+    # plt.figure(figsize=(12,5))
+    ax.plot(df.index, df[metric_train], marker='o', linestyle='-', label=metric_train, color='blue')
+    ax.plot(df.index, df[metric_test], marker='s', linestyle='--', label=metric_test, color='yellow')
+    ax.plot(df.index, df[metric_valid], marker='^', linestyle='-', label=metric_valid, color='green')
 
     # Add Labels & Title
-    plt.xlabel("Models", fontsize=12)
+    ax.set_xlabel("Models", fontsize=12)
     # wrap_labels(plt.gca(), 20, len(df))
-    plt.ylabel(ylabel, fontsize=12)
-    plt.title(title, fontsize=14)
-    plt.legend()
-    plt.grid(True)
-    plt.xticks(rotation=10)
-    plt.savefig(f'images/{file_name}')
-    plt.show()
+    ax.set_ylabel(ylabel, fontsize=12)
+    ax.set_title(title, fontsize=14)
+    ax.legend()
+    ax.grid(True)
+    ax.tick_params(axis='x', rotation=10)
+    plt.savefig('images/loss_function_metrics.png')
 
-plot_models_loss_function(results_df, 'Mean Squared Error (MSE)',
-                          'MSE Train vs MSE Test vs MSE Validation', 'mse_evaluation_for_models.png',
-                          'MSE Train', 'MSE Test', 'MSE Validation')
+plot_params = [
+    ['Mean Squared Error (MSE)', 'MSE Train vs MSE Test vs MSE Validation', 'MSE Train', 'MSE Test', 'MSE Validation'],
+    ['Accuracy/Coordinate Accuracy', 'Accuracy/Coord_Acc Train vs Accuracy/Coord_Acc Test vs Accuracy/Coord_Acc Validation', 'Accuracy/Coord_Acc Train', 'Accuracy/Coord_Acc Test', 'Accuracy/Coord_Acc Validation'],
+    ['Mean Absolute Error (MAE)', 'MAE Train vs MAE Test vs MAE Validation', 'MAE Train', 'MAE Test', 'MAE Validation'],
+    ['Precision/IoU Score', 'Precision/IoU Train vs Precision/IoU Test vs Precision/IoU Validation', 'Precision/IoU Train', 'Precision/IoU Test', 'Precision/IoU Validation'],
+    ['Recall', 'Recall Train vs Recall Test vs Recall Validation', 'Recall Train', 'Recall Test', 'Recall Validation'],
+    ['F1-Score', 'F1-Score Train vs F1-Score Test vs F1-Score Validation', 'F1-Score Train', 'F1-Score Test', 'F1-Score Validation'],
+    ['R2 Score', 'R2 Score Train vs R2 Score Test vs R2 Score Validation', 'R2 Score Train', 'R2 Score Test', 'R2 Score Validation']
+]
+fig, axs = plt.subplots(4,2,figsize=(20,18))
+axs = axs.flatten()
+index = 0
+
+for i, ax in enumerate(axs):
+  if index < len(plot_params):
+    if plot_params[index][0] == 'Recall' or plot_params[index][0] == 'F1-Score':
+      plot_models_loss_function(results_df[:-1], ax, params=plot_params[index])
+    else:
+      plot_models_loss_function(results_df, ax, params=plot_params[index])
+    index += 1
+  else:
+    ax.axis('off')
+
+plt.tight_layout()
+plt.show()
