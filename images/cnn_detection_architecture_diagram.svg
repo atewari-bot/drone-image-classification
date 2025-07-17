@@ -1,0 +1,201 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="600" y="30" text-anchor="middle" font-size="24" font-weight="bold" fill="#2c3e50">CNN Detection Model Architecture Diagram</text>
+  
+  <!-- Input Layer -->
+  <g transform="translate(50, 80)">
+    <rect x="0" y="0" width="80" height="60" fill="#3498db" stroke="#2c3e50" stroke-width="2" rx="5"/>
+    <text x="40" y="25" text-anchor="middle" font-size="12" fill="white" font-weight="bold">Input</text>
+    <text x="40" y="40" text-anchor="middle" font-size="10" fill="white">224×224×3</text>
+  </g>
+  
+  <!-- Conv Block 1 -->
+  <g transform="translate(180, 70)">
+    <!-- Conv2D -->
+    <rect x="0" y="0" width="70" height="40" fill="#e74c3c" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="35" y="20" text-anchor="middle" font-size="10" fill="white" font-weight="bold">Conv2D</text>
+    <text x="35" y="32" text-anchor="middle" font-size="8" fill="white">32 filters</text>
+    
+    <!-- BatchNorm -->
+    <rect x="0" y="45" width="70" height="25" fill="#9b59b6" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="35" y="60" text-anchor="middle" font-size="9" fill="white">BatchNorm</text>
+    
+    <!-- MaxPool -->
+    <rect x="0" y="75" width="70" height="25" fill="#f39c12" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="35" y="90" text-anchor="middle" font-size="9" fill="white">MaxPool</text>
+    
+    <!-- Output size -->
+    <text x="35" y="115" text-anchor="middle" font-size="10" fill="#2c3e50">112×112×32</text>
+  </g>
+  
+  <!-- Conv Block 2 -->
+  <g transform="translate(300, 70)">
+    <rect x="0" y="0" width="70" height="40" fill="#e74c3c" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="35" y="20" text-anchor="middle" font-size="10" fill="white" font-weight="bold">Conv2D</text>
+    <text x="35" y="32" text-anchor="middle" font-size="8" fill="white">64 filters</text>
+    
+    <rect x="0" y="45" width="70" height="25" fill="#9b59b6" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="35" y="60" text-anchor="middle" font-size="9" fill="white">BatchNorm</text>
+    
+    <rect x="0" y="75" width="70" height="25" fill="#f39c12" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="35" y="90" text-anchor="middle" font-size="9" fill="white">MaxPool</text>
+    
+    <text x="35" y="115" text-anchor="middle" font-size="10" fill="#2c3e50">56×56×64</text>
+  </g>
+  
+  <!-- Conv Block 3 -->
+  <g transform="translate(420, 70)">
+    <rect x="0" y="0" width="70" height="40" fill="#e74c3c" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="35" y="20" text-anchor="middle" font-size="10" fill="white" font-weight="bold">Conv2D</text>
+    <text x="35" y="32" text-anchor="middle" font-size="8" fill="white">128 filters</text>
+    
+    <rect x="0" y="45" width="70" height="25" fill="#9b59b6" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="35" y="60" text-anchor="middle" font-size="9" fill="white">BatchNorm</text>
+    
+    <rect x="0" y="75" width="70" height="25" fill="#f39c12" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="35" y="90" text-anchor="middle" font-size="9" fill="white">MaxPool</text>
+    
+    <text x="35" y="115" text-anchor="middle" font-size="10" fill="#2c3e50">28×28×128</text>
+  </g>
+  
+  <!-- Conv Block 4 -->
+  <g transform="translate(540, 70)">
+    <rect x="0" y="0" width="70" height="40" fill="#e74c3c" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="35" y="20" text-anchor="middle" font-size="10" fill="white" font-weight="bold">Conv2D</text>
+    <text x="35" y="32" text-anchor="middle" font-size="8" fill="white">256 filters</text>
+    
+    <rect x="0" y="45" width="70" height="25" fill="#9b59b6" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="35" y="60" text-anchor="middle" font-size="9" fill="white">BatchNorm</text>
+    
+    <rect x="0" y="75" width="70" height="25" fill="#f39c12" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="35" y="90" text-anchor="middle" font-size="9" fill="white">MaxPool</text>
+    
+    <text x="35" y="115" text-anchor="middle" font-size="10" fill="#2c3e50">14×14×256</text>
+  </g>
+  
+  <!-- Global Average Pooling -->
+  <g transform="translate(660, 85)">
+    <rect x="0" y="0" width="80" height="40" fill="#27ae60" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="40" y="18" text-anchor="middle" font-size="10" fill="white" font-weight="bold">Global Avg</text>
+    <text x="40" y="30" text-anchor="middle" font-size="10" fill="white">Pooling</text>
+    <text x="40" y="55" text-anchor="middle" font-size="10" fill="#2c3e50">256</text>
+  </g>
+  
+  <!-- Dense Block 1 -->
+  <g transform="translate(790, 250)">
+    <rect x="0" y="0" width="60" height="40" fill="#34495e" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="30" y="18" text-anchor="middle" font-size="10" fill="white" font-weight="bold">Dense</text>
+    <text x="30" y="30" text-anchor="middle" font-size="9" fill="white">512</text>
+    
+    <rect x="0" y="45" width="60" height="25" fill="#95a5a6" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="30" y="60" text-anchor="middle" font-size="9" fill="white">Dropout</text>
+  </g>
+  
+  <!-- Dense Block 2 -->
+  <g transform="translate(900, 250)">
+    <rect x="0" y="0" width="60" height="40" fill="#34495e" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="30" y="18" text-anchor="middle" font-size="10" fill="white" font-weight="bold">Dense</text>
+    <text x="30" y="30" text-anchor="middle" font-size="9" fill="white">256</text>
+    
+    <rect x="0" y="45" width="60" height="25" fill="#95a5a6" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="30" y="60" text-anchor="middle" font-size="9" fill="white">Dropout</text>
+  </g>
+  
+  <!-- Output Dense -->
+  <g transform="translate(1010, 250)">
+    <rect x="0" y="0" width="60" height="40" fill="#34495e" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="30" y="18" text-anchor="middle" font-size="10" fill="white" font-weight="bold">Dense</text>
+    <text x="30" y="30" text-anchor="middle" font-size="9" fill="white">50</text>
+  </g>
+  
+  <!-- Reshape -->
+  <g transform="translate(1100, 250)">
+    <rect x="0" y="0" width="60" height="40" fill="#16a085" stroke="#2c3e50" stroke-width="2" rx="3"/>
+    <text x="30" y="18" text-anchor="middle" font-size="10" fill="white" font-weight="bold">Reshape</text>
+    <text x="30" y="30" text-anchor="middle" font-size="9" fill="white">10×5</text>
+  </g>
+  
+  <!-- Arrows -->
+  <!-- Input to Conv1 -->
+  <path d="M 130 110 L 175 110" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- Conv1 to Conv2 -->
+  <path d="M 250 110 L 295 110" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- Conv2 to Conv3 -->
+  <path d="M 370 110 L 415 110" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- Conv3 to Conv4 -->
+  <path d="M 490 110 L 535 110" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- Conv4 to GlobalAvg -->
+  <path d="M 610 110 L 655 110" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- GlobalAvg to Dense1 -->
+  <path d="M 700 125 Q 745 125 745 200 Q 745 270 785 270" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- Dense1 to Dense2 -->
+  <path d="M 850 270 L 895 270" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- Dense2 to Dense3 -->
+  <path d="M 960 270 L 1005 270" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- Dense3 to Reshape -->
+  <path d="M 1070 270 L 1095 270" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2c3e50"/>
+    </marker>
+  </defs>
+  
+  <!-- Legend -->
+  <g transform="translate(50, 400)">
+    <text x="0" y="0" font-size="16" font-weight="bold" fill="#2c3e50">Legend:</text>
+    
+    <rect x="0" y="15" width="20" height="15" fill="#3498db" stroke="#2c3e50" stroke-width="1"/>
+    <text x="30" y="27" font-size="12" fill="#2c3e50">Input Layer</text>
+    
+    <rect x="0" y="40" width="20" height="15" fill="#e74c3c" stroke="#2c3e50" stroke-width="1"/>
+    <text x="30" y="52" font-size="12" fill="#2c3e50">Convolutional Layer</text>
+    
+    <rect x="0" y="65" width="20" height="15" fill="#9b59b6" stroke="#2c3e50" stroke-width="1"/>
+    <text x="30" y="77" font-size="12" fill="#2c3e50">Batch Normalization</text>
+    
+    <rect x="0" y="90" width="20" height="15" fill="#f39c12" stroke="#2c3e50" stroke-width="1"/>
+    <text x="30" y="102" font-size="12" fill="#2c3e50">Max Pooling</text>
+    
+    <rect x="250" y="15" width="20" height="15" fill="#27ae60" stroke="#2c3e50" stroke-width="1"/>
+    <text x="280" y="27" font-size="12" fill="#2c3e50">Global Average Pooling</text>
+    
+    <rect x="250" y="40" width="20" height="15" fill="#34495e" stroke="#2c3e50" stroke-width="1"/>
+    <text x="280" y="52" font-size="12" fill="#2c3e50">Dense Layer</text>
+    
+    <rect x="250" y="65" width="20" height="15" fill="#95a5a6" stroke="#2c3e50" stroke-width="1"/>
+    <text x="280" y="77" font-size="12" fill="#2c3e50">Dropout</text>
+    
+    <rect x="250" y="90" width="20" height="15" fill="#16a085" stroke="#2c3e50" stroke-width="1"/>
+    <text x="280" y="102" font-size="12" fill="#2c3e50">Reshape</text>
+  </g>
+  
+  <!-- Model Statistics -->
+  <g transform="translate(50, 550)">
+    <text x="0" y="0" font-size="16" font-weight="bold" fill="#2c3e50">Model Statistics:</text>
+    <text x="0" y="25" font-size="14" fill="#2c3e50">Total Parameters: 666,098 (2.54 MB)</text>
+    <text x="0" y="45" font-size="14" fill="#2c3e50">Trainable Parameters: 665,138 (2.54 MB)</text>
+    <text x="0" y="65" font-size="14" fill="#2c3e50">Non-trainable Parameters: 960 (3.75 KB)</text>
+  </g>
+  
+  <!-- Architecture Description -->
+  <g transform="translate(50, 650)">
+    <text x="0" y="0" font-size="16" font-weight="bold" fill="#2c3e50">Architecture Overview:</text>
+    <text x="0" y="25" font-size="12" fill="#2c3e50">Feature Extraction: 4 Conv2D blocks with increasing filters (32→64→128→256)</text>
+    <text x="0" y="45" font-size="12" fill="#2c3e50">Each block: Conv2D → BatchNorm → MaxPooling (reduces spatial dimensions by half)</text>
+    <text x="0" y="65" font-size="12" fill="#2c3e50">Classification: Global Average Pooling → Dense(512) → Dense(256) → Dense(50) → Reshape(10×5)</text>
+    <text x="0" y="85" font-size="12" fill="#2c3e50">Regularization: Batch Normalization after each conv layer, Dropout after dense layers</text>
+  </g>
+</svg>

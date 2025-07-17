@@ -104,13 +104,13 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
   * Model: Random Forest (baseline & optimized)
   * Features: 80+ extracted features
-  * Tuning: GridSearchCV with 5-fold cross-validation
+  * Tuning: GridSearchCV with 3-fold cross-validation
 
 * Deep Learning
 
-  * CNN Classification: 4 Conv layers
-  * CNN Detection: Bounding box prediction
-  * Architecture: Conv2D → BatchNorm → MaxPooling → Dense
+  **CNN Detection Model: Bounding box prediction**
+
+    ![Image](/images/cnn_detection_architecture_diagram.svg)
 
 **Model Configurations**
 
@@ -140,33 +140,26 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 **Model Comparison Results**
 
-  | Model                 | Train Time (s) | Accuracy | MSE    | MAE    | R² Score |
-  |-----------------------|----------------|----------|--------|--------|----------|
-  | RandomForest Baseline | 15.2           | 0.8245   | 0.3512 | 0.4195 | 0.4891   |
-  | RandomForest Optimized| 47.8           | 0.8421   | 0.3158 | 0.3947 | 0.5404   |
-  | CNN Classification    | 156.3          | 0.8750   | 0.2500 | 0.3536 | 0.6364   |
-  | CNN Denoised          | 142.7          | 0.8636   | 0.2727 | 0.3684 | 0.6061   |
-  | CNN Detection         | 189.5          | 0.7234*  | 0.4567 | 0.5234 | 0.3456   |
-
-**Key Findings**
-
-* Best Classifier: CNN Classification (87.5%)
-* Top Features: Color statistics & texture
-* Class Separation: DRONE easily separable; BIRD-HELICOPTER overlaps
-* Denoising: Slight gains observed
+| Model                          | Training Time (Seconds) | Accuracy/Coord_Acc | Test MSE  | Test MAE | R2 Score Test |
+|-------------------------------|--------------------------|--------------------|-----------|----------|----------------|
+| RandomForestClassifier        | 1.000022                 | 0.9825             | 0.075     | 0.035    | 0.928588       |
+| Optimized RandomForest        | 1.214784                 | 0.9775             | 0.1025    | 0.035159 | 0.902404       |
+| CNN Classification            | 132.873303               | 0.94               | 0.3525    | 0.067989 | 0.664364       |
+| CNN Classification Denoised  | 113.96926                | 0.945              | 0.325     | 0.080804 | 0.690548       |
+| CNN Detection Model           | 115.736416               | 0.706897           | 0.007916  | 0.017157 | 0.880214       |
 
 ### 6. Deployment
 
 **Model Selection Recommendations**
 
-* Primary: CNN Classification (87.5%)
-* Alternative: Optimized Random Forest (84.2%, lightweight)
+* Primary: RandomForestClassifier (98.25%)
+* Alternative: Optimized Random Forest (97.75%, lightweight)
 * Detection: CNN Detection for bounding boxes
 
 **Implementation Considerations**
 
 * Real-Time: CNN requires GPU
-* Edge Use: RF suitable for constrained devices
+* Edge Use: RandomForest suitable for constrained devices
 * Scalability: Modular model pipeline
 
 **Performance Monitoring**
