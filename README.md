@@ -320,7 +320,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 ![Image](/images/rf_optimized_prediction_errors_analysis.png)
 
-#### Model Performance Comparison
+#### Models Performance Comparison
 
 | Metric                          | RandomForestClassifier | Optimized RandomForest | CNN Classification | CNN Classification Denoised | CNN Detection Model |
 |---------------------------------|------------------------|-------------------------|---------------------|------------------------------|----------------------|
@@ -375,7 +375,8 @@ What suggestions do you have for next steps?
 
 - [Project Report](https://github.com/atewari-bot/drone-image-classification/blob/main/README.md)
 - [Jupyter Notebook - Model Training & Performance Metrics Analysis](https://github.com/atewari-bot/drone-image-classification/blob/main/drone_detection.ipynb)
-- [Python File - Model Training & Performance Metrics Analysis](https://github.com/atewari-bot/drone-image-classification/blob/main/drone_detection.py)
+- [Trained Models](https://github.com/atewari-bot/drone-image-classification/blob/main/models/)
+- [Python File - Model Training & Performance Metrics Analysis](https://github.com/atewari-bot/drone-image-classification/blob/main/scripts/drone_detection.py)
 - [Data Sampling Script](https://github.com/atewari-bot/drone-image-classification/blob/main/scripts/image_sampling.py)
 
 
