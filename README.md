@@ -316,7 +316,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 ### Performance Metrics
 
-#### Preduction Errors - RandomForest
+#### Prediction Errors - RandomForest
 
 ![Image](/images/rf_optimized_prediction_errors_analysis.png)
 
