@@ -35,7 +35,7 @@ Original file is located at
 - Noise reduction and enhancement
 
 ### 3. **Detection Framework Selection**
-- **Custom CNN**: Tailored architecture
+- **Standard CNN**: Baseline CNN Architecture
 - **YOLO (You Only Look Once)**: Real-time detection
 - **Faster R-CNN**: High accuracy detection
 - Trade-off analysis between efficiency and accuracy
@@ -60,8 +60,7 @@ Original file is located at
 
 The trained model should achieve:
 - **High accuracy** in drone detection and localization
-- **Strong performance metrics**: Precision, Recall, mAP
-- **Real-time processing capability** for video frames
+- **Strong performance metrics**: Precision, Recall, Accuracy
 - **Robust detection** across various environmental conditions
 
 ---
@@ -143,7 +142,7 @@ img_size = (224, 224)
 MAX_BOXES = 10
 class_names = ['AIRPLANE', 'DRONE', 'HELICOPTER', 'BIRD']
 NUM_CLASSES = len(class_names)
-EPOCHS = 30
+EPOCHS = 50
 BATCH_SIZE = 32
 SMALL_BATCH_SIZE = 8
 run_grid_search = True
@@ -995,14 +994,22 @@ eda_results['dimensionality'] = dim_analysis
 
 """### Dimensionality Reduction Visualization Summary
 
-| **Visualization**                | **What it Shows**                                                                                                                                                                              | **Insights**                                                                                                                                                                                                                                            |
-|----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **PCA: Explained Variance Ratio** | Line plot showing how much variance is captured by each principal component, ordered from highest to lowest.                                                                                  | - Reveals how informative each component is.<br>- A steep drop suggests that few components capture most variance.<br>- Flatter curve means variance is spread more evenly across components.                                                          |
-| **PCA: Cumulative Explained Variance** | Line plot showing cumulative variance captured as more components are included, with a common threshold at 95%.                                                                         | - Helps determine how many components retain most of the variance (e.g., 95%).<br>- If few components are needed, data is low-dimensional.<br>- Useful for feature reduction and efficient representation.                                              |
-| **PCA: First Two Components**     | Scatter plot of data projected onto the first two principal components. Color indicates class label.                                                                                         | - Provides visual assessment of class separation using linear projection.<br>- Clear clusters → useful features for classification.<br>- Overlap means more components or nonlinear techniques may be needed.                                           |
-| **t-SNE Visualization**          | 2D scatter plot of data using t-SNE. Preserves local structure, with color representing class.                                                                                               | - Highlights non-linear relationships and natural clusters.<br>- Better at revealing separability than PCA for complex data.<br>- Helpful for evaluating potential of non-linear models (e.g., deep networks).                                        |
+| Class       | t-SNE Pattern       | CNN Strategy                        | Feature Focus               | Training Needs                          | Expected Performance |
+|-------------|----------------------|-------------------------------------|-----------------------------|-----------------------------------------|----------------------|
+| **DRONE**   | Tight clusters       | Shallow CNN (e.g., MobileNet)       | Geometric shapes            | Fast convergence, low complexity        | Highest            |
+| **AIRPLANE**| Scattered groups     | Medium-depth + spatial attention    | Sky vs background patterns  | Moderate depth, spatial pooling         | Good               |
+| **HELICOPTER** | Dispersed           | Deep CNN + Ensemble (ResNet-50+)   | Rotor blade variations      | Complex features, deeper layers         | Moderate          |
+| **BIRD**    | Mixed, low cohesion  | Transfer learning + augmentation    | Natural textures, poses     | Pre-trained models, heavy augmentation  | Challenging        |
 
---------------
+
+**Additional Key Metrics**
+
+| Metric                        | Value              | Implication                                |
+|------------------------------|--------------------|--------------------------------------------|
+| Explained Variance (PC1+2)   | 62.24%             | Strong class separability                  |
+| Variance (First 10 PCs)      | ~90%               | Core CNN feature set                       |
+| Optimal Dimensionality       | ~25 PCs            | Efficient compression + representation     |
+| Most Challenging Class       | BIRD               | Needs advanced augmentation & transfer learning |
 
 ## EDA - Analyzing Spatial Patterns
 
@@ -1690,23 +1697,32 @@ Below is a summary of each feature plot and what insights we can derive from it:
 
 pca, n_components_95 = perform_rf_dimensionality_analysis(X_train_features, y_train_cls, feature_names)
 
-"""| **PCA Plot**                          | **What It Shows**                                                                                                                                                                                                                                                                                                 | **Insights (Including Class-Specific)**                                                                                                                                                                                                                          |
-|--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **PCA: Explained Variance Ratio**    | Line plot showing how much variance each principal component explains, sorted in descending order. <br>PC1 captures the most variance, with steep drop afterward.                                                                                                                                                    | **PC1 (~28%)** and **PC2 (~14%)** together explain **~42%** of the variance. <br> After the first 5–6 components, the added benefit drops off. <br> DRONE class separation is likely captured in early PCs due to high variance signal.                     |
-| **PCA: Cumulative Explained Variance** | Line plot showing how total variance increases as more PCs are added. Includes a 95% threshold line.                                                                                                                                                                                                            | **95% of variance is captured by ~30 components**. <br> Dimensionality can be reduced from 50+ features to ~30 without significant information loss. <br> Random Forest training can be faster and less prone to overfitting after PCA preprocessing.       |
-| **PCA: First Two Components**        | 2D scatter plot of data projected onto PC1 and PC2. Each point is an image, colored by class: <br>🔵 AIRPLANE, 🔴 DRONE, 🟢 HELICOPTER, 🟠 BIRD.                                                                                                                                                                  | 🔴 **DRONE**: Forms a compact, well-separated cluster → easiest to detect. <br> 🟢 **HELICOPTER**: Moderately scattered; overlaps with AIRPLANE and BIRD → less distinctive. <br> 🟠 **BIRD**: High overlap with HELICOPTER → shared features. <br> 🔵 **AIRPLANE**: Spread out, overlaps others. |
+"""### PCA Analysis
 
+| Class        | Separability        | CNN Focus                     | Strategy Summary                                                   | Expected Accuracy |
+|--------------|---------------------|-------------------------------|--------------------------------------------------------------------|-------------------|
+| **DRONE**    | Best separated     | Geometric shapes              | Early convergence, few PCs needed, simple or shallow models work   | Highest         |
+| **AIRPLANE** | Moderate overlap   | Sky-background spatial cues   | Spatial attention + augmentation helps isolate characteristics     | Good            |
+| **HELICOPTER** | Widely spread      | Rotor complexity patterns     | Needs deeper CNN layers and ensemble models due to feature mix     | Moderate        |
+| **BIRD**     | Most overlapped    | Natural texture variations    | Heavy augmentation + class weighting; benefits from transfer learn | Lowest          |
 
-Key Insights and Takeaways:
+### Insights
 
-Dimensionality Reduction Potential:
-* Strong feature compression is possible. Only 30 components are enough to retain 95% of the variance.
-* This suggests you can simplify the feature space significantly before using it in algorithms like Random Forest, which helps with training speed and potentially reduces overfitting.
+- **PC1** explains **28.65%** variance → primary for class separation (esp. DRONE).
+- **PC2** adds **14.49%**, taking cumulative to **43.14%**.
+- **Top 10 PCs** capture **~85%** of variance → ideal for compressed feature learning.
+- **~35 PCs** required to reach **95%** variance threshold → full information coverage.
 
-Class Separability:
-* DRONE class is clearly separated in the 2D PCA plot → suggests it’s distinct in feature space.
-* BIRD, HELICOPTER, and AIRPLANE have significant overlap, indicating these classes may require more than 2 principal components to be separated well.
-* This visualization suggests DRONE detection is likely easier (distinctive features), whereas fine-tuning is needed to distinguish between other flying objects.
+### Model Design Takeaways
+
+- **Feature Engineering**: Use first **20–25 PCs** to retain useful info, reduce noise.
+- **Class Weighting**: Apply higher weights to **BIRD** and **HELICOPTER** due to overlaps.
+- **CNN Architecture**:
+  - Shallow, fast learners for **DRONE**
+  - Attention layers for **AIRPLANE**
+  - Deep, complex structures for **HELICOPTER**
+  - Transfer learning + strong augmentation for **BIRD**
+- **Random Forest**: Leverages many PCs well; excels on **DRONE**, challenged on **BIRD/HELICOPTER**.
 
 ## Feature Extraction for Convolutional Neural Networks (CNNs)
 
@@ -3595,17 +3611,17 @@ except Exception as e:
 # Create Line Plot for Error Metrics for all models
 def plot_models_loss_function(df, ax, params):
     ylabel, title, metric_train, metric_test, metric_valid = params
-    # plt.figure(figsize=(12,5))
-    ax.plot(df.index, df[metric_train], marker='o', linestyle='-', label=metric_train, color='blue')
-    ax.plot(df.index, df[metric_test], marker='s', linestyle='--', label=metric_test, color='yellow')
-    ax.plot(df.index, df[metric_valid], marker='^', linestyle='-', label=metric_valid, color='green')
+    ax.plot(df.index, df[metric_train], marker='o', linestyle='-', label=metric_train, color='#1f77b4', linewidth=2, markersize=6)
+    ax.plot(df.index, df[metric_test], marker='s', linestyle='--', label=metric_test, color='#d62728', linewidth=2, markersize=6)
+    ax.plot(df.index, df[metric_valid], marker='^', linestyle='-', label=metric_valid, color='#2ca02c', linewidth=2, markersize=6)
 
     # Add Labels & Title
+    ax.set_facecolor('#f7f7f7')  # light gray background
+    ax.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
     ax.set_xlabel("Models", fontsize=12)
-    # wrap_labels(plt.gca(), 20, len(df))
     ax.set_ylabel(ylabel, fontsize=12)
     ax.set_title(title, fontsize=14)
-    ax.legend()
+    ax.legend(frameon=True, framealpha=0.9, facecolor='white', fontsize=10)
     ax.grid(True)
     ax.tick_params(axis='x', rotation=10)
     plt.savefig('images/loss_function_metrics.png')
@@ -3619,7 +3635,7 @@ plot_params = [
     ['F1-Score', 'F1-Score Train vs F1-Score Test vs F1-Score Validation', 'F1-Score Train', 'F1-Score Test', 'F1-Score Validation'],
     ['R2 Score', 'R2 Score Train vs R2 Score Test vs R2 Score Validation', 'R2 Score Train', 'R2 Score Test', 'R2 Score Validation']
 ]
-fig, axs = plt.subplots(4,2,figsize=(20,18))
+fig, axs = plt.subplots(4,2,figsize=(20,20), constrained_layout=False)
 axs = axs.flatten()
 index = 0
 
@@ -3632,6 +3648,8 @@ for i, ax in enumerate(axs):
     index += 1
   else:
     ax.axis('off')
+    ax.grid(False)
 
 plt.tight_layout()
+plt.subplots_adjust(hspace=0.4)
 plt.show()

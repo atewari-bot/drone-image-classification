@@ -50,9 +50,9 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
   **Data Sources**
 
-    •	Primary Dataset: Roboflow Drone Detection Dataset (YOLO format)
-    •	Local Dataset: Drone image classification sample dataset
-    •	Format: Images with bounding box annotations in YOLO format
+  * Primary Dataset: Roboflow Drone Detection Dataset (YOLO format)
+  * Local Dataset: Drone image classification sample dataset
+  * Format: Images with bounding box annotations in YOLO format
 
   **Data Characteristics**
 
@@ -65,51 +65,51 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
   **Data Quality Assessment**
 
-    •	Class Distribution: Frequency analysis for imbalance
-    •	Image Quality: Brightness, contrast, sharpness, entropy, noise levels
-    •	Spatial Patterns: Center vs. edge intensity, gradient magnitude, corner detection
+  * Class Distribution: Frequency analysis for imbalance
+  * Image Quality: Brightness, contrast, sharpness, entropy, noise levels
+  * Spatial Patterns: Center vs. edge intensity, gradient magnitude, corner detection
 
 ### 3. Data Preparation
 
 **Data Cleaning & Preprocessing**
 
-	•	Image Normalization: Rescale pixel values to [0, 1]
-	•	Missing Label Handling: Infer from filenames
-	•	Validation: Remove NaNs, fix formatting inconsistencies
+* Image Normalization: Rescale pixel values to [0, 1]
+* Missing Label Handling: Infer from filenames
+* Validation: Remove NaNs, fix formatting inconsistencies
 
 **Feature Engineering**
 
-	•	Total Features: 80+ including:
+* Total Features: 80+ including:
 
-    | Feature Type       | Examples                                        |
-    |--------------------|-------------------------------------------------|
-    | Color Stats        | RGB channel mean, std, percentiles              |
-    | Texture Features   | Local Binary Patterns (LBP), HOG descriptors    |
-    | Spatial Features   | Center-edge intensity diff, symmetry scores     |
-    | Statistical        | Entropy, skewness, kurtosis                     |
+  | Feature Type       | Examples                                        |
+  |--------------------|-------------------------------------------------|
+  | Color Stats        | RGB channel mean, std, percentiles              |
+  | Texture Features   | Local Binary Patterns (LBP), HOG descriptors    |
+  | Spatial Features   | Center-edge intensity diff, symmetry scores     |
+  | Statistical        | Entropy, skewness, kurtosis                     |
 
 **Data Transformation**
 
-	•	Denoising: 8 techniques (Gaussian blur, median filter, etc.)
-	•	Augmentation: For classification & detection tasks
-	•	Standardization: With StandardScaler for ML models
+* Denoising: 8 techniques (Gaussian blur, median filter, etc.)
+* Augmentation: For classification & detection tasks
+* Standardization: With StandardScaler for ML models
 
 
 ### 4. Modeling
 
 **Model Architecture Approaches**
 
-  Traditional Machine Learning
+* Traditional Machine Learning
 
-    •	Model: Random Forest (baseline & optimized)
-    •	Features: 80+ extracted features
-    •	Tuning: GridSearchCV with 5-fold cross-validation
+  * Model: Random Forest (baseline & optimized)
+  * Features: 80+ extracted features
+  * Tuning: GridSearchCV with 5-fold cross-validation
 
-  Deep Learning
+* Deep Learning
 
-    •	CNN Classification: 4 Conv layers
-    •	CNN Detection: Bounding box prediction
-    •	Architecture: Conv2D → BatchNorm → MaxPooling → Dense
+  * CNN Classification: 4 Conv layers
+  * CNN Detection: Bounding box prediction
+  * Architecture: Conv2D → BatchNorm → MaxPooling → Dense
 
 **Model Configurations**
 
@@ -125,17 +125,17 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 **Performance Metrics**
 
-Classification Models
+* Classification Models
 
-	•	Accuracy
-	•	Precision / Recall / F1-score
-	•	Confusion Matrix
+	* Accuracy
+	* Precision / Recall / F1-score
+	* Confusion Matrix
 
-Detection Models
+* Detection Models
 
-	•	Coordinate Accuracy
-	•	IoU (Intersection over Union)
-	•	MSE / MAE for bounding box regression
+	* Coordinate Accuracy
+	* IoU (Intersection over Union)
+	* MSE / MAE for bounding box regression
 
 **Model Comparison Results**
 
@@ -149,43 +149,43 @@ Detection Models
 
 **Key Findings**
 
-	•	Best Classifier: CNN Classification (87.5%)
-	•	Top Features: Color statistics & texture
-	•	Class Separation: DRONE easily separable; BIRD-HELICOPTER overlaps
-	•	Denoising: Slight gains observed
+* Best Classifier: CNN Classification (87.5%)
+* Top Features: Color statistics & texture
+* Class Separation: DRONE easily separable; BIRD-HELICOPTER overlaps
+* Denoising: Slight gains observed
 
 ### 6. Deployment
 
 **Model Selection Recommendations**
 
-	•	Primary: CNN Classification (87.5%)
-	•	Alternative: Optimized Random Forest (84.2%, lightweight)
-	•	Detection: CNN Detection for bounding boxes
+* Primary: CNN Classification (87.5%)
+* Alternative: Optimized Random Forest (84.2%, lightweight)
+* Detection: CNN Detection for bounding boxes
 
 **Implementation Considerations**
 
-	•	Real-Time: CNN requires GPU
-	•	Edge Use: RF suitable for constrained devices
-	•	Scalability: Modular model pipeline
+* Real-Time: CNN requires GPU
+* Edge Use: RF suitable for constrained devices
+* Scalability: Modular model pipeline
 
 **Performance Monitoring**
 
-	•	Monitor accuracy drop below 80%
-	•	Target <100ms inference latency
-	•	False positives especially important in security
+* Monitor accuracy drop below 80%
+* Target <100ms inference latency
+* False positives especially important in security
 
 ### Business Impact & Recommendations
 
 **Immediate Applications**
 
-	•	Airport Security: CNN perimeter monitoring
-	•	Infrastructure Surveillance: Random Forest for 24/7 ops
-	•	Wildlife Monitoring: Detection model for conservation
+* Airport Security: CNN perimeter monitoring
+* Infrastructure Surveillance: Random Forest for 24/7 ops
+* Wildlife Monitoring: Detection model for conservation
 
 
 ## Results
 
-### Data Understanding (Exploratory Data Analysis)
+### Understanding Data (Exploratory Data Analysis)
 
 **Class Balance Analysis**
 
@@ -200,7 +200,7 @@ Detection Models
 
 ![Image](/images/class_distribution.png)
 
-**Pixel Statistics**
+**Pixel Statistics Analysis**
 
 **Key Takeaways:** 
 ## Class-wise Insights
@@ -214,7 +214,7 @@ Detection Models
 
 ![Image](/images/pixel_statistics.png)
 
-**Image Quality Metrics**
+**Image Quality Metric Analysiss**
 
 ### Key Takeaways
 
@@ -257,6 +257,62 @@ Detection Models
 - **BIRD**: Extract rich texture and natural shape variations
 
 ![Image](/images/spatial_patterns_analysis.png)
+
+## Feature Engineering
+
+### Principal Component Analysis - RandomForest
+
+**Key Takeaways:**
+
+| Class        | Separability        | CNN Focus                     | Strategy Summary                                                   | Expected Accuracy |
+|--------------|---------------------|-------------------------------|--------------------------------------------------------------------|-------------------|
+| **DRONE**    | Best separated     | Geometric shapes              | Early convergence, few PCs needed, simple or shallow models work   | Highest         |
+| **AIRPLANE** | Moderate overlap   | Sky-background spatial cues   | Spatial attention + augmentation helps isolate characteristics     | Good            |
+| **HELICOPTER** | Widely spread      | Rotor complexity patterns     | Needs deeper CNN layers and ensemble models due to feature mix     | Moderate        |
+| **BIRD**     | Most overlapped    | Natural texture variations    | Heavy augmentation + class weighting; benefits from transfer learn | Lowest          |
+
+**Insights**
+
+- **PC1** explains **28.65%** variance → primary for class separation (esp. DRONE).
+- **PC2** adds **14.49%**, taking cumulative to **43.14%**.
+- **Top 10 PCs** capture **~85%** of variance → ideal for compressed feature learning.
+- **~35 PCs** required to reach **95%** variance threshold → full information coverage.
+
+**Model Design Takeaways**
+
+- **Feature Engineering**: Use first **20–25 PCs** to retain useful info, reduce noise.
+- **Class Weighting**: Apply higher weights to **BIRD** and **HELICOPTER** due to overlaps.
+- **CNN Architecture**: 
+  - Shallow, fast learners for **DRONE**
+  - Attention layers for **AIRPLANE**
+  - Deep, complex structures for **HELICOPTER**
+  - Transfer learning + strong augmentation for **BIRD**
+- **Random Forest**: Leverages many PCs well; excels on **DRONE**, challenged on **BIRD/HELICOPTER**.
+
+![Image](/images/rf_pca_analysis.png)
+
+### Principal Component Analysis - CNN
+
+**Key Takeaways**
+
+| Class       | t-SNE Pattern       | CNN Strategy                        | Feature Focus               | Training Needs                          | Expected Performance |
+|-------------|----------------------|-------------------------------------|-----------------------------|-----------------------------------------|----------------------|
+| **DRONE**   | Tight clusters       | Shallow CNN (e.g., MobileNet)       | Geometric shapes            | Fast convergence, low complexity        | Highest            |
+| **AIRPLANE**| Scattered groups     | Medium-depth + spatial attention    | Sky vs background patterns  | Moderate depth, spatial pooling         | Good               |
+| **HELICOPTER** | Dispersed           | Deep CNN + Ensemble (ResNet-50+)   | Rotor blade variations      | Complex features, deeper layers         | Moderate          |
+| **BIRD**    | Mixed, low cohesion  | Transfer learning + augmentation    | Natural textures, poses     | Pre-trained models, heavy augmentation  | Challenging        |
+
+
+**Additional Key Metrics**
+
+| Metric                        | Value              | Implication                                |
+|------------------------------|--------------------|--------------------------------------------|
+| Explained Variance (PC1+2)   | 62.24%             | Strong class separability                  |
+| Variance (First 10 PCs)      | ~90%               | Core CNN feature set                       |
+| Optimal Dimensionality       | ~25 PCs            | Efficient compression + representation     |
+| Most Challenging Class       | BIRD               | Needs advanced augmentation & transfer learning |
+
+![Image](/images/cnn_pca_analysis.png)
 
 ### Performance Metrics
 
