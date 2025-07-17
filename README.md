@@ -26,7 +26,8 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 ### 1. Business Understanding
 
   **Research Question**
-  How can drone detection in images using computer vision techniques enhance:
+
+  How can drone detection in images using computer vision techniques enhance below applications?
 
     * Security
     * Surveillance
@@ -203,7 +204,8 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 **Pixel Statistics Analysis**
 
 **Key Takeaways:** 
-## Class-wise Insights
+
+**Class-wise Insights**
 
 | Class | Key Characteristics | Background Context | Technical Notes |
 |-------|-------------------|-------------------|-----------------|
@@ -216,7 +218,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 **Image Quality Metric Analysiss**
 
-### Key Takeaways
+**Key Takeaways:**
 
 | Quality Metric     | Best Performing Class | Worst Performing Class | Recommendation                          |
 |--------------------|------------------------|--------------------------|------------------------------------------|
@@ -226,7 +228,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 | Noise Level         | AIRPLANE               | BIRD                     | Implement noise reduction for BIRD       |
 | Feature Richness    | BIRD                   | AIRPLANE                 | Extract texture features for BIRD        |
 
-### Classification Implications
+**Classification Implications**
 
 - **DRONE**: Most consistent quality metrics make it easiest to classify  
 - **AIRPLANE**: Sky backgrounds provide clear context but lower contrast  
@@ -249,7 +251,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 | **Texture Complexity** | BIRD                   | AIRPLANE                 | Focus on texture for BIRD classification  |
 
 
-### Classification Strategy Implications
+**Classification Strategy Implications**
 
 - **AIRPLANE**: Leverage high symmetry and center positioning
 - **DRONE**: Utilize geometric corner patterns and edge definition
@@ -316,7 +318,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 ### Performance Metrics
 
-## Model Performance Comparison
+#### Model Performance Comparison
 
 | Metric                         | RandomForestClassifier | Optimized RandomForest | CNN Classification | CNN Classification Denoised | CNN Detection Model |
 |--------------------------------|-------------------------|-------------------------|---------------------|------------------------------|----------------------|
