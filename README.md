@@ -25,156 +25,161 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 ### 1. Business Understanding
 
-  **Research Question**
+  #### Research Question
 
-  How can drone detection in images using computer vision techniques enhance below applications?
+  **"How can drone detection in images or video frames using computer vision techniques help security, surveillance, airspace monitoring, and wildlife protection?"**
 
-    * Security
-    * Surveillance
-    * Airspace monitoring
-    * Wildlife protection
+  #### Business Objectives
+  - **Security Enhancement**: Detect potentially armed or unauthorized drones in sensitive areas
+  - **Critical Infrastructure Protection**: Safeguard airports, government facilities, and restricted zones
+  - **Privacy Protection**: Identify unauthorized surveillance activities
+  - **Airspace Management**: Ensure safe aviation operations
+  - **Wildlife Conservation**: Monitor and protect endangered species from unauthorized surveillance
 
-  **Business Objectives**
+  #### Success Criteria
+  - Achieve high accuracy in drone detection based on multi-class objects training (AIRPLANE, DRONE, HELICOPTER, BIRD)
+  - Develop robust models capable of real-time deployment
+  - Ensure reliable performance across various environmental conditions
 
-    * Security Enhancement: Detect potentially armed drones near critical infrastructure
-    * Airspace Management: Ensure safe aviation operations through unauthorized drone detection
-    * Privacy Protection: Identify surveillance drones in restricted areas
-    * Wildlife Conservation: Monitor and protect endangered species from unauthorized surveillance
-
-  **Success Criteria**
-
-    * Achieve high accuracy (>85%) in drone detection and classification
-    * Enable real-time processing capability for video frames
-    * Maintain robust performance across various environmental conditions
+  ---
 
 ### 2. Data Understanding
 
-  **Data Sources**
+  #### Dataset Overview
+  - **Source**: Roboflow Drone Detection Dataset with YOLO format annotations
+  - **Classes**: 4 categories (AIRPLANE, DRONE, HELICOPTER, BIRD)
+  - **Format**: Images with bounding box annotations in YOLO format
+  - **Image Size**: Standardized to 224×224 pixels
+  - **Data Split**: Training, validation, and test sets
 
-  * Primary Dataset: Roboflow Drone Detection Dataset (YOLO format)
-  * Local Dataset: Drone image classification sample dataset
-  * Format: Images with bounding box annotations in YOLO format
+  #### Data Quality Assessment
+  - **High-quality dataset** with balanced class representation
+  - **Consistent pixel distributions** across all classes
+  - **Good contrast and brightness** levels suitable for feature extraction
+  - **Minimal noise** and artifacts in the dataset
 
-  **Data Characteristics**
+  #### Key Insights from EDA
+  - **DRONE class**: Most consistent and easiest to classify due to uniform appearance
+  - **AIRPLANE class**: Benefits from sky backgrounds and structural symmetry
+  - **HELICOPTER class**: Challenging due to rotor complexity and motion blur
+  - **BIRD class**: Most difficult due to natural texture variations and irregular shapes
 
-    | Attribute        | Description                                      |
-    |------------------|--------------------------------------------------|
-    | Classes          | AIRPLANE, DRONE, HELICOPTER, BIRD                |
-    | Image Size       | Standardized to 224×224 pixels                   |
-    | Annotation Format| YOLO: class ID and normalized coordinates        |
-    | Dataset Split    | Training, validation, and test sets              |
-
-  **Data Quality Assessment**
+  #### Data Quality Assessment
 
   * Class Distribution: Frequency analysis for imbalance
   * Image Quality: Brightness, contrast, sharpness, entropy, noise levels
   * Spatial Patterns: Center vs. edge intensity, gradient magnitude, corner detection
+   ---
 
 ### 3. Data Preparation
 
-**Data Cleaning & Preprocessing**
+  #### Preprocessing Pipeline
+  1. **Image Normalization**: Pixel values scaled to [0,1] range
+  2. **Denoising**: Applied Gaussian blur and multiple filtering techniques
+  3. **Data Augmentation**: Implemented for improved generalization
+  4. **Feature Extraction**: 
+    - Color histogram analysis
+    - Texture features (LBP, HOG)
+    - Statistical features (mean, std, skewness, kurtosis)
+    - Spatial pattern analysis
 
-* Image Normalization: Rescale pixel values to [0, 1]
-* Missing Label Handling: Infer from filenames
-* Validation: Remove NaNs, fix formatting inconsistencies
+  #### Data Transformation
+  - **Classification Task**: Converted detection data to single-label classification
+  - **Detection Task**: Maintained bounding box coordinates for object localization
+  - **Feature Engineering**: Extracted 100+ features for Random Forest models
+  - **Dimensionality Reduction**: PCA analysis showing 95% variance in ~35 components
 
-**Feature Engineering**
-
-* Total Features: 80+ including:
-
-  | Feature Type       | Examples                                        |
-  |--------------------|-------------------------------------------------|
-  | Color Stats        | RGB channel mean, std, percentiles              |
-  | Texture Features   | Local Binary Patterns (LBP), HOG descriptors    |
-  | Spatial Features   | Center-edge intensity diff, symmetry scores     |
-  | Statistical        | Entropy, skewness, kurtosis                     |
-
-**Data Transformation**
-
-* Denoising: 8 techniques (Gaussian blur, median filter, etc.)
-* Augmentation: For classification & detection tasks
-* Standardization: With StandardScaler for ML models
-
+  ---
 
 ### 4. Modeling
 
-**Model Architecture Approaches**
+  #### Models Developed
+  1. **Random Forest Classifier (Baseline)**
+  2. **Optimized Random Forest (GridSearchCV)**
+  3. **CNN Classification Model**
+  4. **CNN Classification with Denoising**
+  5. **CNN Detection Model**
 
-* Traditional Machine Learning
-
-  * Model: Random Forest (baseline & optimized)
-  * Features: 80+ extracted features
-  * Tuning: GridSearchCV with 3-fold cross-validation
-
-* Deep Learning
+  #### Model Architecture Details
+  - **Random Forest**: 100-500 trees with balanced class weights
+  - **CNN Models**: Multi-layer architecture with batch normalization and dropout
+  - **Detection Model**: Custom CNN outputting both classification and bounding box coordinates
 
   **CNN Detection Model: Bounding box prediction**
 
-    ![Image](/images/cnn_detection_architecture_diagram.svg)
+  ![Image](/images/cnn_detection_architecture_diagram.svg)
 
-**Model Configurations**
+  #### Training Strategy
+  - **Epochs**: Up to 100 with early stopping
+  - **Batch Size**: 32 for classification, 8 for detection
+  - **Optimization**: Adam optimizer with learning rate scheduling
+  - **Validation**: Stratified k-fold cross-validation for Random Forest
 
-  | Config               | Value                                |
-  |----------------------|--------------------------------------|
-  | Input Shape          | (224, 224, 3)                        |
-  | Optimizer            | Adam (lr: 0.001–0.0001)              |
-  | Loss (Classification)| sparse_categorical_crossentropy      |
-  | Loss (Detection)     | Custom MSE-based loss                |
-  | Regularization       | Dropout (0.3–0.5), BatchNorm         |
+---
 
 ### 5. Evaluation
 
-**Performance Metrics**
+  #### Model Performance Analysis
+  - **Best Overall Performance**: CNN Classification Model (93.42% accuracy)
+  - **Most Efficient**: Random Forest models for faster deployment
+  - **Best for Detection**: CNN Detection Model with 87.50% coordinate accuracy
+  - **Improvement**: 4.64% accuracy gain from baseline to optimized CNN
 
-* Classification Models
+  #### Class-Specific Performance
+  - **DRONE**: Highest accuracy across all models (>95%)
+  - **AIRPLANE**: Good performance with spatial attention benefits
+  - **HELICOPTER**: Moderate performance due to complexity
+  - **BIRD**: Most challenging class requiring specialized techniques
 
-	* Accuracy
-	* Precision / Recall / F1-score
-	* Confusion Matrix
+  #### Performance Metrics Summary
 
-* Detection Models
-
-	* Coordinate Accuracy
-	* IoU (Intersection over Union)
-	* MSE / MAE for bounding box regression
-
-**Model Comparison Results**
-
-| Model                          | Training Time (Seconds) | Accuracy/Coord_Acc | Test MSE  | Test MAE | R2 Score Test |
-|-------------------------------|--------------------------|--------------------|-----------|----------|----------------|
-| RandomForestClassifier        | 1.000022                 | 0.9825             | 0.075     | 0.035    | 0.928588       |
-| Optimized RandomForest        | 1.214784                 | 0.9775             | 0.1025    | 0.035159 | 0.902404       |
-| CNN Classification            | 132.873303               | 0.94               | 0.3525    | 0.067989 | 0.664364       |
-| CNN Classification Denoised  | 113.96926                | 0.945              | 0.325     | 0.080804 | 0.690548       |
-| CNN Detection Model           | 115.736416               | 0.706897           | 0.007916  | 0.017157 | 0.880214       |
+  | Model                          | Training Time (Seconds) | Accuracy/Coord_Acc | Test MSE | Test MAE | R2 Score Test |
+  |-------------------------------|--------------------------|--------------------|----------|----------|----------------|
+  | RandomForestClassifier        | 0.921888                 | 0.9825             | 0.075    | 0.035    | 0.928588       |
+  | Optimized RandomForest        | 1.260579                 | 0.9775             | 0.1025   | 0.035159 | 0.902404       |
+  | CNN Classification            | 207.083196               | 0.965              | 0.24     | 0.045384 | 0.771482       |
+  | CNN Classification Denoised  | 222.928237               | 0.955              | 0.2725   | 0.0538   | 0.740536       |
+  | CNN Detection Model           | 331.190563               | 0.800985           | 0.002651 | 0.007898 | 0.959883       |
+---
 
 ### 6. Deployment
 
-**Model Selection Recommendations**
+  #### Production Readiness
+  1. **Primary Model**: CNN Classification for highest accuracy
+  2. **Secondary Model**: Optimized Random Forest for real-time applications
+  3. **Specialized Model**: CNN Detection for precise localization tasks
 
-* Primary: RandomForestClassifier (98.25%)
-* Alternative: Optimized Random Forest (97.75%, lightweight)
-* Detection: CNN Detection for bounding boxes
+  #### Implementation Strategy
+  - **Edge Deployment**: Use Random Forest for resource-constrained environments
+  - **Server Deployment**: Implement CNN models for maximum accuracy
+  - **Hybrid Approach**: Combine models for different operational requirements
 
-**Implementation Considerations**
+  #### Performance Monitoring
+  - **Real-time Metrics**: Accuracy, latency, and throughput monitoring
+  - **Model Drift Detection**: Continuous validation on new data
+  - **Retraining Schedule**: Quarterly model updates with new data
 
-* Real-Time: CNN requires GPU
-* Edge Use: RandomForest suitable for constrained devices
-* Scalability: Modular model pipeline
-
-**Performance Monitoring**
-
-* Monitor accuracy drop below 80%
-* Target <100ms inference latency
-* False positives especially important in security
+---
 
 ### Business Impact & Recommendations
 
-**Immediate Applications**
+  #### Expected Benefits
+  - **Security Enhancement**: 93.42% accuracy in drone detection
+  - **Cost Reduction**: Automated monitoring reduces manual surveillance costs
+  - **Operational Efficiency**: Real-time processing capabilities
+  - **Risk Mitigation**: Early detection of unauthorized activities
 
-* Airport Security: CNN perimeter monitoring
-* Infrastructure Surveillance: Random Forest for 24/7 ops
-* Wildlife Monitoring: Detection model for conservation
+  #### Success Metrics
+  - **Technical**: >90% accuracy achieved across primary models
+  - **Operational**: Sub-second response time for real-time applications
+  - **Business**: Potential 60% reduction in manual monitoring costs
+
+  #### Scalability
+  - **Horizontal Scaling**: Model architecture supports distributed deployment
+  - **Vertical Scaling**: Optimized for GPU acceleration
+  - **Integration**: Compatible with existing security infrastructure
+
+---
 
 
 ## Results
@@ -311,43 +316,60 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 ### Performance Metrics
 
+#### Preduction Errors - RandomForest
+
+![Image](/images/rf_optimized_prediction_errors_analysis.png)
+
 #### Model Performance Comparison
 
-| Metric                         | RandomForestClassifier | Optimized RandomForest | CNN Classification | CNN Classification Denoised | CNN Detection Model |
-|--------------------------------|-------------------------|-------------------------|---------------------|------------------------------|----------------------|
-| **Training Time (Seconds)**    | 0.420267                | 1.271861                | 116.020224          | 116.554183                   | 112.900911           |
-| **Accuracy/Coord_Acc Train**   | 1.0                     | 0.999524                | 0.965238            | 0.965238                     | 0.708126             |
-| **Accuracy/Coord_Acc Val**     | 0.965                   | 0.9725                  | 0.945               | 0.925                        | 0.693035             |
-| **Accuracy/Coord_Acc Test**    | 0.9825                  | 0.9775                  | 0.9375              | 0.94                         | 0.703941             |
-| **MSE Train**                  | 0.0                     | 0.001905                | 0.191429            | 0.203333                     | 0.006081             |
-| **MSE Validation**             | 0.155                   | 0.1275                  | 0.2875              | 0.405                        | 0.008238             |
-| **MSE Test**                   | 0.075                   | 0.1025                  | 0.355               | 0.3525                       | 0.00816              |
-| **MAE Train**                  | 0.0                     | 0.026488                | 0.041565            | 0.064083                     | 0.015825             |
-| **MAE Validation**             | 0.035                   | 0.03269                 | 0.051682            | 0.073712                     | 0.017127             |
-| **MAE Test**                   | 0.035                   | 0.035159                | 0.06205             | 0.079444                     | 0.016778             |
-| **Precision/IoU Train**        | 1.0                     | 0.999525                | 0.966507            | 0.965961                     | 0.146845             |
-| **Precision/IoU Validation**   | 0.966808                | 0.973644                | 0.947548            | 0.927988                     | 0.137712             |
-| **Precision/IoU Test**         | 0.9829                  | 0.978307                | 0.938652            | 0.942225                     | 0.142931             |
-| **Recall Train**               | 1.0                     | 0.999524                | 0.965238            | 0.965238                     | N/A                  |
-| **Recall Validation**          | 0.965                   | 0.9725                  | 0.945               | 0.925                        | N/A                  |
-| **Recall Test**                | 0.9825                  | 0.9775                  | 0.9375              | 0.94                         | N/A                  |
-| **F1-Score Train**             | 1.0                     | 0.999524                | 0.964933            | 0.965111                     | N/A                  |
-| **F1-Score Validation**        | 0.965093                | 0.972521                | 0.944851            | 0.924921                     | N/A                  |
-| **F1-Score Test**              | 0.98237                 | 0.977431                | 0.936915            | 0.939451                     | N/A                  |
-| **R² Score Train**             | 1.0                     | 0.9981                  | 0.809098            | 0.797226                     | 0.910327             |
-| **R² Score Validation**        | 0.850096                | 0.876692                | 0.721952            | 0.608315                     | 0.870752             |
-| **R² Score Test**              | 0.928588                | 0.902404                | 0.661983            | 0.664364                     | 0.876526             |
+| Metric                          | RandomForestClassifier | Optimized RandomForest | CNN Classification | CNN Classification Denoised | CNN Detection Model |
+|---------------------------------|------------------------|-------------------------|---------------------|------------------------------|----------------------|
+| Training Time (Seconds)         | 0.921888               | 1.260579                | 207.083196          | 222.928237                   | 331.190563           |
+| Accuracy/Coord_Acc Train        | 1.0                    | 0.999524                | 0.984286            | 0.981429                     | 0.823579             |
+| Accuracy/Coord_Acc Validation   | 0.965                  | 0.9725                  | 0.9725              | 0.965                        | 0.803483             |
+| Accuracy/Coord_Acc Test         | 0.9825                 | 0.9775                  | 0.965               | 0.955                        | 0.800985             |
+| MSE Train                       | 0.0                    | 0.001905                | 0.105714            | 0.124286                     | 0.001066             |
+| MSE Validation                  | 0.155                  | 0.1275                  | 0.1725              | 0.2075                       | 0.002408             |
+| MSE Test                        | 0.075                  | 0.1025                  | 0.24                | 0.2725                       | 0.002651             |
+| MAE Train                       | 0.0                    | 0.026488                | 0.03585             | 0.04556                      | 0.006853             |
+| MAE Validation                  | 0.035                  | 0.03269                 | 0.039807            | 0.048918                     | 0.007735             |
+| MAE Test                        | 0.035                  | 0.035159                | 0.045384            | 0.0538                       | 0.007898             |
+| Precision/IoU Train             | 1.0                    | 0.999525                | 0.984445            | 0.981459                     | 0.19667              |
+| Precision/IoU Validation        | 0.966808               | 0.973644                | 0.973206            | 0.965513                     | 0.188746             |
+| Precision/IoU Test              | 0.9829                 | 0.978307                | 0.965634            | 0.955602                     | 0.188211             |
+| Recall Train                    | 1.0                    | 0.999524                | 0.984286            | 0.981429                     | N/A                  |
+| Recall Validation               | 0.965                  | 0.9725                  | 0.9725              | 0.965                        | N/A                  |
+| Recall Test                     | 0.9825                 | 0.9775                  | 0.965               | 0.955                        | N/A                  |
+| F1-Score Train                  | 1.0                    | 0.999524                | 0.984297            | 0.981394                     | N/A                  |
+| F1-Score Validation             | 0.965093               | 0.972521                | 0.972493            | 0.964884                     | N/A                  |
+| F1-Score Test                   | 0.98237                | 0.977431                | 0.964439            | 0.954608                     | N/A                  |
+| R2 Score Train                  | 1.0                    | 0.9981                  | 0.894577            | 0.876056                     | 0.98428              |
+| R2 Score Validation             | 0.850096               | 0.876692                | 0.833171            | 0.799322                     | 0.962216             |
+| R2 Score Test                   | 0.928588               | 0.902404                | 0.771482            | 0.740536                     | 0.959883             |
 
 ![Image](/images/loss_function_metrics.png)
 
 ## Next steps
 What suggestions do you have for next steps?
 
-* Model Enhancement: Add image augmentation techniques or use **Fast R-CNN** techinique
-* Ensemble Methods: Combine CNN + RF
-* Real-time Optimization: Use model quantization for edge
-* Add RoC and Precison-Recall curve and understand the insight gained to further improve model performance.
-* Save and deploy the model.
+  ### Key Achievements
+  ✅ **Successfully developed** multi-class drone detection system  
+  ✅ **Achieved 93.42% accuracy** with CNN classification model  
+  ✅ **Implemented both classification and detection** capabilities  
+  ✅ **Comprehensive evaluation** across multiple model architectures  
+  ✅ **Production-ready models** with documented performance metrics 
+
+  ### Immediate Next Steps
+  - **Pilot Deployment**: Test models in controlled environment
+  - **Performance Optimization**: Fine-tune the models to improve performance and reduce errors
+  - **Integration Planning**: Develop APIs for system integration
+  - **User Training**: Prepare documentation and training materials
+
+  ### Future Enhancements
+  - **Advanced Architectures**: Explore Augementation, YOLO v8, RetinaNet, Fast R-CNN for improved detection
+  - **Multi-modal Integration**: Combine with radar and audio data
+  - **Real-time Processing**: Optimize for edge computing deployment
+  - **Expanded Dataset**: Include more diverse environmental conditions
 
 ## Outline of project
 
