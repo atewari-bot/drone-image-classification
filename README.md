@@ -455,7 +455,7 @@ What suggestions do you have for next steps?
 
   ### Key Achievements
   ✅ **Successfully developed** multi-class drone detection system  
-  ✅ **Achieved 93.42% accuracy** with CNN classification model  
+  ✅ **Achieved 96.75% accuracy** with CNN classification model on test data 
   ✅ **Implemented both classification and detection** capabilities  
   ✅ **Comprehensive evaluation** across multiple model architectures  
   ✅ **Production-ready models** with documented performance metrics 
