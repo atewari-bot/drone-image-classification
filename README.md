@@ -320,6 +320,10 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 ![Image](/images/rf_optimized_prediction_errors_analysis.png)
 
+#### CNN Detection Model Prediction
+
+![Image](/images/cnn_detection_model_predictions.png)
+
 #### Models Performance Comparison
 
 | Metric                          | RandomForestClassifier | Optimized RandomForest | CNN Classification | CNN Classification Denoised | CNN Detection Model |
@@ -347,7 +351,21 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 | R2 Score Validation             | 0.850096               | 0.876692                | 0.833171            | 0.799322                     | 0.962216             |
 | R2 Score Test                   | 0.928588               | 0.902404                | 0.771482            | 0.740536                     | 0.959883             |
 
+#### Loss Function Metrics
+
 ![Image](/images/loss_function_metrics.png)
+
+#### Optimized RandomForest Test Dataset Performance Metrics
+
+![Image](/images/optimized_rf_test_performance.png)
+
+#### CNN Classification Test Dataset Performance Metrics
+
+![Image](/images/cnn_test_performance_matrix.png)
+
+#### CNN Denoised Test Dataset Performance Metrics
+
+![Image](/images/cnn_denoised_test_performance_matrix.png)
 
 ## Next steps
 What suggestions do you have for next steps?
