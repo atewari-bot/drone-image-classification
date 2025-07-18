@@ -89,6 +89,7 @@ The trained model should achieve:
 # %pip install opencv-python
 # %pip install zipfile
 # %pip install scikit-image
+# %pip install tabulate
 
 import zipfile
 import io
@@ -104,6 +105,7 @@ import cv2
 from PIL import Image
 from matplotlib.patches import Rectangle
 import seaborn as sns
+from tabulate import tabulate
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -143,7 +145,7 @@ img_size = (224, 224)
 MAX_BOXES = 10
 class_names = ['AIRPLANE', 'DRONE', 'HELICOPTER', 'BIRD']
 NUM_CLASSES = len(class_names)
-EPOCHS = 100
+EPOCHS = 110
 BATCH_SIZE = 32
 SMALL_BATCH_SIZE = 8
 run_grid_search = True
@@ -1393,7 +1395,7 @@ def sobel_filter_edge_detection(image):
         sobel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
         sobel_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
 
-        # Apply convolution (simplified)
+        # Apply convolution
         grad_x = cv2.filter2D(image.astype(np.float32), -1, sobel_x)
         grad_y = cv2.filter2D(image.astype(np.float32), -1, sobel_y)
 
@@ -2375,7 +2377,7 @@ def display_performance_summary():
 
     print("\nDetailed Performance Metrics:")
     print("-" * 100)
-    print(metrics_df.to_string())
+    print(tabulate(metrics_df, headers='keys', tablefmt='grid'))
 
     # Create summary table with key metrics
     summary_df = pd.DataFrame(index=metrics_df.index, columns=[
@@ -2391,7 +2393,7 @@ def display_performance_summary():
     print("\n" + "="*80)
     print("Key Performance Metrics Summary")
     print("="*80)
-    print(summary_df.to_string())
+    print(tabulate(summary_df, headers='keys', tablefmt='grid'))
 
     return metrics_df, summary_df
 
@@ -2408,7 +2410,7 @@ def run_detection_model_evaluation():
         print(f"Error in detection model evaluation: {e}")
         return None, None
 
-print("CNN Detection Model Performance Metrics Extension loaded successfully!")
+print("CNN Detection Model Performance Metrics loaded successfully!")
 
 """# Model Training
 
@@ -3286,7 +3288,7 @@ def plot_cnn_performance(model, X_test, y_test, filename):
           name=f"Class {i}",
           ax=axes[2])
     axes[2].plot([0, 1], [0, 1], "k--", lw=1)
-    axes[2].set_title("Precision-Recall Curve")
+    axes[2].set_title("RoC Curve")
     axes[2].legend(loc="best")
 
     plt.tight_layout()
@@ -3666,7 +3668,7 @@ if det_model is not None:
 # Visualize detection model predictions
 visualize_detection_predictions(X_test, Y_test, det_model.predict(X_test))
 
-run_detection_model_evaluation()
+metrics_df, summary_df = run_detection_model_evaluation()
 
 # Create and display results including CNN Detection Model
 print("\n" + "="*100)
@@ -3681,7 +3683,8 @@ try:
     results_df[numeric_columns] = results_df[numeric_columns].round(4)
 
     transposed_df = results_df.T
-    print(transposed_df.to_string())
+    # print(transposed_df.to_string())
+    print(tabulate(transposed_df, headers='keys', tablefmt='grid'))
 
     # Create and display summary table
     print("\n" + "="*80)
@@ -3691,7 +3694,7 @@ try:
     summary_metrics = ['Training Time (Seconds)', 'Accuracy/Coord_Acc Test', 'MSE Test', 'MAE Test', 'R2 Score Test']
     summary_df = results_df[summary_metrics].copy()
 
-    print(summary_df.to_string())
+    print(tabulate(summary_df, headers='keys', tablefmt='grid'))
 
     # Save results
     results_df.to_csv('data/comprehensive_model_results.csv')
