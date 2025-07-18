@@ -110,7 +110,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
   ![Image](/images/cnn_detection_architecture_diagram.svg)
 
   #### Training Strategy
-  - **Epochs**: Up to 100 with early stopping
+  - **Epochs**: Up to 110 with early stopping
   - **Batch Size**: 32 for classification, 8 for detection
   - **Optimization**: Adam optimizer with learning rate scheduling
   - **Validation**: Stratified k-fold cross-validation for Random Forest
@@ -322,6 +322,8 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 #### CNN Detection Model Prediction
 
+# CNN Denoised Model Performance Summary
+
 ![Image](/images/cnn_detection_model_predictions.png)
 
 #### Models Performance Comparision
@@ -355,17 +357,98 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 ![Image](/images/loss_function_metrics.png)
 
-#### Optimized RandomForest Test Dataset Performance Metrics
+### Optimized RandomForest Test Dataset Performance Metrics
 
 ![Image](/images/optimized_rf_test_performance.png)
 
-#### CNN Classification Test Dataset Performance Metrics
+#### Overall Performance
+| Metric | Value | Description |
+|--------|-------|-------------|
+| Classes | 4 | Airplane, Drone, Helicopter, Bird |
+| AUC Score | 1.00 | Perfect AUC across all classes |
+| Performance Level | Perfect/Near-Perfect | Exceptional discriminative ability |
+
+#### Confusion Matrix Results
+| Class | Correct Predictions | Misclassifications | Details |
+|-------|-------------------|-------------------|---------|
+| Airplane | 87 | 5 | 5 → Helicopter |
+| Drone | 159 | 0 | Perfect classification |
+| Helicopter | 75 | 0 | Perfect classification |
+| Bird | 70 | 4 | 1 → Airplane, 3 → Drone |
+
+#### Precision-Recall Performance
+| Class | Class ID | Average Precision (AP) | Rank |
+|-------|----------|----------------------|------|
+| Airplane | Class 0 | 1.00 | 1st (Tied) |
+| Drone | Class 1 | 1.00 | 1st (Tied) |
+| Helicopter | Class 2 | 0.99 | 3rd |
+| Bird | Class 3 | 0.99 | 3rd (Tied) |
+
+#### ROC Curve Performance
+| Class | AUC Score | Performance |
+|-------|-----------|------------|
+| Class 0 (Airplane) | 1.00 | Perfect |
+| Class 1 (Drone) | 1.00 | Perfect |
+| Class 2 (Helicopter) | 1.00 | Perfect |
+| Class 3 (Bird) | 1.00 | Perfect |
+
+#### Key Performance Insights
+| Insight | Description |
+|---------|-------------|
+| Best Performing Classes | Drone & Helicopter - Perfect confusion matrix performance |
+| Most Challenging Class | Bird - 4 misclassifications (1 → Airplane, 3 → Drone) |
+| Common Misclassification | Airplane → Helicopter (5 instances) and Bird → Drone (3 instances) |
+| Model Strength | Perfect 1.00 AUC across all classes, near-perfect AP scores |
+| Overall Accuracy | Extremely high with only 9 total misclassifications out of 391 samples |
+| Improvement over CNN | Significantly better performance with perfect AUC and higher AP scores |
+
+### CNN Classification Test Dataset Performance Metrics
 
 ![Image](/images/cnn_test_performance_matrix.png)
 
-#### CNN Denoised Test Dataset Performance Metrics
+### CNN Denoised Test Dataset Performance Metrics
 
 ![Image](/images/cnn_denoised_test_performance_matrix.png)
+
+#### Overall Performance
+| Metric | Value | Description |
+|--------|-------|-------------|
+| Classes | 4 | Airplane, Drone, Helicopter, Bird |
+| AUC Score | 0.97 | All classes achieve identical AUC |
+| Performance Level | Excellent | Strong discriminative ability across all classes |
+
+#### Confusion Matrix Results
+| Class | Correct Predictions | Misclassifications | Details |
+|-------|-------------------|-------------------|---------|
+| Airplane | 73 | 19 | 16 → Helicopter, 3 → Bird |
+| Drone | 159 | 0 | Perfect classification |
+| Helicopter | 65 | 10 | 7 → Airplane, 3 → Bird |
+| Bird | 61 | 13 | 10 → Airplane, 3 → Drone |
+
+#### Precision-Recall Performance
+| Class | Class ID | Average Precision (AP) | Rank |
+|-------|----------|----------------------|------|
+| Drone | Class 1 | 0.98 | 1st (Highest) |
+| Bird | Class 3 | 0.93 | 2nd |
+| Helicopter | Class 2 | 0.90 | 3rd |
+| Airplane | Class 0 | 0.88 | 4th (Lowest) |
+
+#### ROC Curve Performance
+| Class | AUC Score | Performance |
+|-------|-----------|------------|
+| Class 0 (Airplane) | 0.97 | Excellent |
+| Class 1 (Drone) | 0.97 | Excellent |
+| Class 2 (Helicopter) | 0.97 | Excellent |
+| Class 3 (Bird) | 0.97 | Excellent |
+
+#### Key Performance Insights
+| Insight | Description |
+|---------|-------------|
+| Best Performing Class | Drone - Perfect confusion matrix performance and highest AP (0.98) |
+| Most Challenging Class | Airplane - Shows most confusion with other classes, lowest AP (0.88) |
+| Common Misclassification | Airplane ↔ Helicopter confusion (16 and 7 instances respectively) |
+| Model Strength | High discriminative power with consistent 0.97 AUC across all classes |
+| Precision-Recall | Maintains high precision across different recall levels for all classes |
 
 ## Next steps
 What suggestions do you have for next steps?
