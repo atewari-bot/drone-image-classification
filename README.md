@@ -78,10 +78,10 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
   2. **Denoising**: Applied Gaussian blur and multiple filtering techniques
   3. **Data Augmentation**: Implemented for improved generalization
   4. **Feature Extraction**: 
-    - Color histogram analysis
-    - Texture features (LBP, HOG)
-    - Statistical features (mean, std, skewness, kurtosis)
-    - Spatial pattern analysis
+     * Color histogram analysis
+     * Texture features (LBP, HOG)
+     * Statistical features (mean, std, skewness, kurtosis)
+     * Spatial pattern analysis
 
   #### Data Transformation
   - **Classification Task**: Converted detection data to single-label classification
@@ -322,8 +322,6 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 #### CNN Detection Model Prediction
 
-# CNN Denoised Model Performance Summary
-
 ![Image](/images/cnn_detection_model_predictions.png)
 
 #### Models Performance Comparision
@@ -455,7 +453,7 @@ What suggestions do you have for next steps?
 
   ### Key Achievements
   ✅ **Successfully developed** multi-class drone detection system  
-  ✅ **Achieved 96.75% accuracy** with CNN classification model on test data 
+  ✅ **Achieved 96.75% accuracy** with CNN classification model on test data   
   ✅ **Implemented both classification and detection** capabilities  
   ✅ **Comprehensive evaluation** across multiple model architectures  
   ✅ **Production-ready models** with documented performance metrics 
