@@ -327,6 +327,8 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 #### Models Performance Comparision
 
+![Image](/images/model_comparison_with_fast_rcnn.png)
+
 |                               | RandomForestClassifier | Optimized RandomForest | CNN Classification | CNN Classification Denoised | Fast R-CNN Model | CNN Detection Model   |
 |-------------------------------|------------------------|------------------------|--------------------|-----------------------------|------------------|-----------------------|
 | Training Time (Seconds)       | 0.985104               | 1.25319                | 212.668            | 206.649                     | 997.934          | 368.73712372779846    |

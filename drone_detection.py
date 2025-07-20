@@ -4321,6 +4321,10 @@ def create_fast_rcnn_model(num_classes=5, input_shape=(224, 224, 3)):
     bbox_output = Dense(4, activation='linear', name='bbox_regression')(x)
 
     model = Model(inputs=inputs, outputs=[classification_output, bbox_output])
+
+    print("Augmented Fast R-CNN Model Summary:")
+    model.summary()
+
     return model
 
 """**Prepare data for Fast R-CNN training**"""
@@ -4416,7 +4420,7 @@ def prepare_fast_rcnn_data(X, Y, num_proposals=100, positive_fraction=0.25):
             continue
 
         if (i + 1) % 50 == 0:
-            print(f"Processed {i + 1}/{len(X)} images for Fixed Fast R-CNN")
+            print(f"Processed {i + 1}/{len(X)} images for Fast R-CNN")
 
     if not fast_rcnn_images:
         print("Warning: No valid samples generated!")
@@ -4580,13 +4584,15 @@ def predict_bbox(model, image, confidence_threshold=0.3):
         # Get model predictions
         predictions = model.predict(image_batch, verbose=0)
         pred_classes = predictions[0][0]  # Shape: (num_classes,)
+        print(f"Predicted classes: {pred_classes}")
         pred_deltas = predictions[1][0]   # Shape: (4,)
 
         # Find best class prediction (excluding background at index 0)
         class_scores = pred_classes[1:]  # Exclude background class
-        max_confidence = np.max(class_scores)
+        max_confidence = np.max(pred_classes)
 
         if max_confidence > confidence_threshold:
+            print(f"Max confidence: {max_confidence}")
             best_class = np.argmax(class_scores) + 1  # +1 to account for background
 
             # Use a reasonable default proposal for bbox regression
@@ -4710,7 +4716,7 @@ def visualize_fast_rcnn_predictions(X_test, Y_test, model, num_samples=20):
     Visualization with bounding box display
     """
     try:
-        class_names = ['AIRPLANE', 'DRONE', 'HELICOPTER', 'BIRD']
+        class_names = ['Background', 'AIRPLANE', 'DRONE', 'HELICOPTER', 'BIRD']
 
         fig, axes = plt.subplots(4, 5, figsize=(20, 24))
         axes = axes.flatten()
@@ -4723,7 +4729,7 @@ def visualize_fast_rcnn_predictions(X_test, Y_test, model, num_samples=20):
                 true_boxes = Y_test[i]
 
                 # Get predictions with improved function
-                pred_class, pred_bbox, confidence = predict_bbox(model, img, confidence_threshold=0.2)
+                pred_class, pred_bbox, confidence = predict_bbox(model, img, confidence_threshold=0.01)
 
                 # Find ground truth
                 valid_gt_boxes = [box for box in true_boxes if np.sum(np.abs(box)) > 0]
@@ -4761,6 +4767,7 @@ def visualize_fast_rcnn_predictions(X_test, Y_test, model, num_samples=20):
                         axes[i].add_patch(rect)
 
                 # Draw predicted bbox (red)
+                print(f"Predicted class: {pred_class}, Confidence: {confidence}")
                 if pred_class > 0 and confidence > 0.1:  # Lower threshold for visualization
                     px, py, pw, ph = pred_bbox
                     px1 = (px - pw/2) * img_width
@@ -4769,6 +4776,7 @@ def visualize_fast_rcnn_predictions(X_test, Y_test, model, num_samples=20):
                     ph_pix = ph * img_height
 
                     # Ensure positive dimensions and reasonable bounds
+                    print(f"pw Pixel: {pw_pix}, ph Pixel: {ph_pix}")
                     if pw_pix > 5 and ph_pix > 5:  # Minimum pixel size
                         rect = Rectangle((px1, py1), pw_pix, ph_pix,
                                        linewidth=3, edgecolor='red', facecolor='none',
@@ -4905,7 +4913,7 @@ def plot_fast_rcnn_training_history(history):
 
 # # Main training and evaluation function for Fast R-CNN
 def run_fast_rcnn_pipeline(X_train, Y_train, X_val, Y_val, X_test, Y_test,
-                                   epochs=25, augmentation_factor=4):
+                                   epochs=20, augmentation_factor=4):
     """
     Complete pipeline for Fast R-CNN with augmentation
     """
@@ -4927,7 +4935,6 @@ def run_fast_rcnn_pipeline(X_train, Y_train, X_val, Y_val, X_test, Y_test,
         print(f"Input image shape: {X_train[0].shape}")
 
         # Initialize augmentation and train model
-        print("\nTraining Fast R-CNN with Augmentation...")
         model, history = train_fast_rcnn_model(
             X_train, Y_train, X_val, Y_val,
             epochs=epochs, augmentation_factor=augmentation_factor
@@ -5336,7 +5343,7 @@ demonstrate_augmentation_effects(X_train[:4], Y_train[:4])
 # Train model
 rcnn_model, rcnn_history, test_acc, test_mse, test_mae = run_fast_rcnn_pipeline(
     X_train, Y_train, X_val, Y_val, X_test, Y_test,
-    epochs=25, augmentation_factor=2
+    epochs=20, augmentation_factor=4
 )
 fast_rcnn_end_time = time.time()
 fast_rcnn_model_training_time = fast_rcnn_end_time - fast_rcnn_start_time
@@ -5354,7 +5361,6 @@ else:
 """**Generating predictions visualization**"""
 
 # Visualize predictions
-print("\nGenerating predictions visualization...")
 visualize_fast_rcnn_predictions(X_test, Y_test, rcnn_model)
 
 """**Display performance results including Fast R-CNN**"""
