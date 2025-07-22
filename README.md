@@ -356,7 +356,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 #### Loss Function Metrics
 
-![Image](/images/loss_function_metrics.png)
+![Image](/images/comprehensive_model_comparison.png)
 
 ### Optimized RandomForest Test Dataset Performance Metrics
 
