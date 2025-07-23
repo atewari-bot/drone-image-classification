@@ -72,10 +72,10 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
   1. **Image Standardization**: Resize to 224×224, normalize pixel values (0-1)
   2. **Quality Enhancement**: Gaussian blur denoising for artifact reduction
   3. **Feature Engineering**: Extract 87 features including:
-    - Color channel statistics (RGB + grayscale)
-    - Texture features (LBP, HOG, gradient magnitude)
-    - Spatial characteristics (symmetry, center positioning)
-    - Statistical measures (entropy, skewness, kurtosis)
+      * Color channel statistics (RGB + grayscale)
+      * Texture features (LBP, HOG, gradient magnitude)
+      * Spatial characteristics (symmetry, center positioning)
+      * Statistical measures (entropy, skewness, kurtosis)
 
   #### Data Transformation
   - **Classification Task**: Converted detection data to single-label classification
@@ -99,7 +99,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
   | Model | Architecture | Test Accuracy | Training Time | Use Case |
   |-------|-------------|---------------|---------------|----------|
-  | **RandomForest Baseline** | 100 estimators | 84.21% | 8.4s | Rapid prototyping |
+  | **RandomForest Baseline** | 500 estimators | 84.21% | 8.4s | Rapid prototyping |
   | **Optimized RandomForest** | GridSearchCV tuned | **94.74%** | 847.2s | Production classification |
   | **CNN Classification** | 4-layer CNN | 89.47% | 301.5s | Deep feature learning |
   | **CNN Denoised** | CNN + preprocessing | 92.11% | 298.7s | Noisy environments |
@@ -147,7 +147,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
   ![Image](/images/resnet_fast_rcnn_diagram.svg)
 
   #### Training Strategy
-  - **Epochs**: Up to 110 with early stopping
+  - **Epochs**: 110 to 200 with early stopping
   - **Batch Size**: 32 for classification, 8 for detection
   - **Optimization**: Adam optimizer with learning rate scheduling
   - **Validation**: Stratified k-fold cross-validation for Random Forest
