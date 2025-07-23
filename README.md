@@ -93,7 +93,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
   3. **CNN Classification Model**
   4. **CNN Classification with Denoising**
   5. **CNN Detection Model**
-  6. **RestNet-50 Fast R-CNN Model**
+  6. **ResNet-50 Fast R-CNN Model**
 
   #### Model Portfolio
 
@@ -142,7 +142,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
   ![Image](/images/cnn_detection_architecture_diagram.svg)
 
-  **Architecture: RestNet Fast R-CNN Detection Model**
+  **Architecture: ResNet Fast R-CNN Detection Model**
 
   ![Image](/images/resnet_fast_rcnn_diagram.svg)
 
