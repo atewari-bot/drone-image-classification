@@ -529,7 +529,7 @@ What suggestions do you have for next steps?
   - **User Training**: Prepare documentation and training materials
 
   ### Future Enhancements
-  - **Advanced Architectures**: Explore Augementation, YOLO v8, RetinaNet, Fast R-CNN for improved detection
+  - **Advanced Architectures**: Explore Augementation, YOLO v8, RetinaNet for improved detection
   - **Multi-modal Integration**: Combine with radar and audio data
   - **Real-time Processing**: Optimize for edge computing deployment
   - **Expanded Dataset**: Include more diverse environmental conditions
