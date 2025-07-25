@@ -167,6 +167,8 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
   - **Key Parameters**: 500 estimators, entropy criterion, max_depth=20
   - **Class Handling**: Balanced weights for minority class protection
 
+  ![Image](/images/opti_rf_features_distribution.png)
+
   #### Fast R-CNN Enhancement
   - **Transfer Learning**: ResNet50 pre-trained backbone
   - **Advanced Loss**: Focal loss for class imbalance handling
