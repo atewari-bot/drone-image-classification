@@ -882,6 +882,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 </table>
 
 ### 🔍 Cross-Set Performance Analysis
+
 <div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin: 30px 0;">
 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 15px; width: 320px; margin: 15px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);">
   <h4 style="margin: 0 0 15px 0; text-align: center; font-size: 18px;">🌳 **Random Forest Champion**</h4>
@@ -919,6 +920,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 </div>
 
 ### 📈 Performance Trends Analysis
+
 <table align="center" style="border-collapse: collapse; width: 90%; margin: 20px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden;">
   <tr style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white;">
     <th style="padding: 15px; text-align: center; font-weight: 600;">🔍 **Analysis Category**</th>
