@@ -520,7 +520,7 @@ What suggestions do you have for next steps?
   ### Key Achievements
   ✅ **Successfully developed** multi-class drone detection system  
   ✅ **Achieved 98.25% accuracy** with RandomForest model on test data   
-  ✅ **Implemented both classification and detection** capabilities with 90.48% detection accuracy
+  ✅ **Implemented both classification and detection** capabilities with 90.48% detection accuracy  
   ✅ **Comprehensive evaluation** across multiple model architectures  
   ✅ **Production-ready models** with documented performance metrics 
 
@@ -544,6 +544,7 @@ What suggestions do you have for next steps?
 - [Python File - Model Training & Performance Metrics Analysis](https://github.com/atewari-bot/drone-image-classification/blob/main/scripts/drone_detection.py)
 - [Data Sampling Script](https://github.com/atewari-bot/drone-image-classification/blob/main/scripts/image_sampling.py)
 
+  ![Image](/images/project_outline.png)
 
 ## Contact and Further Information
 
