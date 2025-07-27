@@ -586,6 +586,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 ![Image](/images/model_comparison_with_fast_rcnn.png)
 
+```
 ## <div align="center">🔬 Detailed Performance Metrics Across Train/Validation/Test Sets</div>
 
 <table align="center" style="border-collapse: collapse; width: 100%; max-width: 1400px; margin: 20px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); border-radius: 12px; overflow: hidden;">
@@ -880,6 +881,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 </tr>
   </tbody>
 </table>
+```
 
 ### 🔍 Cross-Set Performance Analysis
 
