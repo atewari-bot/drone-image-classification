@@ -4,7 +4,7 @@
 
 ## Executive summary
 
-This project develops a comprehensive computer vision system for automated drone detection in aerial imagery, addressing critical needs in security, surveillance, airspace monitoring, and wildlife protection. Through systematic application of the CRISP-DM methodology, we implemented and evaluated six distinct machine learning models, achieving **94.74% classification accuracy** and **78.91% spatial detection accuracy**.
+This project develops a comprehensive computer vision system for automated drone detection in aerial imagery, addressing critical needs in security, surveillance, airspace monitoring, and wildlife protection. Through systematic application of the CRISP-DM methodology, we implemented and evaluated six distinct machine learning models, achieving **94.74% classification accuracy** and **90.28% spatial detection accuracy**.
 
 ## Rationale - Why should anyone care about this question?
 In recent years, we have observed the unprecedented usage of drone and related technologies in various areas like surveillance, security, crops monitoring, delivery drones, airspace monitoring, search & rescue operations. This incredibly useful technology has many benefits but if armed, drones pose great threat to civilian and armed forces life & infrastructure. These drones could also be used for surveillance by bad people or could be a great concern for violation of privacy. 
@@ -93,58 +93,247 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
   3. **CNN Classification Model**
   4. **CNN Classification with Denoising**
   5. **CNN Detection Model**
-  6. **ResNet-50 Fast R-CNN Model**
+  6. **MobileNetV2 Fast R-CNN Model**
 
   #### Model Portfolio
 
-  | Model | Architecture | Test Accuracy | Training Time | Use Case |
-  |-------|-------------|---------------|---------------|----------|
-  | **RandomForest Baseline** | 500 estimators | 98.3% | 1.2s | Rapid prototyping |
-  | **Optimized RandomForest** | GridSearchCV tuned | **97.8%** | 1.2s | Production classification |
-  | **CNN Classification** | 4-layer CNN | 96.5% | 241.1s | Deep feature learning |
-  | **CNN Denoised** | CNN + preprocessing | 94.5% | 191.6s | Noisy environments |
-  | **CNN Detection** | Multi-output CNN | 77.4%* | 366.5s | Basic localization |
-  | **Fast R-CNN** | ResNet50 backbone | **90.05%** | 2898.0s | Precise detection |
+  <table align="center" style="border-collapse: collapse; width: 100%; max-width: 1200px; margin: 20px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden;">
+  <thead>
+    <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+      <th style="padding: 15px 12px; text-align: left; font-weight: 600; font-size: 14px; border-right: 1px solid rgba(255,255,255,0.2);">
+        📈 <strong>Performance Metric</strong>
+      </th>
+      <th style="padding: 15px 12px; text-align: center; font-weight: 600; font-size: 12px; border-right: 1px solid rgba(255,255,255,0.2); min-width: 140px;">
+        🌳 <strong>Random Forest<br/>Classifier</strong>
+      </th>
+      <th style="padding: 15px 12px; text-align: center; font-weight: 600; font-size: 12px; border-right: 1px solid rgba(255,255,255,0.2); min-width: 140px;">
+        ⚙️ <strong>Optimized<br/>Random Forest</strong>
+      </th>
+      <th style="padding: 15px 12px; text-align: center; font-weight: 600; font-size: 12px; border-right: 1px solid rgba(255,255,255,0.2); min-width: 140px;">
+        🧠 <strong>CNN<br/>Classification</strong>
+      </th>
+      <th style="padding: 15px 12px; text-align: center; font-weight: 600; font-size: 12px; border-right: 1px solid rgba(255,255,255,0.2); min-width: 140px;">
+        🧠 <strong>CNN Classification<br/>Denoised</strong>
+      </th>
+      <th style="padding: 15px 12px; text-align: center; font-weight: 600; font-size: 12px; border-right: 1px solid rgba(255,255,255,0.2); min-width: 140px;">
+        🎯 <strong>CNN Detection<br/>Model</strong>
+      </th>
+      <th style="padding: 15px 12px; text-align: center; font-weight: 600; font-size: 12px; min-width: 140px;">
+        ⚡ <strong>Fast R-CNN<br/>Model</strong>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+      <td style="padding: 12px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef;">
+        ⏱️ <strong>Training Time (seconds)</strong>
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+        <strong>0.41s</strong> 🚀
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+        <strong>1.24s</strong> 🚀
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #fff3cd; color: #856404;">
+        246.88s
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d1ecf1; color: #0c5460;">
+        143.18s
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #f8d7da; color: #721c24;">
+        358.08s
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #f8d7da; color: #721c24;">
+        2707.92s
+      </td>
+    </tr>
+    <tr style="background-color: white; border-bottom: 1px solid #e9ecef;">
+      <td style="padding: 12px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef;">
+        🎯 <strong>Test Accuracy / Coord Accuracy</strong>
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+        <strong>98.25%</strong> 🏆
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+        <strong>97.75%</strong> 🥈
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d1ecf1; color: #0c5460;">
+        96.50%
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d1ecf1; color: #0c5460;">
+        94.50%
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #fff3cd; color: #856404;">
+        79.21%*
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d1ecf1; color: #0c5460;">
+        92.86%*
+      </td>
+    </tr>
+    <tr style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+      <td style="padding: 12px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef;">
+        📉 <strong>Test MSE (Lower is Better)</strong>
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.075
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.103
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.215
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.338
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+        <strong>0.003</strong> 🏆
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+        <strong>0.003</strong> 🥈
+      </td>
+    </tr>
+    <tr style="background-color: white; border-bottom: 1px solid #e9ecef;">
+      <td style="padding: 12px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef;">
+        📉 <strong>Test MAE (Lower is Better)</strong>
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.035
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.035
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.044
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.060
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+        <strong>0.008</strong> 🏆
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.039
+      </td>
+    </tr>
+    <tr style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+      <td style="padding: 12px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef;">
+        🎯 <strong>Test Precision / IoU</strong>
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+        <strong>98.29%</strong> 🏆
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+        <strong>97.83%</strong> 🥈
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d1ecf1; color: #0c5460;">
+        96.55%
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d1ecf1; color: #0c5460;">
+        94.61%
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.188* (IoU)
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.290* (IoU)
+      </td>
+    </tr>
+    <tr style="background-color: white;">
+      <td style="padding: 12px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef;">
+        📊 <strong>Test R² Score</strong>
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.929
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.902
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.795
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.679
+      </td>
+      <td style="padding: 12px; text-align: center; color: #495057;">
+        0.949
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+        <strong>0.997</strong> 🏆
+      </td>
+    </tr>
+  </tbody>
+</table>
 
-  #### Performance Breakdown
+🏆 Champion Models by Category
 
-  #### Classification Models
+<table align="center" style="border-collapse: collapse; width: 80%; margin: 20px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <tr style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white;">
+    <th style="padding: 15px; text-align: center; font-weight: 600; border-radius: 8px 0 0 8px;">
+      🏅 **Performance Category**
+    </th>
+    <th style="padding: 15px; text-align: center; font-weight: 600; border-radius: 0 8px 8px 0;">
+      🎖️ **Champion Model**
+    </th>
+  </tr>
+  <tr style="background-color: #f8f9fa;">
+    <td style="padding: 12px; font-weight: 600; text-align: center; border-right: 1px solid #e9ecef;">
+      ⚡ **Fastest Training**
+    </td>
+    <td style="padding: 12px; text-align: center; color: #155724;">
+      🌳 **Random Forest Classifier** (0.41s)
+    </td>
+  </tr>
+  <tr style="background-color: white;">
+    <td style="padding: 12px; font-weight: 600; text-align: center; border-right: 1px solid #e9ecef;">
+      🎯 **Highest Classification Accuracy**
+    </td>
+    <td style="padding: 12px; text-align: center; color: #155724;">
+      🌳 **Random Forest Classifier** (98.25%)
+    </td>
+  </tr>
+  <tr style="background-color: #f8f9fa;">
+    <td style="padding: 12px; font-weight: 600; text-align: center; border-right: 1px solid #e9ecef;">
+      📍 **Best Detection Accuracy**
+    </td>
+    <td style="padding: 12px; text-align: center; color: #155724;">
+      ⚡ **Fast R-CNN Model** (92.86%)
+    </td>
+  </tr>
+  <tr style="background-color: white;">
+    <td style="padding: 12px; font-weight: 600; text-align: center; border-right: 1px solid #e9ecef;">
+      📉 **Lowest Error Rate**
+    </td>
+    <td style="padding: 12px; text-align: center; color: #155724;">
+      🎯 **CNN Detection Model** (MSE: 0.003)
+    </td>
+  </tr>
+  <tr style="background-color: #f8f9fa;">
+    <td style="padding: 12px; font-weight: 600; text-align: center; border-right: 1px solid #e9ecef;">
+      📊 **Best Model Fit**
+    </td>
+    <td style="padding: 12px; text-align: center; color: #155724;">
+      ⚡ **Fast R-CNN Model** (R²: 0.997)
+    </td>
+  </tr>
+</table>
+
+  #### Class-wise Performance
   ```
-  Champion: RandomForest Classification
-  ├── Accuracy: 98.25%
-  ├── Precision: 98.29%
-  ├── Recall: 98.25%
-  └── F1-Score: 92.86%
-
-  Runner-up: Optimized RandomForest
-  ├── Accuracy: 97.75%
-  ├── Precision: 97.83%
-  ├── Recall: 97.75%
-  └── F1-Score: 90.24%
-  ```
-
-  #### Detection Models
-  ```
-  Best Detector: Fast R-CNN
-  ├── Coordinate Accuracy: 90.48%
-  ├── IoU Score: 0.2249
-  ├── MSE: 0.0050
-  └── Inference: <2s per image
-
-  Speed Champion: CNN Detection
-  ├── Coordinate Accuracy: 77.44%
-  ├── IoU Score: 0.1708
-  ├── MSE: 0.0033
-  └── Inference: <0.5s per image
+  🎯 Class-wise Performance  
+  ├── 🚁 DRONE: Perfect (100%)
+  ├── 🚁 HELICOPTER: Perfect (100%)
+  ├── 🛩️ AIRPLANE: 94.6% (5 misclassifications)
+  └── 🦅 BIRD: 94.6% (4 misclassifications)
   ```
 
   **Architecture: CNN Detection Model**
 
   ![Image](/images/cnn_detection_architecture_diagram.svg)
 
-  **Architecture: ResNet Fast R-CNN Detection Model**
+  **Architecture: MobileNetV2 Fast R-CNN Detection Model**
 
-  ![Image](/images/resnet_fast_rcnn_diagram.svg)
+  ![Image](/images/fast_rcnn_detection_diagram.svg)
 
   #### Training Strategy
   - **Epochs**: 110 to 200 with early stopping
@@ -170,7 +359,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
   ![Image](/images/opti_rf_features_distribution.png)
 
   #### Fast R-CNN Enhancement
-  - **Transfer Learning**: ResNet50 pre-trained backbone
+  - **Transfer Learning**: MobileNetV2 pre-trained backbone
   - **Advanced Loss**: Focal loss for class imbalance handling
   - **Multi-Scale Detection**: Adaptive bounding box regression
 
@@ -192,14 +381,17 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
   #### Performance Metrics Summary
 
-|                         |   RandomForestClassifier |   Optimized RandomForest |   CNN Classification |   CNN Classification Denoised |   CNN Detection Model |   Fast R-CNN Model |
-|-------------------------|--------------------------|--------------------------|----------------------|-------------------------------|-----------------------|--------------------|
-| Training Time (s)       |                   1.1573 |                   1.2264 |             241.052  |                      191.601  |              366.536  |          2897.99   |
-| Test Accuracy/Coord_Acc |                   0.9825 |                   0.9775 |               0.965  |                        0.945  |                0.7744 |             0.9048 |
-| Test MSE                |                   0.075  |                   0.1025 |               0.215  |                        0.3625 |                0.0033 |             0.005  |
-| Test MAE                |                   0.035  |                   0.0352 |               0.0463 |                        0.0598 |                0.0093 |             0.0461 |
-| Test Precision/IoU      |                   0.9829 |                   0.9783 |               0.9654 |                        0.9465 |                0.1708 |             0.2249 |
-| Test R2                 |                   0.9286 |                   0.9024 |               0.7953 |                        0.6548 |                0.9503 |             0.995  |
+  | **Model** | **Training Time** | **Test Accuracy** | **MSE** | **Precision/IoU** | **R² Score** |
+  |-----------|------------------|-------------------|---------|-------------------|--------------|
+  | **🌳 RandomForest** | 0.41s | **98.25%** | 0.075 | **98.29%** | 0.9286 |
+  | **⚙️ Optimized RF** | 1.24s | **97.75%** | 0.1025 | **97.83%** | 0.9024 |
+  | **🧠 CNN Classification** | 246.88s | **96.50%** | 0.215 | **96.55%** | 0.7953 |
+  | **🧠 CNN Denoised** | 143.18s | 94.50% | 0.3375 | 94.61% | 0.6786 |
+  | **🎯 CNN Detection** | 358.07s | 79.21%* | 0.0034 | 18.81%* | 0.9486 |
+  | **⚡ Fast R-CNN** | 2707.92s | 92.86%* | 0.0029 | 29.01%* | 0.9971 |
+
+  <sub><b>* Detection models show coordinate accuracy and IoU instead of classification metrics</b></sub>
+
 ---
 
 ### 6. Deployment
@@ -252,10 +444,12 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 * Total samples: 2100
 * Imbalance ratio (max/min): 2.19
 * Class distribution:
-    * DRONE: 834 samples (39.7%)
-    * HELICOPTER: 460 samples (21.9%)
-    * BIRD: 380 samples (18.1%)
-    * AIRPLANE: 426 samples (20.3%)
+  ```
+  * 🚁 DRONE      ████████████████████  834 samples (39.7%)
+  * 🚁 HELICOPTER ███████████           460 samples (21.9%)  
+  * 🛩️ AIRPLANE   ██████████            426 samples (20.3%)
+  * 🦅 BIRD       █████████             380 samples (18.1%)
+  ```
 
 ![Image](/images/class_distribution.png)
 
@@ -359,7 +553,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 |-------------|----------------------|-------------------------------------|-----------------------------|-----------------------------------------|----------------------|
 | **DRONE**   | Tight clusters       | Shallow CNN (e.g., MobileNet)       | Geometric shapes            | Fast convergence, low complexity        | Highest            |
 | **AIRPLANE**| Scattered groups     | Medium-depth + spatial attention    | Sky vs background patterns  | Moderate depth, spatial pooling         | Good               |
-| **HELICOPTER** | Dispersed           | Deep CNN + Ensemble (ResNet-50+)   | Rotor blade variations      | Complex features, deeper layers         | Moderate          |
+| **HELICOPTER** | Dispersed           | Deep CNN + Ensemble (MobileNetV2)   | Rotor blade variations      | Complex features, deeper layers         | Moderate          |
 | **BIRD**    | Mixed, low cohesion  | Transfer learning + augmentation    | Natural textures, poses     | Pre-trained models, heavy augmentation  | Challenging        |
 
 
@@ -388,36 +582,377 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 ![Image](/images/fast_rcnn_predictions.png)
 
-#### Models Performance Comparision
+### Models Performance Comparision
 
 ![Image](/images/model_comparison_with_fast_rcnn.png)
 
-|                               | RandomForestClassifier | Optimized RandomForest | CNN Classification | CNN Classification Denoised | CNN Detection Model | Fast R-CNN Model |
-|-------------------------------|--------------------------|--------------------------|----------------------|-------------------------------|-----------------------|----------------------|
-| **Training Time (Seconds)**       | 1.1843 | 1.8834 | 275.896 | 320.674 | 388.4339 | 3043.4365 |
-| **Accuracy/Coord_Acc Train**      | 1 | 0.9995 | 0.9914 | 0.9833 | 0.7971 | 0.9384 |
-| **Accuracy/Coord_Acc Validation** | 0.965 | 0.9725 | 0.985 | 0.97 | 0.7836 | 0.9428 |
-| **Accuracy/Coord_Acc Test**       | 0.9825 | 0.9775 | 0.9775 | 0.96 | 0.7892 | 0.9167 |
-| **MSE Train**                     | 0 | 0.0019 | 0.0533 | 0.1143 | 0.0016 | 0.0036 |
-| **MSE Validation**                | 0.155 | 0.1275 | 0.0975 | 0.17 | 0.0024 | 0.0031 |
-| **MSE Test**                      | 0.075 | 0.1025 | 0.1275 | 0.2475 | 0.003 | 0.0038 |
-| **MAE Train**                     | 0 | 0.0265 | 0.0331 | 0.0365 | 0.0078 | 0.0382 |
-| **MAE Validation**                | 0.035 | 0.0327 | 0.0337 | 0.0395 | 0.0086 | 0.0369 |
-| **MAE Test**                      | 0.035 | 0.0352 | 0.0358 | 0.0444 | 0.0086 | 0.0389 |
-| **Precision/IoU Train**           | 1 | 0.9995 | 0.9915 | 0.9834 | 0.1777 | 0.3453 |
-| **Precision/IoU Validation**      | 0.9668 | 0.9736 | 0.985 | 0.9707 | 0.1654 | 0.3355 |
-| **Precision/IoU Test**            | 0.9829 | 0.9783 | 0.9777 | 0.9607 | 0.1691 | 0.3786 |
-| **Recall Train**                  | 1 | 0.9995 | 0.9914 | 0.9833 | N/A | N/A |
-| **Recall Validation**             | 0.965 | 0.9725 | 0.985 | 0.97 | N/A | N/A |
-| **Recall Test**                   | 0.9825 | 0.9775 | 0.9775 | 0.96 | N/A | N/A |
-| **F1-Score Train**                | 1 | 0.9995 | 0.9914 | 0.9833 | N/A | N/A |
-| **F1-Score Validation**           | 0.9651 | 0.9725 | 0.985 | 0.9701 | N/A | N/A |
-| **F1-Score Test**                 | 0.9824 | 0.9774 | 0.9774 | 0.9597 | N/A | N/A |
-| **R2 Score Train**                | 1 | 0.9981 | 0.9468 | 0.886 | 0.9767 | 0.9964 |
-| **R2 Score Validation**           | 0.8501 | 0.8767 | 0.9057 | 0.8356 | 0.9627 | 0.9969 |
-| **R2 Score Test**                 | 0.9286 | 0.9024 | 0.8786 | 0.7643 | 0.9546 | 0.9962 |
+## <div align="center">🔬 Detailed Performance Metrics Across Train/Validation/Test Sets</div>
 
-#### Loss Function Metrics
+<table align="center" style="border-collapse: collapse; width: 100%; max-width: 1400px; margin: 20px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); border-radius: 12px; overflow: hidden;">
+  <thead>
+    <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+      <th style="padding: 18px 15px; text-align: left; font-weight: 700; font-size: 14px; border-right: 2px solid rgba(255,255,255,0.3); position: sticky; left: 0; z-index: 10; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        📈 <strong>Performance Metric</strong>
+      </th>
+      <th style="padding: 18px 12px; text-align: center; font-weight: 600; font-size: 12px; border-right: 1px solid rgba(255,255,255,0.2); min-width: 130px;">
+        🌳 <strong>Random Forest<br/>Classifier</strong>
+      </th>
+      <th style="padding: 18px 12px; text-align: center; font-weight: 600; font-size: 12px; border-right: 1px solid rgba(255,255,255,0.2); min-width: 130px;">
+        ⚙️ <strong>Optimized<br/>Random Forest</strong>
+      </th>
+      <th style="padding: 18px 12px; text-align: center; font-weight: 600; font-size: 12px; border-right: 1px solid rgba(255,255,255,0.2); min-width: 130px;">
+        🧠 <strong>CNN<br/>Classifier</strong>
+      </th>
+      <th style="padding: 18px 12px; text-align: center; font-weight: 600; font-size: 12px; border-right: 1px solid rgba(255,255,255,0.2); min-width: 130px;">
+        🧠 <strong>CNN<br/>Denoised</strong>
+      </th>
+      <th style="padding: 18px 12px; text-align: center; font-weight: 600; font-size: 12px; border-right: 1px solid rgba(255,255,255,0.2); min-width: 130px;">
+        🎯 <strong>CNN<br/>Detection</strong>
+      </th>
+      <th style="padding: 18px 12px; text-align: center; font-weight: 600; font-size: 12px; min-width: 130px;">
+        ⚡ <strong>Fast<br/>R-CNN</strong>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Training Time -->
+    <tr style="background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%); border-bottom: 2px solid #dee2e6;">
+      <td colspan="7" style="padding: 12px 15px; font-weight: 700; color: #495057; text-align: center; font-size: 16px;">
+        ⏱️ <strong>TRAINING PERFORMANCE</strong>
+      </td>
+    </tr>
+    <tr style="background-color: white; border-bottom: 1px solid #e9ecef;">
+      <td style="padding: 12px 15px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef; position: sticky; left: 0; z-index: 5; background-color: white;">
+        ⏰ <strong>Training Time (seconds)</strong>
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 700; font-size: 14px;">
+        <strong>0.41</strong> 🚀
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+        <strong>1.24</strong> ⚡
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #fff3cd; color: #856404;">
+        246.88
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #d1ecf1; color: #0c5460;">
+        143.18
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #f8d7da; color: #721c24;">
+        358.07
+      </td>
+      <td style="padding: 12px; text-align: center; background-color: #f8d7da; color: #721c24;">
+        2707.92
+      </td>
+    </tr>
+<!-- Accuracy Section -->
+<tr style="background: linear-gradient(90deg, #e3f2fd 0%, #bbdefb 100%); border-bottom: 2px solid #90caf9;">
+  <td colspan="7" style="padding: 12px 15px; font-weight: 700; color: #1565c0; text-align: center; font-size: 16px;">
+    🎯 <strong>ACCURACY METRICS</strong>
+  </td>
+</tr>
+<tr style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+  <td style="padding: 12px 15px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef; position: sticky; left: 0; z-index: 5; background-color: #f8f9fa;">
+    📈 <strong>Training Accuracy</strong>
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 700;">
+    <strong>100.00%</strong> 🏆
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+    <strong>99.95%</strong>
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d1ecf1; color: #0c5460;">
+    98.81%
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d1ecf1; color: #0c5460;">
+    96.71%
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #fff3cd; color: #856404;">
+    81.37%*
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d1ecf1; color: #0c5460;">
+    92.05%*
+  </td>
+</tr>
+<tr style="background-color: white; border-bottom: 1px solid #e9ecef;">
+  <td style="padding: 12px 15px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef; position: sticky; left: 0; z-index: 5; background-color: white;">
+    📊 <strong>Validation Accuracy</strong>
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    96.50%
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+    <strong>97.25%</strong> 🥇
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+    <strong>97.25%</strong> 🥇
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    94.75%
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #fff3cd; color: #856404;">
+    79.90%*
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    92.72%*
+  </td>
+</tr>
+<tr style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+  <td style="padding: 12px 15px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef; position: sticky; left: 0; z-index: 5; background-color: #f8f9fa;">
+    🎯 <strong>Test Accuracy</strong>
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 700;">
+    <strong>98.25%</strong> 🏆
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+    <strong>97.75%</strong> 🥈
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d1ecf1; color: #0c5460;">
+    96.50%
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    94.50%
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #fff3cd; color: #856404;">
+    79.21%*
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    92.86%*
+  </td>
+</tr>
+
+<!-- Error Metrics Section -->
+<tr style="background: linear-gradient(90deg, #ffebee 0%, #ffcdd2 100%); border-bottom: 2px solid #ef9a9a;">
+  <td colspan="7" style="padding: 12px 15px; font-weight: 700; color: #c62828; text-align: center; font-size: 16px;">
+    📉 <strong>ERROR METRICS (Lower is Better)</strong>
+  </td>
+</tr>
+<tr style="background-color: white; border-bottom: 1px solid #e9ecef;">
+  <td style="padding: 12px 15px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef; position: sticky; left: 0; z-index: 5; background-color: white;">
+    📉 <strong>Test MSE</strong>
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    0.075
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    0.103
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    0.215
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    0.338
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 700;">
+    <strong>0.003</strong> 🏆
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+    <strong>0.003</strong> 🥈
+  </td>
+</tr>
+<tr style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+  <td style="padding: 12px 15px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef; position: sticky; left: 0; z-index: 5; background-color: #f8f9fa;">
+    📉 <strong>Test MAE</strong>
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    0.035
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    0.035
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    0.044
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    0.060
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 700;">
+    <strong>0.008</strong> 🏆
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    0.039
+  </td>
+</tr>
+
+<!-- Classification Metrics Section -->
+<tr style="background: linear-gradient(90deg, #e8f5e8 0%, #c8e6c9 100%); border-bottom: 2px solid #a5d6a7;">
+  <td colspan="7" style="padding: 12px 15px; font-weight: 700; color: #2e7d32; text-align: center; font-size: 16px;">
+    🎯 <strong>CLASSIFICATION METRICS</strong>
+  </td>
+</tr>
+<tr style="background-color: white; border-bottom: 1px solid #e9ecef;">
+  <td style="padding: 12px 15px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef; position: sticky; left: 0; z-index: 5; background-color: white;">
+    🎯 <strong>Test Precision / IoU</strong>
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 700;">
+    <strong>98.29%</strong> 🏆
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+    <strong>97.83%</strong> 🥈
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d1ecf1; color: #0c5460;">
+    96.55%
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    94.61%
+  </td>
+  <td style="padding: 12px; text-align: center; color: #856404;">
+    0.188* (IoU)
+  </td>
+  <td style="padding: 12px; text-align: center; color: #856404;">
+    0.290* (IoU)
+  </td>
+</tr>
+<tr style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+  <td style="padding: 12px 15px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef; position: sticky; left: 0; z-index: 5; background-color: #f8f9fa;">
+    📈 <strong>Test Recall</strong>
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 700;">
+    <strong>98.25%</strong> 🏆
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+    <strong>97.75%</strong> 🥈
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d1ecf1; color: #0c5460;">
+    96.50%
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    94.50%
+  </td>
+  <td style="padding: 12px; text-align: center; color: #6c757d; font-style: italic;">
+    N/A
+  </td>
+  <td style="padding: 12px; text-align: center; color: #6c757d; font-style: italic;">
+    N/A
+  </td>
+</tr>
+<tr style="background-color: white; border-bottom: 1px solid #e9ecef;">
+  <td style="padding: 12px 15px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef; position: sticky; left: 0; z-index: 5; background-color: white;">
+    🎯 <strong>Test F1 Score</strong>
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 700;">
+    <strong>98.24%</strong> 🏆
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 600;">
+    <strong>97.74%</strong> 🥈
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d1ecf1; color: #0c5460;">
+    96.47%
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    94.45%
+  </td>
+  <td style="padding: 12px; text-align: center; color: #6c757d; font-style: italic;">
+    N/A
+  </td>
+  <td style="padding: 12px; text-align: center; color: #6c757d; font-style: italic;">
+    N/A
+  </td>
+</tr>
+
+<!-- Model Fit Section -->
+<tr style="background: linear-gradient(90deg, #f3e5f5 0%, #e1bee7 100%); border-bottom: 2px solid #ce93d8;">
+  <td colspan="7" style="padding: 12px 15px; font-weight: 700; color: #7b1fa2; text-align: center; font-size: 16px;">
+    📊 <strong>MODEL FIT QUALITY</strong>
+  </td>
+</tr>
+<tr style="background-color: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+  <td style="padding: 12px 15px; font-weight: 600; color: #495057; border-right: 1px solid #e9ecef; position: sticky; left: 0; z-index: 5; background-color: #f8f9fa;">
+    📊 <strong>Test R² Score</strong>
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    0.929
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    0.902
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    0.795
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    0.679
+  </td>
+  <td style="padding: 12px; text-align: center; color: #495057;">
+    0.949
+  </td>
+  <td style="padding: 12px; text-align: center; background-color: #d4edda; color: #155724; font-weight: 700;">
+    <strong>0.997</strong> 🏆
+  </td>
+</tr>
+  </tbody>
+</table>
+
+### 🔍 Cross-Set Performance Analysis
+<div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin: 30px 0;">
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 15px; width: 320px; margin: 15px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);">
+  <h4 style="margin: 0 0 15px 0; text-align: center; font-size: 18px;">🌳 **Random Forest Champion**</h4>
+  <div style="font-size: 13px; line-height: 1.6;">
+    <strong>🏆 Best Overall Performance</strong><br/>
+    ✅ Fastest Training: 0.41s<br/>
+    ✅ Perfect Train Accuracy: 100%<br/>
+    ✅ Highest Test Accuracy: 98.25%<br/>
+    ✅ Best Test Precision: 98.29%<br/>
+    ✅ Excellent Generalization
+  </div>
+</div>
+<div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 15px; width: 320px; margin: 15px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);">
+  <h4 style="margin: 0 0 15px 0; text-align: center; font-size: 18px;">⚡ **Detection Specialist**</h4>
+  <div style="font-size: 13px; line-height: 1.6;">
+    <strong>🎯 Fast R-CNN Excellence</strong><br/>
+    ✅ Best Model Fit: R² = 0.997<br/>
+    ✅ Lowest Detection MSE: 0.003<br/>
+    ✅ Strong Coordinate Accuracy<br/>
+    ⚠️ Longest Training Time<br/>
+    🎯 Detection Task Optimized
+  </div>
+</div>
+<div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; border-radius: 15px; width: 320px; margin: 15px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);">
+  <h4 style="margin: 0 0 15px 0; text-align: center; font-size: 18px;">🎯 **CNN Detection Leader**</h4>
+  <div style="font-size: 13px; line-height: 1.6;">
+    <strong>📉 Error Minimization</strong><br/>
+    ✅ Lowest Test MAE: 0.008<br/>
+    ✅ Minimal MSE: 0.003<br/>
+    ✅ High R² Score: 0.949<br/>
+    ⚠️ Lower Classification Accuracy<br/>
+    🎯 Coordinate Precision Focused
+  </div>
+</div>
+</div>
+
+### 📈 Performance Trends Analysis
+<table align="center" style="border-collapse: collapse; width: 90%; margin: 20px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden;">
+  <tr style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white;">
+    <th style="padding: 15px; text-align: center; font-weight: 600;">🔍 **Analysis Category**</th>
+    <th style="padding: 15px; text-align: center; font-weight: 600;">📊 **Key Finding**</th>
+    <th style="padding: 15px; text-align: center; font-weight: 600;">🎯 **Best Model**</th>
+  </tr>
+  <tr style="background-color: #f8f9fa;">
+    <td style="padding: 12px; font-weight: 600; text-align: center;">**⚡ Training Efficiency**</td>
+    <td style="padding: 12px; text-align: center;">Random Forest models train 200-6000x faster</td>
+    <td style="padding: 12px; text-align: center; color: #155724;">🌳 **RF Classifier**</td>
+  </tr>
+  <tr style="background-color: white;">
+    <td style="padding: 12px; font-weight: 600; text-align: center;">**🎯 Classification Excellence**</td>
+    <td style="padding: 12px; text-align: center;">Random Forest achieves near-perfect scores</td>
+    <td style="padding: 12px; text-align: center; color: #155724;">🌳 **RF Classifier**</td>
+  </tr>
+  <tr style="background-color: #f8f9fa;">
+    <td style="padding: 12px; font-weight: 600; text-align: center;">**📍 Detection Precision**</td>
+    <td style="padding: 12px; text-align: center;">CNN Detection minimizes coordinate errors</td>
+    <td style="padding: 12px; text-align: center; color: #155724;">🎯 **CNN Detection**</td>
+  </tr>
+  <tr style="background-color: white;">
+    <td style="padding: 12px; font-weight: 600; text-align: center;">**📊 Model Fit Quality**</td>
+    <td style="padding: 12px; text-align: center;">Fast R-CNN shows exceptional R² scores</td>
+    <td style="padding: 12px; text-align: center; color: #155724;">⚡ **Fast R-CNN**</td>
+  </tr>
+  <tr style="background-color: #f8f9fa;">
+    <td style="padding: 12px; font-weight: 600; text-align: center;">**⚖️ Generalization**</td>
+    <td style="padding: 12px; text-align: center;">Random Forest shows consistent train-test performance</td>
+    <td style="padding: 12px; text-align: center; color: #155724;">🌳 **RF Models**</td>
+  </tr>
+</table>
+
+### Loss Function Metrics
 
 ![Image](/images/comprehensive_model_comparison.png)
 
@@ -525,16 +1060,17 @@ What suggestions do you have for next steps?
   ✅ **Production-ready models** with documented performance metrics 
 
   ### Immediate Next Steps
-  - **Pilot Deployment**: Test models in controlled environment
-  - **Performance Optimization**: Fine-tune the models to improve performance and reduce errors
-  - **Integration Planning**: Develop APIs for system integration
-  - **User Training**: Prepare documentation and training materials
+  - **🧪 Pilot Deployment** - Test in controlled environment
+  - **⚙️ Performance Optimization** - Fine-tune model parameters
+  - **🔌 API Development** - Create integration endpoints
+  - **📚 Documentation** - Prepare user training materials
 
   ### Future Enhancements
-  - **Advanced Architectures**: Explore Augementation, YOLO v8, RetinaNet for improved detection
-  - **Multi-modal Integration**: Combine with radar and audio data
-  - **Real-time Processing**: Optimize for edge computing deployment
-  - **Expanded Dataset**: Include more diverse environmental conditions
+  - **🆕 Advanced Architectures** - Explore YOLO v8, RetinaNet
+  - **🎭 Multi-modal Integration** - Combine radar and audio data
+  - **📱 Edge Optimization** - Optimize for mobile deployment
+  * **🌍 Dataset Expansion** - Include diverse environmental conditions
+  - **🎯 Real-time Tracking** - Implement object tracking capabilities
 
 ## Outline of project
 
@@ -544,7 +1080,16 @@ What suggestions do you have for next steps?
 - [Python File - Model Training & Performance Metrics Analysis](https://github.com/atewari-bot/drone-image-classification/blob/main/scripts/drone_detection.py)
 - [Data Sampling Script](https://github.com/atewari-bot/drone-image-classification/blob/main/scripts/image_sampling.py)
 
-  ![Image](/images/project_outline.png)
+```
+📦 drone-image-classification/
+├── 📄 README.md - Project documentation
+├── 📊 drone_detection.ipynb - Analysis notebook
+├── 🤖 models/ - Trained model files
+├── 🐍 scripts/
+│   ├── drone_detection.py - Training script
+│   └── image_sampling.py - Data preprocessing
+└── 📈 images/ - Performance visualizations
+```
 
 ## Contact and Further Information
 

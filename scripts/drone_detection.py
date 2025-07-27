@@ -2307,7 +2307,7 @@ def create_comprehensive_results_table():
 
     # Create DataFrame with all models
     metrics_df = pd.DataFrame(index=[
-        'RandomForestClassifier',
+        'RandomForest Classifier',
         'Optimized RandomForest',
         'CNN Classification',
         'CNN Classification Denoised',
@@ -2325,13 +2325,13 @@ def create_comprehensive_results_table():
 
     try:
         # Training times
-        metrics_df.loc['RandomForestClassifier', 'Training Time (Seconds)'] = np.round(model_training_time[0], 4) if len(model_training_time) > 0 else 0
+        metrics_df.loc['RandomForest Classifier', 'Training Time (Seconds)'] = np.round(model_training_time[0], 4) if len(model_training_time) > 0 else 0
         metrics_df.loc['Optimized RandomForest', 'Training Time (Seconds)'] = np.round(model_training_time[1], 4) if len(model_training_time) > 1 else 0
         metrics_df.loc['CNN Classification', 'Training Time (Seconds)'] = np.round(model_training_time[2], 4) if len(model_training_time) > 2 else 0
         metrics_df.loc['CNN Classification Denoised', 'Training Time (Seconds)'] = np.round(model_training_time[3], 4) if len(model_training_time) > 3 else 0
 
         # Classification models data
-        for i, model_name in enumerate(['RandomForestClassifier', 'Optimized RandomForest', 'CNN Classification', 'CNN Classification Denoised']):
+        for i, model_name in enumerate(['RandomForest Classifier', 'Optimized RandomForest', 'CNN Classification', 'CNN Classification Denoised']):
             if i < len(acc_train_models):
                 metrics_df.loc[model_name, 'Accuracy/Coord_Acc Train'] = np.round(acc_train_models[i], 4)
                 metrics_df.loc[model_name, 'Accuracy/Coord_Acc Validation'] = np.round(acc_val_models[i], 4) if i < len(acc_val_models) else None
@@ -4577,6 +4577,11 @@ def train_fast_rcnn_detection_model(X_train, Y_train, X_val, Y_val):
 
     history_obj = History(history)
 
+    print("="*60)
+    print("Model Summary")
+    model.summary()
+    print("="*60)
+
     return model, history_obj, Y_train_converted, Y_val_converted
 
 """**Visualize Fast R-CNN predictions**
@@ -4743,7 +4748,7 @@ def create_comprehensive_results_table_with_rcnn():
 
     # All 6 models
     model_names = [
-        'RandomForestClassifier',
+        'RandomForest Classifier',
         'Optimized RandomForest',
         'CNN Classification',
         'CNN Classification Denoised',
