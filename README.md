@@ -99,42 +99,42 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
   | Model | Architecture | Test Accuracy | Training Time | Use Case |
   |-------|-------------|---------------|---------------|----------|
-  | **RandomForest Baseline** | 500 estimators | 84.21% | 8.4s | Rapid prototyping |
-  | **Optimized RandomForest** | GridSearchCV tuned | **94.74%** | 847.2s | Production classification |
-  | **CNN Classification** | 4-layer CNN | 89.47% | 301.5s | Deep feature learning |
-  | **CNN Denoised** | CNN + preprocessing | 92.11% | 298.7s | Noisy environments |
-  | **CNN Detection** | Multi-output CNN | 62.34%* | 445.8s | Basic localization |
-  | **Fast R-CNN** | ResNet50 backbone | **78.91%*** | 1,247.3s | Precise detection |
+  | **RandomForest Baseline** | 500 estimators | 98.3% | 1.2s | Rapid prototyping |
+  | **Optimized RandomForest** | GridSearchCV tuned | **97.8%** | 1.2s | Production classification |
+  | **CNN Classification** | 4-layer CNN | 96.5% | 241.1s | Deep feature learning |
+  | **CNN Denoised** | CNN + preprocessing | 94.5% | 191.6s | Noisy environments |
+  | **CNN Detection** | Multi-output CNN | 77.4%* | 366.5s | Basic localization |
+  | **Fast R-CNN** | ResNet50 backbone | **90.05%** | 2898.0s | Precise detection |
 
   #### Performance Breakdown
 
   #### Classification Models
   ```
-  Champion: Optimized RandomForest
-  ├── Accuracy: 94.74%
-  ├── Precision: 94.89%
-  ├── Recall: 94.74%
-  └── F1-Score: 94.75%
+  Champion: RandomForest Classification
+  ├── Accuracy: 98.25%
+  ├── Precision: 98.29%
+  ├── Recall: 98.25%
+  └── F1-Score: 92.86%
 
-  Runner-up: CNN Denoised
-  ├── Accuracy: 92.11%
-  ├── Precision: 92.32%
-  ├── Recall: 92.11%
-  └── F1-Score: 92.18%
+  Runner-up: Optimized RandomForest
+  ├── Accuracy: 97.75%
+  ├── Precision: 97.83%
+  ├── Recall: 97.75%
+  └── F1-Score: 90.24%
   ```
 
   #### Detection Models
   ```
   Best Detector: Fast R-CNN
-  ├── Coordinate Accuracy: 78.91%
-  ├── IoU Score: 84.56%
-  ├── MSE: 0.0612
+  ├── Coordinate Accuracy: 90.48%
+  ├── IoU Score: 0.2249
+  ├── MSE: 0.0050
   └── Inference: <2s per image
 
   Speed Champion: CNN Detection
-  ├── Coordinate Accuracy: 62.34%
-  ├── IoU Score: 72.43%
-  ├── MSE: 0.0934
+  ├── Coordinate Accuracy: 77.44%
+  ├── IoU Score: 0.1708
+  ├── MSE: 0.0033
   └── Inference: <0.5s per image
   ```
 
@@ -520,7 +520,7 @@ What suggestions do you have for next steps?
   ### Key Achievements
   ✅ **Successfully developed** multi-class drone detection system  
   ✅ **Achieved 98.25% accuracy** with RandomForest model on test data   
-  ✅ **Implemented both classification and detection** capabilities  
+  ✅ **Implemented both classification and detection** capabilities with 90.48% detection accuracy
   ✅ **Comprehensive evaluation** across multiple model architectures  
   ✅ **Production-ready models** with documented performance metrics 
 
