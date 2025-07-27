@@ -192,14 +192,14 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
   #### Performance Metrics Summary
 
-| Model                        | Training Time (s) | Test Accuracy/Coord_Acc | Test MSE  | Test MAE | Test Precision/IoU | Test R2   |
-|-----------------------------|-------------------|--------------------------|-----------|----------|---------------------|-----------|
-| RandomForestClassifier      | 1.0980            | 0.9825                   | 0.0750    | 0.0350   | 0.9829              | 0.9286    |
-| Optimized RandomForest      | 1.3091            | 0.9775                   | 0.1025    | 0.0352   | 0.9783              | 0.9024    |
-| CNN Classification          | 190.2170          | 0.9575                   | 0.2825    | 0.0554   | 0.9583              | 0.7310    |
-| CNN Classification Denoised | 175.3490          | 0.9450                   | 0.2850    | 0.0646   | 0.9449              | 0.7286    |
-| CNN Detection Model         | 361.6090          | 0.7680                   | 0.0033    | 0.0095   | 0.1695              | 0.9503    |
-| Fast R-CNN Model            | 913.4430          | 0.7897                   | 0.0121    | 0.0745   | 0.0893              | 0.7661    |
+|                         |   RandomForestClassifier |   Optimized RandomForest |   CNN Classification |   CNN Classification Denoised |   CNN Detection Model |   Fast R-CNN Model |
+|-------------------------|--------------------------|--------------------------|----------------------|-------------------------------|-----------------------|--------------------|
+| Training Time (s)       |                   1.1573 |                   1.2264 |             241.052  |                      191.601  |              366.536  |          2897.99   |
+| Test Accuracy/Coord_Acc |                   0.9825 |                   0.9775 |               0.965  |                        0.945  |                0.7744 |             0.9048 |
+| Test MSE                |                   0.075  |                   0.1025 |               0.215  |                        0.3625 |                0.0033 |             0.005  |
+| Test MAE                |                   0.035  |                   0.0352 |               0.0463 |                        0.0598 |                0.0093 |             0.0461 |
+| Test Precision/IoU      |                   0.9829 |                   0.9783 |               0.9654 |                        0.9465 |                0.1708 |             0.2249 |
+| Test R2                 |                   0.9286 |                   0.9024 |               0.7953 |                        0.6548 |                0.9503 |             0.995  |
 ---
 
 ### 6. Deployment
@@ -392,30 +392,30 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 ![Image](/images/model_comparison_with_fast_rcnn.png)
 
-| Metric                        | RandomForestClassifier | Optimized RandomForest | CNN Classification | CNN Classification Denoised | CNN Detection Model | Fast R-CNN Model |
-|------------------------------|------------------------|------------------------|--------------------|-----------------------------|---------------------|------------------|
-| Training Time (Seconds)      | 1.0980                 | 1.3091                 | 190.2170           | 175.3490                    | 361.6088            | 913.4430         |
-| Accuracy/Coord_Acc Train     | 1.0000                 | 0.9995                 | 0.9724             | 0.9786                      | 0.7833              | 0.8025           |
-| Accuracy/Coord_Acc Validation| 0.9650                 | 0.9725                 | 0.9525             | 0.9525                      | 0.7756              | 0.8060           |
-| Accuracy/Coord_Acc Test      | 0.9825                 | 0.9775                 | 0.9575             | 0.9450                      | 0.7680              | 0.7897           |
-| MSE Train                    | 0.0000                 | 0.0019                 | 0.1986             | 0.1286                      | 0.0018              | 0.0125           |
-| MSE Validation               | 0.1550                 | 0.1275                 | 0.2525             | 0.2450                      | 0.0030              | 0.0100           |
-| MSE Test                     | 0.0750                 | 0.1025                 | 0.2825             | 0.2850                      | 0.0033              | 0.0121           |
-| MAE Train                    | 0.0000                 | 0.0265                 | 0.0405             | 0.0550                      | 0.0087              | 0.0748           |
-| MAE Validation               | 0.0350                 | 0.0327                 | 0.0489             | 0.0596                      | 0.0097              | 0.0694           |
-| MAE Test                     | 0.0350                 | 0.0352                 | 0.0554             | 0.0646                      | 0.0095              | 0.0745           |
-| Precision/IoU Train          | 1.0000                 | 0.9995                 | 0.9729             | 0.9788                      | 0.1769              | 0.0965           |
-| Precision/IoU Validation     | 0.9668                 | 0.9736                 | 0.9531             | 0.9537                      | 0.1690              | 0.1003           |
-| Precision/IoU Test           | 0.9829                 | 0.9783                 | 0.9583             | 0.9449                      | 0.1695              | 0.0893           |
-| Recall Train                 | 1.0000                 | 0.9995                 | 0.9724             | 0.9786                      | N/A                 | N/A              |
-| Recall Validation            | 0.9650                 | 0.9725                 | 0.9525             | 0.9525                      | N/A                 | N/A              |
-| Recall Test                  | 0.9825                 | 0.9775                 | 0.9575             | 0.9450                      | N/A                 | N/A              |
-| F1-Score Train               | 1.0000                 | 0.9995                 | 0.9721             | 0.9785                      | N/A                 | N/A              |
-| F1-Score Validation          | 0.9651                 | 0.9725                 | 0.9524             | 0.9525                      | N/A                 | N/A              |
-| F1-Score Test                | 0.9824                 | 0.9774                 | 0.9569             | 0.9447                      | N/A                 | N/A              |
-| R2 Score Train               | 1.0000                 | 0.9981                 | 0.8020             | 0.8718                      | 0.9728              | 0.7652           |
-| R2 Score Validation          | 0.8501                 | 0.8767                 | 0.7558             | 0.7631                      | 0.9522              | 0.8083           |
-| R2 Score Test                | 0.9286                 | 0.9024                 | 0.7310             | 0.7286                      | 0.9503              | 0.7661           |
+|                               | RandomForestClassifier | Optimized RandomForest | CNN Classification | CNN Classification Denoised | CNN Detection Model | Fast R-CNN Model |
+|-------------------------------|--------------------------|--------------------------|----------------------|-------------------------------|-----------------------|----------------------|
+| **Training Time (Seconds)**       | 1.1843 | 1.8834 | 275.896 | 320.674 | 388.4339 | 3043.4365 |
+| **Accuracy/Coord_Acc Train**      | 1 | 0.9995 | 0.9914 | 0.9833 | 0.7971 | 0.9384 |
+| **Accuracy/Coord_Acc Validation** | 0.965 | 0.9725 | 0.985 | 0.97 | 0.7836 | 0.9428 |
+| **Accuracy/Coord_Acc Test**       | 0.9825 | 0.9775 | 0.9775 | 0.96 | 0.7892 | 0.9167 |
+| **MSE Train**                     | 0 | 0.0019 | 0.0533 | 0.1143 | 0.0016 | 0.0036 |
+| **MSE Validation**                | 0.155 | 0.1275 | 0.0975 | 0.17 | 0.0024 | 0.0031 |
+| **MSE Test**                      | 0.075 | 0.1025 | 0.1275 | 0.2475 | 0.003 | 0.0038 |
+| **MAE Train**                     | 0 | 0.0265 | 0.0331 | 0.0365 | 0.0078 | 0.0382 |
+| **MAE Validation**                | 0.035 | 0.0327 | 0.0337 | 0.0395 | 0.0086 | 0.0369 |
+| **MAE Test**                      | 0.035 | 0.0352 | 0.0358 | 0.0444 | 0.0086 | 0.0389 |
+| **Precision/IoU Train**           | 1 | 0.9995 | 0.9915 | 0.9834 | 0.1777 | 0.3453 |
+| **Precision/IoU Validation**      | 0.9668 | 0.9736 | 0.985 | 0.9707 | 0.1654 | 0.3355 |
+| **Precision/IoU Test**            | 0.9829 | 0.9783 | 0.9777 | 0.9607 | 0.1691 | 0.3786 |
+| **Recall Train**                  | 1 | 0.9995 | 0.9914 | 0.9833 | N/A | N/A |
+| **Recall Validation**             | 0.965 | 0.9725 | 0.985 | 0.97 | N/A | N/A |
+| **Recall Test**                   | 0.9825 | 0.9775 | 0.9775 | 0.96 | N/A | N/A |
+| **F1-Score Train**                | 1 | 0.9995 | 0.9914 | 0.9833 | N/A | N/A |
+| **F1-Score Validation**           | 0.9651 | 0.9725 | 0.985 | 0.9701 | N/A | N/A |
+| **F1-Score Test**                 | 0.9824 | 0.9774 | 0.9774 | 0.9597 | N/A | N/A |
+| **R2 Score Train**                | 1 | 0.9981 | 0.9468 | 0.886 | 0.9767 | 0.9964 |
+| **R2 Score Validation**           | 0.8501 | 0.8767 | 0.9057 | 0.8356 | 0.9627 | 0.9969 |
+| **R2 Score Test**                 | 0.9286 | 0.9024 | 0.8786 | 0.7643 | 0.9546 | 0.9962 |
 
 #### Loss Function Metrics
 
