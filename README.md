@@ -487,7 +487,7 @@ What suggestions do you have for next steps?
   ### Key Achievements
   ✅ **Successfully developed** multi-class drone detection system  
   ✅ **Achieved 98.25% accuracy** with RandomForest model on test data   
-  ✅ **Implemented both classification and detection** capabilities with 90.48% detection accuracy  
+  ✅ **Implemented both classification and detection** capabilities with 92.86% detection accuracy  
   ✅ **Comprehensive evaluation** across multiple model architectures  
   ✅ **Production-ready models** with documented performance metrics 
 
