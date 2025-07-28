@@ -4,7 +4,7 @@
 
 ## Executive summary
 
-This project develops a comprehensive computer vision system for automated drone detection in aerial imagery, addressing critical needs in security, surveillance, airspace monitoring, and wildlife protection. Through systematic application of the CRISP-DM methodology, we implemented and evaluated six distinct machine learning models, achieving **94.74% classification accuracy** and **90.28% spatial detection accuracy**.
+This project develops a comprehensive computer vision system for automated drone detection in aerial imagery, addressing critical needs in security, surveillance, airspace monitoring, and wildlife protection. Through systematic application of the CRISP-DM methodology, we implemented and evaluated six distinct machine learning models, achieving **98.25% classification accuracy** and **92.86% spatial detection accuracy**.
 
 ## Rationale - Why should anyone care about this question?
 In recent years, we have observed the unprecedented usage of drone and related technologies in various areas like surveillance, security, crops monitoring, delivery drones, airspace monitoring, search & rescue operations. This incredibly useful technology has many benefits but if armed, drones pose great threat to civilian and armed forces life & infrastructure. These drones could also be used for surveillance by bad people or could be a great concern for violation of privacy. 
