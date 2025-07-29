@@ -4,7 +4,7 @@
 
 ## Executive summary
 
-This project develops a comprehensive computer vision system for automated drone detection in aerial imagery, addressing critical needs in security, surveillance, airspace monitoring, and wildlife protection. Through systematic application of the CRISP-DM methodology, we implemented and evaluated six distinct machine learning models, achieving **98.25% classification accuracy** and **92.86% spatial detection accuracy**.
+This project develops a comprehensive computer vision system for automated drone detection in aerial imagery, addressing critical needs in security, surveillance, airspace monitoring, and wildlife protection. Through systematic application of the CRISP-DM methodology, we implemented and evaluated six distinct machine learning models, achieving **98.25% classification accuracy** and **90.5% spatial detection accuracy**.
 
 ## Rationale - Why should anyone care about this question?
 In recent years, we have observed the unprecedented usage of drone and related technologies in various areas like surveillance, security, crops monitoring, delivery drones, airspace monitoring, search & rescue operations. This incredibly useful technology has many benefits but if armed, drones pose great threat to civilian and armed forces life & infrastructure. These drones could also be used for surveillance by bad people or could be a great concern for violation of privacy. 
@@ -174,7 +174,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
   | **🧠 CNN Classification** | 246.88s | **96.50%** | 0.215 | **96.55%** | 0.7953 |
   | **🧠 CNN Denoised** | 143.18s | 94.50% | 0.3375 | 94.61% | 0.6786 |
   | **🎯 CNN Detection** | 358.07s | 79.21%* | 0.0034 | 18.81%* | 0.9486 |
-  | **⚡ Fast R-CNN** | 2707.92s | 92.86%* | 0.0029 | 29.01%* | 0.9971 |
+  | **⚡ Fast R-CNN** | 2707.92s | 90.5%* | 0.0029 | 29.01%* | 0.9971 |
 
   <sub><b>* Detection models show coordinate accuracy and IoU instead of classification metrics</b></sub>
 
@@ -374,7 +374,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 ### 🔬 Detailed Performance Metrics Across Train/Validation/Test Sets
 
-![Image](/images/metrics/detailed_performance_metrics.svg)
+![Image](/images/metrics/model_performance_metrics.svg)
 
 ### 🔍 Cross-Set Performance Analysis
 
@@ -487,7 +487,7 @@ What suggestions do you have for next steps?
   ### Key Achievements
   ✅ **Successfully developed** multi-class drone detection system  
   ✅ **Achieved 98.25% accuracy** with RandomForest model on test data   
-  ✅ **Implemented both classification and detection** capabilities with 92.86% detection accuracy  
+  ✅ **Implemented both classification and detection** capabilities with 90.5% detection accuracy  
   ✅ **Comprehensive evaluation** across multiple model architectures  
   ✅ **Production-ready models** with documented performance metrics 
 

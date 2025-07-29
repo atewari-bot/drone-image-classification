@@ -1,0 +1,271 @@
+<svg width="1400" height="1800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <defs>
+    <linearGradient id="mainBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="headerBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="modelHeaderBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6c5ce7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a29bfe;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="metricLabelBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#74b9ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0984e3;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="sectionHeaderBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00b894;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00cec9;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="bestValueBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00b894;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00cec9;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="secondBestBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fdcb6e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e17055;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="championsBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffeaa7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fab1a0;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="insightsBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e17055;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fdcb6e;stop-opacity:1" />
+    </linearGradient>
+    
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+  
+  <!-- Main Background -->
+  <rect width="100%" height="100%" fill="url(#mainBg)"/>
+  
+  <!-- Main Dashboard Container -->
+  <rect x="50" y="50" width="1300" height="1700" rx="15" fill="white" filter="url(#shadow)"/>
+  
+  <!-- Header -->
+  <rect x="50" y="50" width="1300" height="100" rx="15" fill="url(#headerBg)"/>
+  <text x="700" y="115" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="600">📊 Comprehensive Model Performance Metrics</text>
+  
+  <!-- Model Headers -->
+  <rect x="80" y="180" width="200" height="60" fill="url(#metricLabelBg)"/>
+  <text x="180" y="220" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="700">Performance Metric</text>
+  
+  <rect x="280" y="180" width="170" height="60" fill="url(#modelHeaderBg)"/>
+  <text x="365" y="205" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="600">🌳 Random Forest</text>
+  <text x="365" y="225" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="600">Classifier</text>
+  
+  <rect x="450" y="180" width="170" height="60" fill="url(#modelHeaderBg)"/>
+  <text x="535" y="205" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="600">⚡ Optimized</text>
+  <text x="535" y="225" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="600">Random Forest</text>
+  
+  <rect x="620" y="180" width="170" height="60" fill="url(#modelHeaderBg)"/>
+  <text x="705" y="205" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="600">🧠 CNN</text>
+  <text x="705" y="225" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="600">Classifier</text>
+  
+  <rect x="790" y="180" width="170" height="60" fill="url(#modelHeaderBg)"/>
+  <text x="875" y="205" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="600">🔧 CNN</text>
+  <text x="875" y="225" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="600">Denoised</text>
+  
+  <rect x="960" y="180" width="170" height="60" fill="url(#modelHeaderBg)"/>
+  <text x="1045" y="205" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="600">🎯 CNN</text>
+  <text x="1045" y="225" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="600">Detection</text>
+  
+  <rect x="1130" y="180" width="170" height="60" fill="url(#modelHeaderBg)"/>
+  <text x="1215" y="205" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="600">⚡ Fast</text>
+  <text x="1215" y="225" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="600">R-CNN</text>
+  
+  <!-- Training Performance Section -->
+  <rect x="80" y="250" width="1220" height="40" fill="url(#sectionHeaderBg)"/>
+  <text x="100" y="275" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="600">⏱️ TRAINING PERFORMANCE</text>
+  
+  <!-- Training Time Row -->
+  <rect x="80" y="290" width="200" height="50" fill="#f1f3f4"/>
+  <text x="100" y="320" fill="#2d3436" font-family="Arial, sans-serif" font-size="14" font-weight="600">Training Time (s)</text>
+  
+  <rect x="280" y="290" width="170" height="50" fill="url(#bestValueBg)"/>
+  <text x="365" y="320" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="700">1.03 🏆</text>
+  
+  <rect x="450" y="290" width="170" height="50" fill="url(#secondBestBg)"/>
+  <text x="535" y="320" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="600">1.21 🥈</text>
+  
+  <rect x="620" y="290" width="170" height="50" fill="white"/>
+  <text x="705" y="320" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">246.60</text>
+  
+  <rect x="790" y="290" width="170" height="50" fill="white"/>
+  <text x="875" y="320" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">214.17</text>
+  
+  <rect x="960" y="290" width="170" height="50" fill="white"/>
+  <text x="1045" y="320" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">366.78</text>
+  
+  <rect x="1130" y="290" width="170" height="50" fill="white"/>
+  <text x="1215" y="320" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">2802.62</text>
+  
+  <!-- Accuracy Metrics Section -->
+  <rect x="80" y="350" width="1220" height="40" fill="url(#sectionHeaderBg)"/>
+  <text x="100" y="375" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="600">🎯 ACCURACY METRICS</text>
+  
+  <!-- Test Accuracy Row -->
+  <rect x="80" y="390" width="200" height="50" fill="#f1f3f4"/>
+  <text x="100" y="420" fill="#2d3436" font-family="Arial, sans-serif" font-size="14" font-weight="600">Test Accuracy</text>
+  
+  <rect x="280" y="390" width="170" height="50" fill="url(#bestValueBg)"/>
+  <text x="365" y="420" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="700">98.25% 🏆</text>
+  
+  <rect x="450" y="390" width="170" height="50" fill="url(#secondBestBg)"/>
+  <text x="535" y="420" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="600">97.75% 🥈</text>
+  
+  <rect x="620" y="390" width="170" height="50" fill="white"/>
+  <text x="705" y="420" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">96.50%</text>
+  
+  <rect x="790" y="390" width="170" height="50" fill="white"/>
+  <text x="875" y="420" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">95.25%</text>
+  
+  <rect x="960" y="390" width="170" height="50" fill="white"/>
+  <text x="1045" y="420" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">77.54%</text>
+  
+  <rect x="1130" y="390" width="170" height="50" fill="white"/>
+  <text x="1215" y="420" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">90.48%</text>
+  
+  <!-- Error Metrics Section -->
+  <rect x="80" y="450" width="1220" height="40" fill="url(#sectionHeaderBg)"/>
+  <text x="100" y="475" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="600">📉 ERROR METRICS (Lower is Better)</text>
+  
+  <!-- Test MSE Row -->
+  <rect x="80" y="490" width="200" height="50" fill="#f1f3f4"/>
+  <text x="100" y="520" fill="#2d3436" font-family="Arial, sans-serif" font-size="14" font-weight="600">Test MSE</text>
+  
+  <rect x="280" y="490" width="170" height="50" fill="white"/>
+  <text x="365" y="520" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">0.0750</text>
+  
+  <rect x="450" y="490" width="170" height="50" fill="white"/>
+  <text x="535" y="520" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">0.1025</text>
+  
+  <rect x="620" y="490" width="170" height="50" fill="white"/>
+  <text x="705" y="520" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">0.2150</text>
+  
+  <rect x="790" y="490" width="170" height="50" fill="white"/>
+  <text x="875" y="520" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">0.3025</text>
+  
+  <rect x="960" y="490" width="170" height="50" fill="url(#bestValueBg)"/>
+  <text x="1045" y="520" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="700">0.0029 🏆</text>
+  
+  <rect x="1130" y="490" width="170" height="50" fill="url(#secondBestBg)"/>
+  <text x="1215" y="520" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="600">0.0040 🥈</text>
+  
+  <!-- Classification Metrics Section -->
+  <rect x="80" y="550" width="1220" height="40" fill="url(#sectionHeaderBg)"/>
+  <text x="100" y="575" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="600">🎨 CLASSIFICATION METRICS</text>
+  
+  <!-- Test Precision/IoU Row -->
+  <rect x="80" y="590" width="200" height="50" fill="#f1f3f4"/>
+  <text x="100" y="620" fill="#2d3436" font-family="Arial, sans-serif" font-size="14" font-weight="600">Test Precision / IoU</text>
+  
+  <rect x="280" y="590" width="170" height="50" fill="url(#bestValueBg)"/>
+  <text x="365" y="620" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="700">98.29% 🏆</text>
+  
+  <rect x="450" y="590" width="170" height="50" fill="url(#secondBestBg)"/>
+  <text x="535" y="620" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="600">97.83% 🥈</text>
+  
+  <rect x="620" y="590" width="170" height="50" fill="white"/>
+  <text x="705" y="620" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">96.54%</text>
+  
+  <rect x="790" y="590" width="170" height="50" fill="white"/>
+  <text x="875" y="620" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">95.52%</text>
+  
+  <rect x="960" y="590" width="170" height="50" fill="white"/>
+  <text x="1045" y="620" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">17.25% (IoU)</text>
+  
+  <rect x="1130" y="590" width="170" height="50" fill="white"/>
+  <text x="1215" y="620" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">23.93% (IoU)</text>
+  
+  <!-- Model Fit Quality Section -->
+  <rect x="80" y="650" width="1220" height="40" fill="url(#sectionHeaderBg)"/>
+  <text x="100" y="675" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="600">📊 MODEL FIT QUALITY</text>
+  
+  <!-- Test R² Score Row -->
+  <rect x="80" y="690" width="200" height="50" fill="#f1f3f4"/>
+  <text x="100" y="720" fill="#2d3436" font-family="Arial, sans-serif" font-size="14" font-weight="600">Test R² Score</text>
+  
+  <rect x="280" y="690" width="170" height="50" fill="white"/>
+  <text x="365" y="720" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">0.9286</text>
+  
+  <rect x="450" y="690" width="170" height="50" fill="white"/>
+  <text x="535" y="720" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">0.9024</text>
+  
+  <rect x="620" y="690" width="170" height="50" fill="white"/>
+  <text x="705" y="720" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">0.7953</text>
+  
+  <rect x="790" y="690" width="170" height="50" fill="white"/>
+  <text x="875" y="720" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">0.7120</text>
+  
+  <rect x="960" y="690" width="170" height="50" fill="white"/>
+  <text x="1045" y="720" text-anchor="middle" fill="black" font-family="Arial, sans-serif" font-size="14">0.9565</text>
+  
+  <rect x="1130" y="690" width="170" height="50" fill="url(#bestValueBg)"/>
+  <text x="1215" y="720" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="700">0.9960 🏆</text>
+  
+  <!-- Champions Section -->
+  <rect x="80" y="780" width="1220" height="250" rx="15" fill="url(#championsBg)"/>
+  <text x="690" y="815" text-anchor="middle" fill="#2d3436" font-family="Arial, sans-serif" font-size="24" font-weight="700">🏆 PERFORMANCE CHAMPIONS</text>
+  
+  <!-- Champion Cards -->
+  <rect x="120" y="840" width="280" height="60" rx="10" fill="white" filter="url(#shadow)"/>
+  <circle cx="150" cy="870" r="20" fill="url(#headerBg)"/>
+  <text x="150" y="878" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16">⚡</text>
+  <text x="180" y="860" fill="#636e72" font-family="Arial, sans-serif" font-size="12">Fastest Training:</text>
+  <text x="180" y="880" fill="#2d3436" font-family="Arial, sans-serif" font-size="16" font-weight="700">🌳 Random Forest (1.03s)</text>
+  
+  <rect x="420" y="840" width="280" height="60" rx="10" fill="white" filter="url(#shadow)"/>
+  <circle cx="450" cy="870" r="20" fill="url(#headerBg)"/>
+  <text x="450" y="878" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16">🎯</text>
+  <text x="480" y="860" fill="#636e72" font-family="Arial, sans-serif" font-size="12">Highest Accuracy:</text>
+  <text x="480" y="880" fill="#2d3436" font-family="Arial, sans-serif" font-size="16" font-weight="700">🌳 Random Forest (98.25%)</text>
+  
+  <rect x="720" y="840" width="280" height="60" rx="10" fill="white" filter="url(#shadow)"/>
+  <circle cx="750" cy="870" r="20" fill="url(#headerBg)"/>
+  <text x="750" y="878" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16">📉</text>
+  <text x="780" y="860" fill="#636e72" font-family="Arial, sans-serif" font-size="12">Lowest Error:</text>
+  <text x="780" y="880" fill="#2d3436" font-family="Arial, sans-serif" font-size="16" font-weight="700">🎯 CNN Detection (0.0029)</text>
+  
+  <rect x="1020" y="840" width="280" height="60" rx="10" fill="white" filter="url(#shadow)"/>
+  <circle cx="1050" cy="870" r="20" fill="url(#headerBg)"/>
+  <text x="1050" y="878" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16">📊</text>
+  <text x="1080" y="860" fill="#636e72" font-family="Arial, sans-serif" font-size="12">Best Fit:</text>
+  <text x="1080" y="880" fill="#2d3436" font-family="Arial, sans-serif" font-size="16" font-weight="700">⚡ Fast R-CNN (0.9960)</text>
+  
+  <!-- Key Insights Section -->
+  <rect x="80" y="1060" width="1220" height="220" rx="15" fill="url(#insightsBg)"/>
+  <text x="690" y="1095" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24" font-weight="700">💡 KEY INSIGHTS</text>
+  
+  <!-- Insight Cards -->
+  <rect x="120" y="1120" width="550" height="80" rx="10" fill="rgba(255,255,255,0.15)"/>
+  <text x="140" y="1145" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="600">✅ Production Ready:</text>
+  <text x="140" y="1165" fill="white" font-family="Arial, sans-serif" font-size="13">Random Forest models excel in speed and accuracy balance,</text>
+  <text x="140" y="1180" fill="white" font-family="Arial, sans-serif" font-size="13">making them ideal for production environments where both</text>
+  <text x="140" y="1195" fill="white" font-family="Arial, sans-serif" font-size="13">performance and efficiency matter.</text>
+  
+  <rect x="690" y="1120" width="550" height="80" rx="10" fill="rgba(255,255,255,0.15)"/>
+  <text x="710" y="1145" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="600">🎯 Specialized Tasks:</text>
+  <text x="710" y="1165" fill="white" font-family="Arial, sans-serif" font-size="13">CNN models optimize for detection precision and coordinate</text>
+  <text x="710" y="1180" fill="white" font-family="Arial, sans-serif" font-size="13">accuracy, with Fast R-CNN showing exceptional model fit</text>
+  <text x="710" y="1195" fill="white" font-family="Arial, sans-serif" font-size="13">quality for complex detection tasks.</text>
+  
+  <!-- Footer Note -->
+  <text x="690" y="1240" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-style="italic" opacity="0.9">* Detection models show coordinate accuracy and IoU metrics instead of classification precision</text>
+  <text x="690" y="1260" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-style="italic" opacity="0.9">📊 Comprehensive analysis across 6 models with 21 performance metrics | Train/Validation/Test evaluation</text>
+</svg>
