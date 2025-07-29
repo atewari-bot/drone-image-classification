@@ -374,7 +374,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 ### 🔬 Detailed Performance Metrics Across Train/Validation/Test Sets
 
-![Image](/images/metrics/model_performance_metrics.svg)
+![Image](/images/metrics/model_performance_metrics.svg) 
 
 ### 🔍 Cross-Set Performance Analysis
 
