@@ -1,4 +1,4 @@
-<svg width="1400" height="1800" xmlns="http://www.w3.org/2000/svg">
+<svg width="1400" height="1300" xmlns="http://www.w3.org/2000/svg">
   <!-- Background -->
   <defs>
     <linearGradient id="mainBg" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -55,7 +55,7 @@
   <rect width="100%" height="100%" fill="url(#mainBg)"/>
   
   <!-- Main Dashboard Container -->
-  <rect x="50" y="50" width="1300" height="1700" rx="15" fill="white" filter="url(#shadow)"/>
+  <rect x="50" y="50" width="1300" height="1200" rx="15" fill="white" filter="url(#shadow)"/>
   
   <!-- Header -->
   <rect x="50" y="50" width="1300" height="100" rx="15" fill="url(#headerBg)"/>
@@ -249,23 +249,21 @@
   <text x="1080" y="880" fill="#2d3436" font-family="Arial, sans-serif" font-size="16" font-weight="700">⚡ Fast R-CNN (0.9960)</text>
   
   <!-- Key Insights Section -->
-  <rect x="80" y="1060" width="1220" height="220" rx="15" fill="url(#insightsBg)"/>
+  <rect x="80" y="1060" width="1220" height="180" rx="15" fill="url(#insightsBg)"/>
   <text x="690" y="1095" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24" font-weight="700">💡 KEY INSIGHTS</text>
   
   <!-- Insight Cards -->
-  <rect x="120" y="1120" width="550" height="80" rx="10" fill="rgba(255,255,255,0.15)"/>
-  <text x="140" y="1145" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="600">✅ Production Ready:</text>
-  <text x="140" y="1165" fill="white" font-family="Arial, sans-serif" font-size="13">Random Forest models excel in speed and accuracy balance,</text>
-  <text x="140" y="1180" fill="white" font-family="Arial, sans-serif" font-size="13">making them ideal for production environments where both</text>
-  <text x="140" y="1195" fill="white" font-family="Arial, sans-serif" font-size="13">performance and efficiency matter.</text>
+  <rect x="120" y="1120" width="550" height="70" rx="10" fill="rgba(255,255,255,0.15)"/>
+  <text x="140" y="1140" fill="white" font-family="Arial, sans-serif" font-size="15" font-weight="600">✅ Production Ready:</text>
+  <text x="140" y="1158" fill="white" font-family="Arial, sans-serif" font-size="12">Random Forest models excel in speed and accuracy balance,</text>
+  <text x="140" y="1173" fill="white" font-family="Arial, sans-serif" font-size="12">making them ideal for production environments.</text>
   
-  <rect x="690" y="1120" width="550" height="80" rx="10" fill="rgba(255,255,255,0.15)"/>
-  <text x="710" y="1145" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="600">🎯 Specialized Tasks:</text>
-  <text x="710" y="1165" fill="white" font-family="Arial, sans-serif" font-size="13">CNN models optimize for detection precision and coordinate</text>
-  <text x="710" y="1180" fill="white" font-family="Arial, sans-serif" font-size="13">accuracy, with Fast R-CNN showing exceptional model fit</text>
-  <text x="710" y="1195" fill="white" font-family="Arial, sans-serif" font-size="13">quality for complex detection tasks.</text>
+  <rect x="690" y="1120" width="550" height="70" rx="10" fill="rgba(255,255,255,0.15)"/>
+  <text x="710" y="1140" fill="white" font-family="Arial, sans-serif" font-size="15" font-weight="600">🎯 Specialized Tasks:</text>
+  <text x="710" y="1158" fill="white" font-family="Arial, sans-serif" font-size="12">CNN models optimize for detection precision with Fast R-CNN</text>
+  <text x="710" y="1173" fill="white" font-family="Arial, sans-serif" font-size="12">showing exceptional model fit quality for complex tasks.</text>
   
   <!-- Footer Note -->
-  <text x="690" y="1240" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-style="italic" opacity="0.9">* Detection models show coordinate accuracy and IoU metrics instead of classification precision</text>
-  <text x="690" y="1260" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-style="italic" opacity="0.9">📊 Comprehensive analysis across 6 models with 21 performance metrics | Train/Validation/Test evaluation</text>
+  <text x="690" y="1215" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11" font-style="italic" opacity="0.9">* Detection models show coordinate accuracy and IoU metrics instead of classification precision</text>
+  <text x="690" y="1230" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11" font-style="italic" opacity="0.9">📊 Comprehensive analysis across 6 models with 21 performance metrics | Train/Validation/Test evaluation</text>
 </svg>
