@@ -117,7 +117,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
   ![Image](/images/fast_rcnn_detection_diagram.svg)
 
   #### Training Strategy
-  - **Epochs**: 110 to 200 with early stopping
+  - **Epochs**: Upto 110 with early stopping
   - **Batch Size**: 32 for classification, 8 for detection
   - **Optimization**: Adam optimizer with learning rate scheduling
   - **Validation**: Stratified k-fold cross-validation for Random Forest
@@ -151,8 +151,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
   #### Model Performance Analysis
   - **Best Overall Performance**: RandomForest Classifier Model (98.25% accuracy)
   - **Most Efficient**: Random Forest models for faster deployment
-  - **Best for Detection**: Fast R-CNN Detection Model with 78.97% coordinate accuracy
-  - **Improvement**: 4.64% accuracy gain from baseline to optimized CNN
+  - **Best for Detection**: Fast R-CNN Detection Model with 79.21% coordinate accuracy
 
   #### Class-Specific Performance
   - **DRONE**: Highest accuracy across all models (>95%)
