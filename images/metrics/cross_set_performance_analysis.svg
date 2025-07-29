@@ -1,0 +1,251 @@
+<svg viewBox="0 0 1400 1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="trainGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:0.8" />
+    </linearGradient>
+    <linearGradient id="valGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#d97706;stop-opacity:0.8" />
+    </linearGradient>
+    <linearGradient id="testGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:0.8" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1400" height="1000" fill="#0f172a"/>
+  
+  <!-- Title -->
+  <text x="700" y="35" text-anchor="middle" fill="white" font-size="28" font-weight="bold">
+    📊 Cross-Set Performance Analysis: Train vs Validation vs Test
+  </text>
+  
+  <!-- Model Performance Cards -->
+  <g id="performance-cards">
+    <!-- Random Forest Champion -->
+    <rect x="50" y="70" width="400" height="120" fill="#8b5cf6" rx="12" filter="url(#shadow)"/>
+    <text x="60" y="95" fill="white" font-size="16" font-weight="bold">🌲 **Random Forest Champion**</text>
+    <text x="60" y="115" fill="white" font-size="12">🏆 Best Overall Performance</text>
+    <text x="60" y="135" fill="white" font-size="11">✅ Fastest Training: 1.03s</text>
+    <text x="60" y="150" fill="white" font-size="11">✅ Perfect Train Accuracy: 100%</text>
+    <text x="60" y="165" fill="white" font-size="11">✅ Highest Test Accuracy: 98.25%</text>
+    <text x="60" y="180" fill="white" font-size="11">✅ Excellent Generalization</text>
+    
+    <!-- Detection Specialist -->
+    <rect x="470" y="70" width="400" height="120" fill="#ec4899" rx="12" filter="url(#shadow)"/>
+    <text x="480" y="95" fill="white" font-size="16" font-weight="bold">⚡ **Detection Specialist**</text>
+    <text x="480" y="115" fill="white" font-size="12">🎯 Fast R-CNN Excellence</text>
+    <text x="480" y="135" fill="white" font-size="11">✅ Best Model Fit: R² = 0.997</text>
+    <text x="480" y="150" fill="white" font-size="11">✅ Lowest Detection MSE: 0.003</text>
+    <text x="480" y="165" fill="white" font-size="11">✅ Strong Coordinate Accuracy</text>
+    <text x="480" y="180" fill="white" font-size="11">⚠️ Longest Training Time</text>
+    
+    <!-- CNN Detection Leader -->
+    <rect x="890" y="70" width="400" height="120" fill="#06b6d4" rx="12" filter="url(#shadow)"/>
+    <text x="900" y="95" fill="white" font-size="16" font-weight="bold">🎯 **CNN Detection Leader**</text>
+    <text x="900" y="115" fill="white" font-size="12">📈 Error Minimization</text>
+    <text x="900" y="135" fill="white" font-size="11">✅ Lowest Test MAE: 0.009</text>
+    <text x="900" y="150" fill="white" font-size="11">✅ Minimal MSE: 0.003</text>
+    <text x="900" y="165" fill="white" font-size="11">✅ High R² Score: 0.949</text>
+    <text x="900" y="180" fill="white" font-size="11">🎯 Coordinate Precision Focused</text>
+  </g>
+  
+  <!-- Accuracy Comparison Chart -->
+  <g id="accuracy-chart">
+    <rect x="50" y="220" width="1300" height="200" fill="#1e293b" stroke="#334155" stroke-width="2" rx="8"/>
+    <text x="70" y="245" fill="white" font-size="18" font-weight="bold">📊 Accuracy/Coordinate Accuracy Cross-Set Analysis</text>
+    
+    <!-- Chart Headers -->
+    <text x="280" y="275" text-anchor="middle" fill="#10b981" font-size="12" font-weight="bold">■ Train</text>
+    <text x="350" y="275" text-anchor="middle" fill="#f59e0b" font-size="12" font-weight="bold">■ Validation</text>
+    <text x="420" y="275" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="bold">■ Test</text>
+    
+    <!-- Model Labels -->
+    <text x="70" y="305" fill="white" font-size="11" font-weight="bold">Random Forest</text>
+    <text x="70" y="325" fill="white" font-size="11" font-weight="bold">Optimized RF</text>
+    <text x="70" y="345" fill="white" font-size="11" font-weight="bold">CNN Classification</text>
+    <text x="70" y="365" fill="white" font-size="11" font-weight="bold">CNN Denoised</text>
+    <text x="70" y="385" fill="white" font-size="11" font-weight="bold">CNN Detection*</text>
+    <text x="70" y="405" fill="white" font-size="11" font-weight="bold">Fast R-CNN*</text>
+    
+    <!-- Random Forest Bars -->
+    <rect x="200" y="295" width="200" height="12" fill="url(#trainGrad)" rx="2"/>
+    <text x="410" y="304" fill="#10b981" font-size="10">100%</text>
+    <rect x="200" y="295" width="193" height="12" fill="url(#valGrad)" rx="2" opacity="0.7"/>
+    <text x="400" y="315" fill="#f59e0b" font-size="10">96.5%</text>
+    <rect x="200" y="295" width="196.5" height="12" fill="url(#testGrad)" rx="2" opacity="0.5"/>
+    <text x="405" y="325" fill="#3b82f6" font-size="10">98.25%</text>
+    
+    <!-- Optimized RF Bars -->
+    <rect x="200" y="315" width="199.9" height="12" fill="url(#trainGrad)" rx="2"/>
+    <text x="410" y="324" fill="#10b981" font-size="10">99.95%</text>
+    <rect x="200" y="315" width="194.5" height="12" fill="url(#valGrad)" rx="2" opacity="0.7"/>
+    <text x="400" y="335" fill="#f59e0b" font-size="10">97.25%</text>
+    <rect x="200" y="315" width="195.5" height="12" fill="url(#testGrad)" rx="2" opacity="0.5"/>
+    <text x="402" y="345" fill="#3b82f6" font-size="10">97.75%</text>
+    
+    <!-- CNN Classification Bars -->
+    <rect x="200" y="335" width="197.14" height="12" fill="url(#trainGrad)" rx="2"/>
+    <text x="407" y="344" fill="#10b981" font-size="10">98.57%</text>
+    <rect x="200" y="335" width="193.5" height="12" fill="url(#valGrad)" rx="2" opacity="0.7"/>
+    <text x="400" y="355" fill="#f59e0b" font-size="10">96.75%</text>
+    <rect x="200" y="335" width="193" height="12" fill="url(#testGrad)" rx="2" opacity="0.5"/>
+    <text x="398" y="365" fill="#3b82f6" font-size="10">96.5%</text>
+    
+    <!-- CNN Denoised Bars -->
+    <rect x="200" y="355" width="196.28" height="12" fill="url(#trainGrad)" rx="2"/>
+    <text x="405" y="364" fill="#10b981" font-size="10">98.14%</text>
+    <rect x="200" y="355" width="191" height="12" fill="url(#valGrad)" rx="2" opacity="0.7"/>
+    <text x="395" y="375" fill="#f59e0b" font-size="10">95.5%</text>
+    <rect x="200" y="355" width="190.5" height="12" fill="url(#testGrad)" rx="2" opacity="0.5"/>
+    <text x="394" y="385" fill="#3b82f6" font-size="10">95.25%</text>
+    
+    <!-- CNN Detection Bars -->
+    <rect x="200" y="375" width="158.66" height="12" fill="url(#trainGrad)" rx="2"/>
+    <text x="365" y="384" fill="#10b981" font-size="10">79.33%*</text>
+    <rect x="200" y="375" width="157.42" height="12" fill="url(#valGrad)" rx="2" opacity="0.7"/>
+    <text x="363" y="395" fill="#f59e0b" font-size="10">78.71%*</text>
+    <rect x="200" y="375" width="155.08" height="12" fill="url(#testGrad)" rx="2" opacity="0.5"/>
+    <text x="360" y="405" fill="#3b82f6" font-size="10">77.54%*</text>
+    
+    <!-- Fast R-CNN Bars -->
+    <rect x="200" y="395" width="178.42" height="12" fill="url(#trainGrad)" rx="2"/>
+    <text x="385" y="404" fill="#10b981" font-size="10">89.21%*</text>
+    <rect x="200" y="395" width="181.72" height="12" fill="url(#valGrad)" rx="2" opacity="0.7"/>
+    <text x="388" y="415" fill="#f59e0b" font-size="10">90.86%*</text>
+    <rect x="200" y="395" width="180.96" height="12" fill="url(#testGrad)" rx="2" opacity="0.5"/>
+    <text x="387" y="425" fill="#3b82f6" font-size="10">90.48%*</text>
+  </g>
+  
+  <!-- MSE Comparison Chart -->
+  <g id="mse-chart">
+    <rect x="50" y="450" width="650" height="200" fill="#1e293b" stroke="#334155" stroke-width="2" rx="8"/>
+    <text x="70" y="475" fill="white" font-size="18" font-weight="bold">📈 MSE Cross-Set Comparison (Lower = Better)</text>
+    
+    <!-- MSE Headers -->
+    <text x="200" y="505" text-anchor="middle" fill="#10b981" font-size="12" font-weight="bold">Train</text>
+    <text x="300" y="505" text-anchor="middle" fill="#f59e0b" font-size="12" font-weight="bold">Validation</text>
+    <text x="400" y="505" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="bold">Test</text>
+    <text x="500" y="505" fill="#94a3b8" font-size="12" font-weight="bold">Overfitting Risk</text>
+    
+    <!-- MSE Data Rows -->
+    <text x="70" y="525" fill="white" font-size="11">Random Forest</text>
+    <text x="200" y="525" text-anchor="middle" fill="#10b981" font-size="11">0.000</text>
+    <text x="300" y="525" text-anchor="middle" fill="#f59e0b" font-size="11">0.155</text>
+    <text x="400" y="525" text-anchor="middle" fill="#3b82f6" font-size="11">0.075</text>
+    <text x="500" y="525" fill="#22c55e" font-size="11">✅ Low</text>
+    
+    <text x="70" y="545" fill="white" font-size="11">Optimized RF</text>
+    <text x="200" y="545" text-anchor="middle" fill="#10b981" font-size="11">0.002</text>
+    <text x="300" y="545" text-anchor="middle" fill="#f59e0b" font-size="11">0.128</text>
+    <text x="400" y="545" text-anchor="middle" fill="#3b82f6" font-size="11">0.103</text>
+    <text x="500" y="545" fill="#22c55e" font-size="11">✅ Low</text>
+    
+    <text x="70" y="565" fill="white" font-size="11">CNN Classification</text>
+    <text x="200" y="565" text-anchor="middle" fill="#10b981" font-size="11">0.098</text>
+    <text x="300" y="565" text-anchor="middle" fill="#f59e0b" font-size="11">0.193</text>
+    <text x="400" y="565" text-anchor="middle" fill="#3b82f6" font-size="11">0.215</text>
+    <text x="500" y="565" fill="#eab308" font-size="11">⚠️ Medium</text>
+    
+    <text x="70" y="585" fill="white" font-size="11">CNN Denoised</text>
+    <text x="200" y="585" text-anchor="middle" fill="#10b981" font-size="11">0.134</text>
+    <text x="300" y="585" text-anchor="middle" fill="#f59e0b" font-size="11">0.260</text>
+    <text x="400" y="585" text-anchor="middle" fill="#3b82f6" font-size="11">0.303</text>
+    <text x="500" y="585" fill="#ef4444" font-size="11">🚨 High</text>
+    
+    <text x="70" y="605" fill="white" font-size="11">CNN Detection</text>
+    <text x="200" y="605" text-anchor="middle" fill="#10b981" font-size="11">0.002</text>
+    <text x="300" y="605" text-anchor="middle" fill="#f59e0b" font-size="11">0.002</text>
+    <text x="400" y="605" text-anchor="middle" fill="#3b82f6" font-size="11">0.003</text>
+    <text x="500" y="605" fill="#22c55e" font-size="11">🏆 Excellent</text>
+    
+    <text x="70" y="625" fill="white" font-size="11">Fast R-CNN</text>
+    <text x="200" y="625" text-anchor="middle" fill="#10b981" font-size="11">0.008</text>
+    <text x="300" y="625" text-anchor="middle" fill="#f59e0b" font-size="11">0.006</text>
+    <text x="400" y="625" text-anchor="middle" fill="#3b82f6" font-size="11">0.004</text>
+    <text x="500" y="625" fill="#22c55e" font-size="11">🏆 Excellent</text>
+  </g>
+  
+  <!-- R² Score Comparison -->
+  <g id="r2-chart">
+    <rect x="720" y="450" width="630" height="200" fill="#1e293b" stroke="#334155" stroke-width="2" rx="8"/>
+    <text x="740" y="475" fill="white" font-size="18" font-weight="bold">🎯 R² Score Cross-Set Analysis (Higher = Better)</text>
+    
+    <!-- R² Headers -->
+    <text x="860" y="505" text-anchor="middle" fill="#10b981" font-size="12" font-weight="bold">Train</text>
+    <text x="960" y="505" text-anchor="middle" fill="#f59e0b" font-size="12" font-weight="bold">Validation</text>
+    <text x="1060" y="505" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="bold">Test</text>
+    <text x="1160" y="505" fill="#94a3b8" font-size="12" font-weight="bold">Consistency</text>
+    
+    <!-- R² Data -->
+    <text x="740" y="525" fill="white" font-size="11">Random Forest</text>
+    <text x="860" y="525" text-anchor="middle" fill="#10b981" font-size="11">1.000</text>
+    <text x="960" y="525" text-anchor="middle" fill="#f59e0b" font-size="11">0.850</text>
+    <text x="1060" y="525" text-anchor="middle" fill="#3b82f6" font-size="11">0.929</text>
+    <text x="1160" y="525" fill="#22c55e" font-size="11">✅ Good</text>
+    
+    <text x="740" y="545" fill="white" font-size="11">Optimized RF</text>
+    <text x="860" y="545" text-anchor="middle" fill="#10b981" font-size="11">0.998</text>
+    <text x="960" y="545" text-anchor="middle" fill="#f59e0b" font-size="11">0.877</text>
+    <text x="1060" y="545" text-anchor="middle" fill="#3b82f6" font-size="11">0.902</text>
+    <text x="1160" y="545" fill="#22c55e" font-size="11">✅ Good</text>
+    
+    <text x="740" y="565" fill="white" font-size="11">CNN Classification</text>
+    <text x="860" y="565" text-anchor="middle" fill="#10b981" font-size="11">0.903</text>
+    <text x="960" y="565" text-anchor="middle" fill="#f59e0b" font-size="11">0.814</text>
+    <text x="1060" y="565" text-anchor="middle" fill="#3b82f6" font-size="11">0.795</text>
+    <text x="1160" y="565" fill="#eab308" font-size="11">⚠️ Fair</text>
+    
+    <text x="740" y="585" fill="white" font-size="11">CNN Denoised</text>
+    <text x="860" y="585" text-anchor="middle" fill="#10b981" font-size="11">0.867</text>
+    <text x="960" y="585" text-anchor="middle" fill="#f59e0b" font-size="11">0.749</text>
+    <text x="1060" y="585" text-anchor="middle" fill="#3b82f6" font-size="11">0.712</text>
+    <text x="1160" y="585" fill="#ef4444" font-size="11">🚨 Poor</text>
+    
+    <text x="740" y="605" fill="white" font-size="11">CNN Detection</text>
+    <text x="860" y="605" text-anchor="middle" fill="#10b981" font-size="11">0.978</text>
+    <text x="960" y="605" text-anchor="middle" fill="#f59e0b" font-size="11">0.963</text>
+    <text x="1060" y="605" text-anchor="middle" fill="#3b82f6" font-size="11">0.957</text>
+    <text x="1160" y="605" fill="#22c55e" font-size="11">🏆 Excellent</text>
+    
+    <text x="740" y="625" fill="white" font-size="11">Fast R-CNN</text>
+    <text x="860" y="625" text-anchor="middle" fill="#10b981" font-size="11">0.992</text>
+    <text x="960" y="625" text-anchor="middle" fill="#f59e0b" font-size="11">0.994</text>
+    <text x="1060" y="625" text-anchor="middle" fill="#3b82f6" font-size="11">0.996</text>
+    <text x="1160" y="625" fill="#22c55e" font-size="11">🏆 Outstanding</text>
+  </g>
+  
+  <!-- Key Findings -->
+  <g id="findings">
+    <rect x="50" y="680" width="1300" height="280" fill="#0f172a" stroke="#334155" stroke-width="2" rx="12"/>
+    <text x="70" y="710" fill="white" font-size="20" font-weight="bold">🔍 Cross-Set Performance Key Findings</text>
+    
+    <!-- Generalization Analysis -->
+    <text x="70" y="740" fill="#10b981" font-size="16" font-weight="bold">🎯 Generalization Champions:</text>
+    <text x="70" y="760" fill="#d1d5db" font-size="13">• Random Forest: Excellent train→test performance (100%→98.25%) with minimal overfitting</text>
+    <text x="70" y="780" fill="#d1d5db" font-size="13">• Fast R-CNN: Outstanding consistency across all sets (R² scores: 0.992→0.994→0.996)</text>
+    <text x="70" y="800" fill="#d1d5db" font-size="13">• CNN Detection: Superior error consistency (MSE: 0.002→0.002→0.003)</text>
+    
+    <!-- Overfitting Issues -->
+    <text x="70" y="830" fill="#ef4444" font-size="16" font-weight="bold">⚠️ Overfitting Concerns:</text>
+    <text x="70" y="850" fill="#d1d5db" font-size="13">• CNN Denoised: Significant performance drop (Train 98.14% → Test 95.25%, R² degradation)</text>
+    <text x="70" y="870" fill="#d1d5db" font-size="13">• CNN Classification: Moderate overfitting with increasing MSE across sets</text>
+    
+    <!-- Task-Specific Excellence -->
+    <text x="70" y="900" fill="#8b5cf6" font-size="16" font-weight="bold">🎪 Task-Specific Excellence:</text>
+    <text x="70" y="920" fill="#d1d5db" font-size="13">• Classification Tasks: Random Forest dominates (98.25% test accuracy, 98.29% precision)</text>
+    <text x="70" y="940" fill="#d1d5db" font-size="13">• Detection Tasks: Fast R-CNN excels in model fit (R² = 0.996) with consistent performance</text>
+    <text x="720" y="920" fill="#d1d5db" font-size="13">• Error Minimization: CNN Detection leads in MAE/MSE metrics across all sets</text>
+    <text x="720" y="940" fill="#d1d5db" font-size="13">• Speed vs Accuracy: Random Forest optimal trade-off (1s training, 98.25% accuracy)</text>
+  </g>
+  
+  <!-- Footer -->
+  <text x="70" y="985" fill="#64748b" font-size="11">
+    * Detection models use coordinate accuracy and IoU metrics | Analysis covers Train/Validation/Test performance patterns | July 2025
+  </text>
+</svg>

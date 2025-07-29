@@ -97,12 +97,7 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
   #### Model Portfolio
   
-  ![Image](/images/metrics/model_portfolio.png)
-
-
-  🏆 Champion Models by Category
-
-  ![Image](/images/metrics/champions_category_by_models.png)
+  ![Image](/images/metrics/model_portfolio.svg)
 
   #### Class-wise Performance
   ```
@@ -378,11 +373,11 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
 ### 🔍 Cross-Set Performance Analysis
 
-![Image](/images/metrics/cross_set_performance_analysis.png)
+![Image](/images/metrics/cross_set_performance_analysis.svg)
 
 ### 📈 Performance Trends Analysis
 
-![Image](/images/metrics/performance_trend_analysis.png)
+![Image](/images/metrics/performance_trend_analysis.png) 
 
 ### Loss Function Metrics
 
