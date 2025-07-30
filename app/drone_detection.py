@@ -46,8 +46,8 @@ CLASS_LABELS = ['AIRPLANE', 'BIRD', 'DRONE', 'HELICOPTER']
 
 # Model paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CLASSIFICATION_MODEL_PATH = os.path.join(BASE_DIR, 'data', 'models', 'best_classification_model.h5')
-DETECTION_MODEL_PATH = os.path.join(BASE_DIR, 'data', 'models', 'best_detection_model.h5')
+CLASSIFICATION_MODEL_PATH = os.path.join(BASE_DIR, 'data', 'models', 'cnn_classification_model.keras')
+DETECTION_MODEL_PATH = os.path.join(BASE_DIR, 'data', 'models', 'cnn_detection_model.h5')
 
 def load_models():
     """Load the trained models"""
