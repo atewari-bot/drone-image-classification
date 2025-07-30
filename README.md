@@ -502,7 +502,7 @@ What suggestions do you have for next steps?
 
 - [Project Report](https://github.com/atewari-bot/drone-image-classification/blob/main/README.md)
 - [Jupyter Notebook - Model Training & Performance Metrics Analysis](https://github.com/atewari-bot/drone-image-classification/blob/main/drone_detection.ipynb)
-- [Trained Models](https://github.com/atewari-bot/drone-image-classification/blob/main/models/)
+- [Trained Models](https://github.com/atewari-bot/drone-image-classification/blob/main/data/models/)
 - [Python File - Model Training & Performance Metrics Analysis](https://github.com/atewari-bot/drone-image-classification/blob/main/scripts/drone_detection.py)
 - [Data Sampling Script](https://github.com/atewari-bot/drone-image-classification/blob/main/scripts/image_sampling.py)
 
