@@ -161,14 +161,14 @@ I used CRISP-DM methodologies for end to end model training and deployment lifec
 
   #### Performance Metrics Summary
 
-  | **Model** | **Training Time** | **Test Accuracy** | **MSE** | **Precision/IoU** | **R² Score** |
-  |-----------|------------------|-------------------|---------|-------------------|--------------|
-  | **🌳 RandomForest** | 0.41s | **98.25%** | 0.075 | **98.29%** | 0.9286 |
-  | **⚙️ Optimized RF** | 1.24s | **97.75%** | 0.1025 | **97.83%** | 0.9024 |
-  | **🧠 CNN Classification** | 246.88s | **96.50%** | 0.215 | **96.55%** | 0.7953 |
-  | **🧠 CNN Denoised** | 143.18s | 94.50% | 0.3375 | 94.61% | 0.6786 |
-  | **🎯 CNN Detection** | 358.07s | 79.21%* | 0.0034 | 18.81%* | 0.9486 |
-  | **⚡ Fast R-CNN** | 2707.92s | 90.5%* | 0.0029 | 29.01%* | 0.9971 |
+  | **Performance Metrics** | **RandomForest Classifier** | **Optimized RandomForest** | **CNN Classification** | **CNN Classification Denoised** | **CNN Detection Model** | **Fast R-CNN Model** |
+  |--------------------------|------------------------------|----------------------------|-------------------------|----------------------------------|--------------------------|----------------------|
+  | ⏱️ **Training Time (s)** | **🥇 1.0274** | 1.2119 | 246.598 | 214.166 | 366.778 | 🥉 2802.62 |
+  | 🎯 **Test Accuracy/Coord_Acc** | **🥇 0.9825** | 0.9775 | 0.965 | 0.9525 | 🥉 0.7754 | 0.9048 |
+  | 📊 **Test MSE** | **🥇 0.075** | 0.1025 | 0.215 | 🥉 0.3025 | 0.0029 | 0.004 |
+  | 📈 **Test MAE** | 0.035 | 0.0352 | 0.0456 | 🥉 0.0568 | **🥇 0.009** | 0.0479 |
+  | 🔍 **Test Precision/IoU** | **🥇 0.9829** | 0.9783 | 0.9654 | 0.9552 | 🥉 0.1725 | 0.2393 |
+  | 📋 **Test R²** | 0.9286 | 0.9024 | 0.7953 | 0.712 | 0.9565 | **🥇 0.996** |
 
   <sub><b>* Detection models show coordinate accuracy and IoU instead of classification metrics</b></sub>
 
