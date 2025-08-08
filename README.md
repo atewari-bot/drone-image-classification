@@ -527,3 +527,8 @@ What suggestions do you have for next steps?
 | **LinkedIn** | [linkedin.com/in/ajaytewari](https://www.linkedin.com/in/ajaytewari/) |
 | **Project Repository** | [git@github.com:atewari-bot/drone-image-classification.git](https://github.com/atewari-bot/drone-image-classification) |
 | **Primary Data Source** | [Roboflow Drone Dataset](https://universe.roboflow.com/ahmedmohsen/drone-detection-new-peksv) |
+
+## Recognition
+
+![Image](https://api.accredible.com/v1/frontend/credential_website_embed_image/badge/157538374)
+
